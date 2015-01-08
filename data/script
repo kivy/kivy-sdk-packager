@@ -1,0 +1,22 @@
+#!/bin/bash
+SCRIPT_PATH="${BASH_SOURCE[0]}";
+if([ -h "${SCRIPT_PATH}" ]) then
+  while([ -h "${SCRIPT_PATH}" ]) do SCRIPT_PATH=`readlink "${SCRIPT_PATH}"`; done
+fi
+SCRIPT_PATH=$(python -c "import os; print os.path.realpath(os.path.dirname('${SCRIPT_PATH}'))")
+
+# activate the virtualenv
+${SCRIPT_PATH}/venv/bin/activate
+
+export PYTHONPATH="${SCRIPT_PATH}/kivy:${PYTHONPATH}"
+export DYLD_FALLBACK_LIBRARY_PATH="${SCRIPT_PATH}/lib"
+export LD_PRELOAD_PATH="${SCRIPT_PATH}/lib"
+export GST_REGISTRY="${SCRIPT_PATH}/gst.registry"
+export GST_PLUGIN_SCANNER="${SCRIPT_PATH}/gst-plugin-scanner"
+export GTK_PATH="${SCRIPT_PATH}/../Frameworks/GStreamer.framework/Versions/Current"
+export GST_PLUGIN_SYSTEM_PATH="${SCRIPT_PATH}/../Frameworks/GStreamer.framework/Versions/Current/lib/gstreamer-1.0"
+export GIO_EXTRA_MODULES="${SCRIPT_PATH}/../Frameworks/GStreamer.framework/Versions/Current/lib/gio/modules"
+
+if [ "X$@" != "X" ]; then
+	exec ./python "$@"
+fi

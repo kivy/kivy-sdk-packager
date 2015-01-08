@@ -8,6 +8,7 @@ SCRIPT_PATH=$(python -c "import os; print os.path.realpath(os.path.dirname('${SC
 # activate the virtualenv
 ${SCRIPT_PATH}/venv/bin/activate
 
+# setup the environment to not mess with the system
 export PYTHONPATH="${SCRIPT_PATH}/kivy:${PYTHONPATH}"
 export DYLD_FALLBACK_LIBRARY_PATH="${SCRIPT_PATH}/lib"
 export LD_PRELOAD_PATH="${SCRIPT_PATH}/lib"
@@ -17,6 +18,12 @@ export GTK_PATH="${SCRIPT_PATH}/../Frameworks/GStreamer.framework/Versions/Curre
 export GST_PLUGIN_SYSTEM_PATH="${SCRIPT_PATH}/../Frameworks/GStreamer.framework/Versions/Current/lib/gstreamer-1.0"
 export GIO_EXTRA_MODULES="${SCRIPT_PATH}/../Frameworks/GStreamer.framework/Versions/Current/lib/gio/modules"
 
-if [ "X$@" != "X" ]; then
+# if an app is available, use it
+if [ -d "${SCRIPT_PATH}/yourapp" ]; then
+	cd "${SCRIPT_PATH}/yourapp"
+	exec ../python -m main "$@"
+
+# default drag & drop support
+elif [ "X$@" != "X" ]; then
 	exec ./python "$@"
 fi

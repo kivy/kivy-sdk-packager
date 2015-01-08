@@ -13,7 +13,7 @@ OSXRELOCATOR="osxrelocator"
 
 echo "-- Create initial Kivy.app package"
 $PLATYPUS -DBR -x -y \
-	-i "$SCRIPT_PATH/data/kivyicon.icns" \
+	-i "$SCRIPT_PATH/data/icon.icns" \
 	-a "Kivy" \
 	-o "None" \
 	-p "/bin/bash" \

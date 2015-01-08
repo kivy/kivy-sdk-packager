@@ -21,9 +21,13 @@ export GIO_EXTRA_MODULES="${SCRIPT_PATH}/../Frameworks/GStreamer.framework/Versi
 # if an app is available, use it
 if [ -d "${SCRIPT_PATH}/yourapp" ]; then
 	cd "${SCRIPT_PATH}/yourapp"
-	exec ../python -m main "$@"
+	if [ -f "main.pyo" ]; then
+		exec ${SCRIPT_PATH}/python -OO -m main "$@"
+	else
+		exec ${SCRIPT_PATH}/python -m main "$@"
+	fi
 
 # default drag & drop support
 elif [ "X$@" != "X" ]; then
-	exec ./python "$@"
+	exec ${SCRIPT_PATH}/python "$@"
 fi

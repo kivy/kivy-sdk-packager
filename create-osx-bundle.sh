@@ -92,10 +92,10 @@ popd
 
 echo "-- Download and compile Kivy"
 pushd Kivy.app/Contents/Resources
-curl -L -O https://github.com/kivy/kivy/archive/core-sdl2-frameworks.zip
-unzip core-sdl2-frameworks.zip 
-rm core-sdl2-frameworks.zip
-mv kivy-core-sdl2-frameworks kivy
+curl -L -O https://github.com/kivy/kivy/archive/master.zip
+unzip master.zip
+rm master.zip
+mv kivy-master kivy
 
 cd kivy
 USE_SDL2=1 make

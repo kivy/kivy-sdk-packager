@@ -121,7 +121,7 @@ osxrelocator -r . @rpath/SDL2_ttf.framework/Versions/A/SDL2_ttf \
 osxrelocator -r . @rpath/SDL2_image.framework/Versions/A/SDL2_image \
 	@executable_path/../Frameworks/SDL2_image.framework/Versions/A/SDL2_image
 osxrelocator -r . @rpath/SDL2_mixer.framework/Versions/A/SDL2_mixer \
-	@executable_path/../Frameworks/SDL2_mixer.frameworks/Versions/A/SDL2_mixer
+	@executable_path/../Frameworks/SDL2_mixer.framework/Versions/A/SDL2_mixer
 
 
 echo "-- Done !"

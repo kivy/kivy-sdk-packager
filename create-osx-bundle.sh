@@ -120,8 +120,8 @@ osxrelocator -r . @rpath/SDL2_ttf.framework/Versions/A/SDL2_ttf \
 	@executable_path/../Frameworks/SDL2_ttf.framework/Versions/A/SDL2_ttf
 osxrelocator -r . @rpath/SDL2_image.framework/Versions/A/SDL2_image \
 	@executable_path/../Frameworks/SDL2_image.framework/Versions/A/SDL2_image
-osxrelocator -r . /System/Library/Frameworks/Python.framework/ \
-	@executable_path/../Frameworks/Python.framework/
+osxrelocator -r . @rpath/SDL2_mixer/Versions/A/SDL2_mixer \
+	@executable_path/../Frameworks/SDL2_mixer/Versions/A/SDL2_mixer
 
 
 echo "-- Done !"

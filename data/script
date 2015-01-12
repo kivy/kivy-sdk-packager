@@ -17,6 +17,7 @@ export GST_PLUGIN_SCANNER="${SCRIPT_PATH}/gst-plugin-scanner"
 export GTK_PATH="${SCRIPT_PATH}/../Frameworks/GStreamer.framework/Versions/Current"
 export GST_PLUGIN_SYSTEM_PATH="${SCRIPT_PATH}/../Frameworks/GStreamer.framework/Versions/Current/lib/gstreamer-1.0"
 export GIO_EXTRA_MODULES="${SCRIPT_PATH}/../Frameworks/GStreamer.framework/Versions/Current/lib/gio/modules"
+export KIVY_HOME="${SCRIPT_PATH}/.kivy"
 
 # if an app is available, use it
 if [ -d "${SCRIPT_PATH}/yourapp" ]; then

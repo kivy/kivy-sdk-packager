@@ -13,6 +13,7 @@ import re
 import csv
 import platform
 from zipfile import ZipFile
+from ConfigParser import ConfigParser
 import urlparse
 try:
     from urllib.request import urlretrieve
@@ -36,13 +37,27 @@ def exec_binary(status, cmd, env=None, cwd=None, shell=True):
         print(b, end='')
 
 
+def copy_files(src, dst):
+    if not exists(dst):
+        makedirs(dst)
+    for item in listdir(src):
+        s = os.path.join(src, item)
+        d = os.path.join(dst, item)
+        if os.path.isdir(s):
+            copy_files(s, d)
+        else:
+            copy2(s, d)
+
+
 class WindowsPortablePythonBuild(object):
     '''Custom build command that builds portable win32 python
     and kivy deps.
     '''
 
-    pip_deps = ['cython', 'docutils', 'pygments', 'requests', 'plyer',
-                'kivy-garden', 'wheel']
+    pip_deps = ['cython==0.21.2', 'docutils', 'pygments', 'requests', 'plyer',
+                'kivy-garden', 'wheel', 'nose', 'sphinxcontrib-blockdiag',
+                'sphinxcontrib-seqdiag', 'sphinxcontrib-actdiag',
+                'sphinxcontrib-nwdiag']
 
     dist_dir = None
     temp_dir = ''
@@ -55,6 +70,8 @@ class WindowsPortablePythonBuild(object):
     strip_tk = False
     kivy_zip = ''
     zip7 = ''
+    kivy_lib = False
+    glew_zip = ''
 
     def parse_args(self):
         py_curr = 'py{}.{}.{}_x{}:{}'.format(
@@ -129,9 +146,18 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
             '(e.g. master). Defaults to master.', default='master', dest='kivy_ver')
         zip7 = r'C:\Program Files\7-Zip\7z.exe'
         parser.add_argument(
-            "--7zip", help='The path to the 7-zip binary. Only required for x64 '
-            'installations when mingw is downloaded. Defaults to {}'.format(zip7),
+            "--7zip", help='The full path to the 7-zip binary. Required for SDL2 '
+            '. Defaults to {}'.format(zip7),
             default=zip7, dest='zip7')
+        parser.add_argument(
+            "--kivy-lib", help='Whether kivy should be installed in a directory '
+            'in the distribution directory (False), or if it should be installed to site '
+            'packages (True). Defaults to False.', action="store_true", dest='kivy_lib')
+        parser.add_argument(
+            "--glew-ver", help='The version of glew to compile and install.'
+            'Could be one of the released versions, e.g. 1.12.0 from '
+            'http://sourceforge.net/projects/glew/files/glew/. Defaults to'
+            ' 1.12.0.', default='1.12.0', dest='glew_ver')
 
         args = parser.parse_args()
         self.dist_dir = base = abspath(args.dir)
@@ -145,6 +171,9 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
         self.clean = args.clean
         self.kivy_zip = 'https://github.com/kivy/kivy/archive/{}.zip'.format(args.kivy_ver)
         self.zip7 = args.zip7
+        self.kivy_lib = args.kivy_lib
+        self.glew_zip = ('http://iweb.dl.sourceforge.net/project/glew/glew/{}/glew-{}.zip'.
+                         format(args.glew_ver, args.glew_ver))
 
         pywin_base = args.pywin
         m = re.match('.+Build(?: |%20)([0-9]+)/?', pywin_base)
@@ -235,17 +264,19 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
                     mingw = self.do_mingw(mingw, os.environ)
 
             env = os.environ.copy()
-            env['PATH'] = '{};{};{};{}'.format(pydir, join(mingw, 'bin'),
+            env['PATH'] = '{};{};{};{};{}'.format(
+                join(build_path, 'SDL2', 'bin'), pydir, join(mingw, 'bin'),
                 join(pydir, 'Scripts'), env['PATH'])
             env['PYTHONPATH'] = ''
+            env['USE_SDL2'] = '1'
 
             if patch_py:
                 print('Patching python')
                 self.patch_python_x64(pydir, env, pyver)
 
             self.get_glew(pydir, mingw, arch, env)
-
-            self.get_pip_deps(pydir, env, pywin_url)
+            self.get_sdl2(build_path, arch, env)
+            self.get_pip_deps(build_path, pydir, env, pywin_url)
 
         print('Done')
 
@@ -287,11 +318,15 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
                 pass
 
         f = join(pydir, 'Lib', 'distutils', 'distutils.cfg')
-        print('Writing {}'.format(f))
-        if exists(f):
-            raise Exception('{} already exists'.format(f))
-        with open(f, 'w') as fd:
-            fd.write('[build]\ncompiler=mingw32\n')
+        print('Updating {}'.format(f))
+        config = ConfigParser()
+        config.read(f)
+        if not config.has_section('build'):
+            config.add_section('build')
+        config.set('build', 'compiler', 'mingw32')
+        with open(f, 'w') as fh:
+            config.write(fh)
+
         if not exists(join(pydir, 'Scripts')):
             makedirs(join(pydir, 'Scripts'))
 
@@ -397,12 +432,37 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
         elif exists(url):
             f = url
 
-        print('Extracting mingw-get {}'.format(f))
+        print('\nExtracting mingw-get {}'.format(f))
         with open(f, 'rb') as fd:
             ZipFile(fd).extractall(mingw)
         exec_binary(
-            'Installing MinGW', ['mingw-get.exe', 'install', 'gcc', 'mingw32-make'],
+            'Installing MinGW', ['mingw-get.exe', 'install', 'gcc', 'msys-make', 'g++'],
             env, join(mingw, 'bin'), shell=True)
+
+        url = 'http://zlib.net/zlib128-dll.zip'
+        local_url = join(self.temp_dir, 'zlib128-dll.zip')
+        if not exists(local_url):
+            print("*Downloading: {}".format(url))
+            print("Progress: 000.00%", end=' ')
+            f, _ = urlretrieve(url, local_url, reporthook=report_hook)
+            print(" [Done]")
+        else:
+            f = local_url
+
+        print('\nExtracting zlib {}'.format(f))
+        base_dir = join(self.temp_dir, 'zlib128-dll')
+        rmtree(base_dir, ignore_errors=True)
+        makedirs(base_dir)
+        with open(f, 'rb') as fd:
+            ZipFile(fd).extractall(base_dir)
+
+        files = [(join(base_dir, 'zlib1.dll'), join(mingw, 'bin'))]
+        files += [(join(base_dir, 'include', f), join(mingw, 'include'))
+                  for f in listdir(join(base_dir, 'include'))]
+        files += [(join(base_dir, 'lib', f), join(mingw, 'lib'))
+                  for f in listdir(join(base_dir, 'lib'))]
+        for src_f, dst_f in files:
+            copy2(src_f, dst_f)
         return mingw
 
     def do_mingw64(self, mingw, env):
@@ -433,10 +493,11 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
         copytree(mingw_extracted, mingw)
         return mingw
 
-    def get_pip_deps(self, pydir, env, pywin):
+    def get_pip_deps(self, build_path, pydir, env, pywin):
         width = self.width
         temp_dir = self.temp_dir
         py = join(pydir, 'python.exe')
+        print('\n')
 
         print('Getting pip and easy install')
         url = 'https://bootstrap.pypa.io/get-pip.py'
@@ -452,78 +513,78 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
         exec_binary('Installing easy install', [py, ez], env, pydir, shell=True)
 
         pip = join(pydir, 'Scripts', 'pip.exe')
-        for mod in self.pip_deps:
-            exec_binary('Installing {}'.format(mod), [pip, 'install', mod],
+        for mod in self.pip_deps + ([self.kivy_zip] if self.kivy_lib else []):
+            exec_binary('\nInstalling {}'.format(mod), [pip, 'install', mod],
                         env, pydir, shell=True)
 
         wheel = join(pydir, 'Scripts', 'wheel.exe')
 
         pywin_out = join(temp_dir, pywin.split('/')[-1])
         if not exists(pywin_out):
-            print("Downloading pywin32. Progress: 000.00%", end=' ')
+            print("\nDownloading pywin32. Progress: 000.00%", end=' ')
             pywin, _ = urlretrieve(pywin, pywin_out, reporthook=report_hook)
             print(' [Done]')
 
         exec_binary('Converting {} to wheel'.format(pywin),
                     [wheel, 'convert', pywin], env, temp_dir, shell=True)
-        wheels = [join(temp_dir, f) for f in listdir(temp_dir) if f.startswith('pywin32') and f.endswith('.whl')]
+        wheels = [join(temp_dir, f) for f in listdir(temp_dir)
+                  if f.startswith('pywin32') and f.endswith('.whl')]
         if len(wheels) != 1:
             raise Exception('Expected one pywin wheel, found {}'.format(wheels))
 
         exec_binary('Installing the wheel {}'.format(wheels[0]),
                     [wheel, 'install', '--force', wheels[0]], env, pydir, shell=True)
 
-        print('Getting kivy')
-        url = self.kivy_zip
-        kivy = join(temp_dir, 'kivy.zip')
-        try:
-            remove(kivy)
-        except:
-            pass
-        rmtree(join(temp_dir, 'kivy'), ignore_errors=True)
-        rmtree(join(self.dist_dir, 'kivy'), ignore_errors=True)
+        if not self.kivy_lib:
+            print('\nGetting kivy')
+            url = self.kivy_zip
+            kivy = join(temp_dir, 'kivy.zip')
+            try:
+                remove(kivy)
+            except:
+                pass
+            rmtree(join(temp_dir, 'kivy'), ignore_errors=True)
+            rmtree(join(build_path, 'kivy'), ignore_errors=True)
 
-        kivy, _ = urlretrieve(url, kivy)
-        print('Extracting kivy {}'.format(kivy))
-        with open(kivy, 'rb') as fd:
-            ZipFile(fd).extractall(join(temp_dir, 'kivy'))
-        makedirs(join(self.dist_dir, 'kivy'))
-        copytree(
-            join(temp_dir, 'kivy', list(listdir(join(temp_dir, 'kivy')))[0]),
-            join(self.dist_dir, 'kivy'))
-        exec_binary('Compiling kivy', [py, 'setup.py', 'build_ext', '--inplace'],
-                    env, join(self.dist_dir, 'kivy'), shell=True)
+            kivy, _ = urlretrieve(url, kivy)
+            print('Extracting kivy {}'.format(kivy))
+            with open(kivy, 'rb') as fd:
+                ZipFile(fd).extractall(join(temp_dir, 'kivy'))
+            copytree(
+                join(temp_dir, 'kivy', list(listdir(join(temp_dir, 'kivy')))[0]),
+                join(build_path, 'kivy'))
+            exec_binary('Compiling kivy', [py, 'setup.py', 'build_ext', '--inplace'],
+                        env, join(build_path, 'kivy'), shell=True)
 
         print('Copying tools')
-        def copy_files(src, dst):
-            for item in listdir(src):
-                s = os.path.join(src, item)
-                d = os.path.join(dst, item)
-                if os.path.isdir(s):
-                    copy_files(s, d)
-                else:
-                    shutil.copy2(s, d)
-        copy_files(join(dirname(__file__), 'data'), pydir)
+        copy_files(join(dirname(__file__), 'data'), build_path)
 
     def get_glew(self, pydir, mingw, arch, env):
+        print('\nGetting Glew')
         temp_dir = self.temp_dir
-        glew_dir = 'glew-1.12.0'
-        glew = glew_dir + '-win32.zip'
-        url = 'http://iweb.dl.sourceforge.net/project/glew/glew/1.12.0/' + glew
-        f = join(temp_dir, glew)
-        arch_path = 'x64' if arch == '64' else 'Win32'
+        url = self.glew_zip
+        local_url = join(temp_dir, url.split('/')[-1])
+        rmtree(join(temp_dir, 'glew'), ignore_errors=True)
 
-        if not exists(f):
-            print("*Getting glew. Downloading: {}".format(url))
-            print("Progress: 000.00%", end=' ')
-            f, _ = urlretrieve(url, f, reporthook=report_hook)
-            print(" [Done]")
+        if not exists(local_url):
+            local_url, _ = urlretrieve(url, local_url)
+        print('Extracting glew {}'.format(local_url))
+        with open(local_url, 'rb') as fd:
+            ZipFile(fd).extractall(join(temp_dir, 'glew'))
 
-        z = join(temp_dir, splitext(glew)[0])
-        print('Extracting glew {}'.format(f))
-        with open(f, 'rb') as fd:
-            ZipFile(fd).extractall(z)
-        z = join(z, glew_dir)
+        z = base_dir = join(temp_dir, 'glew', list(listdir(join(temp_dir, 'glew')))[0])
+        exec_binary(
+            'Compiling Glew',
+            ['gcc', '-DGLEW_NO_GLU', '-O2', '-Wall', '-W', '-Iinclude', '-DGLEW_BUILD',
+             '-o', 'src/glew.o', '-c', 'src/glew.c'], env, base_dir, shell=True)
+        exec_binary(
+            '',
+            ['gcc', '-shared', '-Wl,-soname,libglew32.dll',
+             '-Wl,--out-implib,lib/libglew32.dll.a', '-o', 'lib/glew32.dll',
+             'src/glew.o', '-L/mingw/lib', '-lglu32', '-lopengl32', '-lgdi32',
+             '-luser32', '-lkernel32'], env, base_dir, shell=True)
+        exec_binary(
+            '', ['ar', 'cr', 'lib/libglew32.a', 'src/glew.o'], env, base_dir, shell=True)
 
         print('Distributing glew to mingw and python')
         include = join(mingw, 'include', 'GL')
@@ -533,29 +594,62 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
         if not exists(py_include):
             makedirs(py_include)
 
-        lib = join(mingw, 'lib')
-        glew_dll = join(z, 'bin', 'Release', arch_path, 'glew32.dll')
         files = glob(join(z, 'include', 'GL', '*'))
         files = (
             zip(files, [include] * len(files)) +
             zip(files, [py_include] * len(files)) +
-            [(glew_dll, join(mingw, 'bin')),
-             (join(z, 'lib', 'Release', arch_path, 'glew32.lib'), lib),
-             (join(z, 'lib', 'Release', arch_path, 'glew32s.lib'), lib)])
+            [(join(z, 'lib', 'glew32.dll'), join(mingw, 'bin')),
+             (join(z, 'lib', 'libglew32.a'), join(mingw, 'lib')),
+             (join(z, 'lib', 'libglew32.dll.a'), join(mingw, 'lib')),
+             (join(z, 'lib', 'libglew32.dll.a'), join(pydir, 'libs'))])
         for src_f, dst_f in files:
-            try:
-                copy2(src_f, dst_f)
-            except:
-                pass
+            copy2(src_f, dst_f)
 
-        libs = join(pydir, 'libs')
-        glew_def = join(libs, 'glew32.def')
+    def get_sdl2(self, build_path, arch, env):
+        sdl2_ver = '2.0.3'
+        sdl2_mixer_ver = '2.0.0'
+        sdl2_ttf_ver = '2.0.12'
+        sdl2_image_ver = '2.0.0'
 
-        exec_binary('Gendefing ' + glew_dll, ['gendef.exe', glew_dll], env, libs)
-        exec_binary('Generating libglew32.a',
-                    ['dlltool', '--dllname', glew_dll, '--def', glew_def,
-                     '--output-lib', 'libglew32.a'], env, libs)
-        remove(glew_def)
+        temp_dir = self.temp_dir
+        lib = join(build_path, 'SDL2', 'lib')
+        bin = join(build_path, 'SDL2', 'bin')
+        include = join(build_path, 'SDL2', 'include')
+        for d in (lib, bin, include):
+            if not exists(d):
+                makedirs(d)
+
+        for name, ver in (
+            ('https://www.libsdl.org/release/SDL2-devel-{}-mingw.tar.gz',
+             sdl2_ver),
+            ('https://www.libsdl.org/projects/SDL_mixer/release/SDL2_mixer-devel-{}-mingw.tar.gz',
+             sdl2_mixer_ver),
+            ('http://www.libsdl.org/projects/SDL_ttf/release/SDL2_ttf-devel-2.0.12-mingw.tar.gz',
+             sdl2_ttf_ver),
+            ('http://www.libsdl.org/projects/SDL_image/release/SDL2_image-devel-{}-mingw.tar.gz',
+             sdl2_image_ver)):
+            url = name.format(ver)
+            local_url = join(temp_dir, url.split('/')[-1])
+
+            print('\nGetting {}'.format(url))
+            if not exists(local_url):
+                local_url, _ = urlretrieve(url, local_url)
+
+            exec_binary(
+                'Extracting {}'.format(local_url),
+                [self.zip7, 'x', '-y', local_url], env, self.temp_dir, shell=True)
+            exec_binary(
+                'Extracting {}'.format(local_url[:-3]),
+                [self.zip7, 'x', '-y', local_url[:-3]], env, self.temp_dir, shell=True)
+
+            base_dir = local_url.replace('-mingw.tar.gz', '').replace('-devel', '')
+            if arch == '64':
+                base_dir = join(base_dir, 'x86_64-w64-mingw32')
+            else:
+                base_dir = join(base_dir, 'i686-w64-mingw32')
+            copy_files(join(base_dir, 'lib'), lib)
+            copy_files(join(base_dir, 'bin'), bin)
+            copy_files(join(base_dir, 'include'), include)
 
 
 if __name__ == '__main__':

@@ -57,7 +57,7 @@ class WindowsPortablePythonBuild(object):
     pip_deps = ['cython==0.21.2', 'docutils', 'pygments', 'requests', 'plyer',
                 'kivy-garden', 'wheel', 'nose', 'sphinxcontrib-blockdiag',
                 'sphinxcontrib-seqdiag', 'sphinxcontrib-actdiag',
-                'sphinxcontrib-nwdiag']
+                'sphinxcontrib-nwdiag', 'mock']
 
     dist_dir = None
     temp_dir = ''

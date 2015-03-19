@@ -291,8 +291,10 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
                 print("-" * width)
                 if arch == '64':
                     mingw = self.do_mingw64(mingw, os.environ)
+                    self.get_pkg_config(mingw, arch)
                 else:
                     mingw = self.do_mingw(mingw, os.environ)
+                    self.get_pkg_config(mingw, arch)
                 print('Done installing MinGW\n')
 
             env = os.environ.copy()
@@ -735,8 +737,8 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
     def get_gstreamer(self, build_path, arch, env):
         temp_dir = self.temp_dir
         bitness = 'x86_64' if arch == '64' else 'x86'
-        runtime_name = 'gstreamer-sdk-{}-{}.msi'.format(bitness, self.gst_ver)
-        devel_name = 'gstreamer-sdk-devel-{}-{}.msi'.format(bitness, self.gst_ver)
+        runtime_name = 'gstreamer-1.0-{}-1.4.5.msi'.format(bitness, self.gst_ver)
+        devel_name = 'gstreamer-1.0-devel-{}-1.4.5.msi'.format(bitness, self.gst_ver)
 
         gst = join(temp_dir, 'gstreamer')
         print('Removing gstreamer directory {}'.format(gst))
@@ -747,9 +749,7 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
         for name in (runtime_name, devel_name):
             local_url = join(temp_dir, name)
             url = (
-                'http://www.freedesktop.org/software/gstreamer-sdk/data/'
-                'packages/windows/{}/{}'.format(
-                'x86-64' if arch == '64' else 'x86', name))
+                'http://gstreamer.freedesktop.org/data/pkg/windows/1.4.5/{}'.format(name))
             if not exists(local_url):
                 print("Getting {}\nProgress: 000.00%".format(url), end=' ')
                 local_url, _ = urlretrieve(url, local_url, reporthook=report_hook)
@@ -759,12 +759,33 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
                 "Extracting {} to {}".format(local_url, gst),
                 ['msiexec', '/a', local_url, '/qb', 'TARGETDIR={}'.format(gst)],
                 cwd=gst, shell=False)
-        gst = join(gst, 'gstreamer-sdk')
+        gst = join(gst, 'gstreamer')
         gst = join(gst, list(listdir(gst))[0], bitness)
 
         print('Copying {} to {}'.format(gst, join(build_path, 'gstreamer')))
         copy_files(gst, join(build_path, 'gstreamer'))
 
+    def get_pkg_config(self, mingw, arch):
+        temp_dir = self.temp_dir
+        bittness = '64' if arch == '64' else '32'
+        pkg_url = 'pkg-config_0.28-1_win{}.zip'.format(bittness)
+        glib_url = 'glib_2.34.3-1_win{}.zip'.format(bittness)
+        gettext = 'gettext_0.18.2.1-1_win{}.zip'.format(bittness)
+
+        for name in (pkg_url, glib_url, gettext):
+            url = 'http://win32builder.gnome.org/packages/3.6/{}'.format(name)
+            local_url = join(temp_dir, name)
+            if not exists(local_url):
+                print("Getting {}\nProgress: 000.00%".format(url), end=' ')
+                local_url, _ = urlretrieve(url, local_url, reporthook=report_hook)
+                print(" [Done]")
+
+            base_dir = join(temp_dir, splitext(name)[0])
+            rmtree(base_dir, ignore_errors=True)
+            makedirs(base_dir)
+            with open(local_url, 'rb') as fd:
+                ZipFile(fd).extractall(base_dir)
+            copy_files(join(base_dir, 'bin'), join(mingw, 'bin'))
 
 if __name__ == '__main__':
     WindowsPortablePythonBuild().run()

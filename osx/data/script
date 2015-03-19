@@ -29,6 +29,11 @@ if [ -d "${SCRIPT_PATH}/yourapp" ]; then
 	fi
 
 # default drag & drop support
-elif [ "X$@" != "X" ]; then
+elif [ $# -ne 0 ]; then
 	exec ${SCRIPT_PATH}/python "$@"
+
+# start a python shell, only if we didn't double-clicked
+elif [ "$SHLVL" -gt 1 ];
+	exec ${SCRIPT_PATH}/python
+
 fi

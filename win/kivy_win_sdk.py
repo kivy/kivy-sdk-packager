@@ -72,6 +72,9 @@ class WindowsPortablePythonBuild(object):
     zip7 = ''
     kivy_lib = False
     glew_zip = ''
+    gst_ver = ''
+    no_gst = False
+    no_sdl2 = False
 
     def parse_args(self):
         py_curr = 'py{}.{}.{}_x{}:{}'.format(
@@ -116,7 +119,7 @@ specified.'''.format(mingw_default),
             'Defaults to False.', action="store_true",
             dest='no_mingw')
 
-        mingw64_default=r'http://iweb.dl.sourceforge.net\
+        mingw64_default='http://iweb.dl.sourceforge.net\
 /project/mingw-w64/Toolchains%20targetting%20Win64/Personal%20Builds/mingw-\
 builds/4.9.2/threads-win32/seh/x86_64-4.9.2-release-win32-seh-rt_v3-rev1.7z'
         parser.add_argument("--mingw64", help='''Path to MinGW-w64. \
@@ -154,10 +157,21 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
             'in the distribution directory (False), or if it should be installed to site '
             'packages (True). Defaults to False.', action="store_true", dest='kivy_lib')
         parser.add_argument(
-            "--glew-ver", help='The version of glew to compile and install.'
+            "--glew-ver", help='The version number of glew to compile and install.'
             'Could be one of the released versions, e.g. 1.12.0 from '
             'http://sourceforge.net/projects/glew/files/glew/. Defaults to'
             ' 1.12.0.', default='1.12.0', dest='glew_ver')
+        parser.add_argument(
+            "--gst-ver", help='The version number of gstreamer to install.'
+            'Could be one of the released versions, e.g. 2013.6 from '
+            'http://www.freedesktop.org/software/gstreamer-sdk/data/packages/windows/. '
+            'Defaults to 2013.6.', default='2013.6', dest='gst_ver')
+        parser.add_argument(
+            "--no-gst", help='If Gstreamer should not be downloaded.',
+            action="store_true", dest='no_gst')
+        parser.add_argument(
+            "--no-sdl2", help='If SDL2 should not be downloaded.',
+            action="store_true", dest='no_sdl2')
 
         args = parser.parse_args()
         self.dist_dir = base = abspath(args.dir)
@@ -174,6 +188,12 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
         self.kivy_lib = args.kivy_lib
         self.glew_zip = ('http://iweb.dl.sourceforge.net/project/glew/glew/{}/glew-{}.zip'.
                          format(args.glew_ver, args.glew_ver))
+        self.gst_ver = args.gst_ver
+        self.no_gst = args.no_gst
+        self.no_sdl2 = args.no_sdl2
+
+        if not exists(self.zip7):
+            raise Exception('Valid 7-Zip installtion was not found at {}'.format(self.zip7))
 
         pywin_base = args.pywin
         m = re.match('.+Build(?: |%20)([0-9]+)/?', pywin_base)
@@ -210,6 +230,14 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
                 link = py[1]
                 if len(py) > 2:
                     md5 = py[2]
+
+            if arch == '64':
+                try:
+                    proc = Popen(['git'], stdout=PIPE, stderr=PIPE)
+                    proc.communicate()
+                except WindowsError:
+                    raise Exception(
+                        'Git not found, required for a 64 bit installation')
 
             build_py.append((name, pyver, arch, link, md5, pywin_url))
         self.build_pythons = build_py
@@ -253,30 +281,62 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
                 print("*Creating build directory: {}".format(build_path))
                 makedirs(build_path)
             self.get_python(width, pydir, link, md5)
-            print('Done installing Python')
+            print('Done installing Python\n')
             patch_py = arch == '64'
 
             mingw = join(build_path, 'MinGW')
             if not self.no_mingw:
+                print("-" * width)
+                print("Preparing MinGW")
+                print("-" * width)
                 if arch == '64':
                     mingw = self.do_mingw64(mingw, os.environ)
                 else:
                     mingw = self.do_mingw(mingw, os.environ)
+                print('Done installing MinGW\n')
 
             env = os.environ.copy()
-            env['PATH'] = '{};{};{};{};{}'.format(
-                join(build_path, 'SDL2', 'bin'), pydir, join(mingw, 'bin'),
-                join(pydir, 'Scripts'), env['PATH'])
+            pth = [d for d in env['PATH'].split(';')
+                   if 'mingw' not in d.lower() and 'python' not in d.lower()]
+            env['PATH'] = ';'.join(
+                [join(build_path, 'SDL2', 'bin'), pydir, join(mingw, 'bin'),
+                join(mingw, 'msys', '1.0', 'bin'), join(pydir, 'Scripts'),
+                join(build_path, 'gstreamer', 'bin'), ';'.join(pth)])
             env['PYTHONPATH'] = ''
             env['USE_SDL2'] = '1'
+            env['GST_REGISTRY'] = join(build_path, 'gstreamer', 'registry.bin')
+            env['GST_PLUGIN_PATH'] = join(build_path, 'gstreamer', 'lib', 'gstreamer-1.0')
+            env['PKG_CONFIG_PATH'] = join(build_path, 'gstreamer', 'lib', 'pkgconfig')
 
             if patch_py:
-                print('Patching python')
+                print("-" * width)
+                print("Patching python")
+                print("-" * width)
                 self.patch_python_x64(pydir, env, pyver)
+                print('Done patching python\n')
 
+            print("-" * width)
+            print("Preparing Glew")
+            print("-" * width)
             self.get_glew(pydir, mingw, arch, env)
-            self.get_sdl2(build_path, arch, env)
+            print('Done preparing Glew\n')
+            if not self.no_sdl2:
+                print("-" * width)
+                print("Preparing SDL2")
+                print("-" * width)
+                self.get_sdl2(build_path, arch, env)
+                print('Done preparing SDL2\n')
+            if not self.no_gst:
+                print("-" * width)
+                print("Preparing GStreamer")
+                print("-" * width)
+                self.get_gstreamer(build_path, arch, env)
+                print('Done preparing GStreamer\n')
+            print("-" * width)
+            print("Preparing pip deps")
+            print("-" * width)
             self.get_pip_deps(build_path, pydir, env, pywin_url)
+            print('Done preparing pip deps\n')
 
         print('Done')
 
@@ -378,8 +438,10 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
 
         # see http://bugs.python.org/issue4709 and
         # http://ascend4.org/Setting_up_a_MinGW-w64_build_environment
-        remove(join(libs, 'old_' + pylib))
-        rename(join(libs, pylib), join(libs, 'old_' + pylib))
+        try: remove(join(libs, 'old_' + pylib))
+        except: pass
+        try: rename(join(libs, pylib), join(libs, 'old_' + pylib))
+        except: pass
         exec_binary('Gendefing ' + pydll, ['gendef.exe', pydll], env, libs)
         exec_binary('Generating libpython.a',
                     ['dlltool', '--dllname', pydll, '--def', pydef,
@@ -466,9 +528,12 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
         return mingw
 
     def do_mingw64(self, mingw, env):
-        url = self.mingw
+        url = self.mingw64
         rmtree(mingw, ignore_errors=True)
-        makedirs(mingw)
+        try:
+            remove(mingw)
+        except:
+            pass
         if isdir(url):
             copytree(url, mingw)
             return mingw
@@ -484,10 +549,10 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
         elif exists(url):
             f = url
 
-        mingw_extracted = join(self.temp_dir, splitext(basename(f))[0])
+        mingw_extracted = join(self.temp_dir, 'mingw64')
         rmtree(mingw_extracted, ignore_errors=True)
         exec_binary(
-            'Extracting mingw-w64', [self.zip7, 'x', f, mingw_extracted], env,
+            'Extracting mingw-w64', [self.zip7, 'x', '-y', f], env,
             self.temp_dir, shell=True)
         print("Copying {}".format(mingw_extracted))
         copytree(mingw_extracted, mingw)
@@ -518,6 +583,9 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
                         env, pydir, shell=True)
 
         wheel = join(pydir, 'Scripts', 'wheel.exe')
+        for f in list(listdir(temp_dir)):
+            if f.endswith('.whl'):
+                remove(join(temp_dir, f))
 
         pywin_out = join(temp_dir, pywin.split('/')[-1])
         if not exists(pywin_out):
@@ -525,8 +593,8 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
             pywin, _ = urlretrieve(pywin, pywin_out, reporthook=report_hook)
             print(' [Done]')
 
-        exec_binary('Converting {} to wheel'.format(pywin),
-                    [wheel, 'convert', pywin], env, temp_dir, shell=True)
+        exec_binary('Converting {} to wheel'.format(pywin_out),
+                    [wheel, 'convert', pywin_out], env, temp_dir, shell=True)
         wheels = [join(temp_dir, f) for f in listdir(temp_dir)
                   if f.startswith('pywin32') and f.endswith('.whl')]
         if len(wheels) != 1:
@@ -560,14 +628,15 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
         copy_files(join(dirname(__file__), 'data'), build_path)
 
     def get_glew(self, pydir, mingw, arch, env):
-        print('\nGetting Glew')
         temp_dir = self.temp_dir
         url = self.glew_zip
         local_url = join(temp_dir, url.split('/')[-1])
         rmtree(join(temp_dir, 'glew'), ignore_errors=True)
 
         if not exists(local_url):
-            local_url, _ = urlretrieve(url, local_url)
+            print("Progress: 000.00%", end=' ')
+            local_url, _ = urlretrieve(url, local_url, reporthook=report_hook)
+            print(" [Done]")
         print('Extracting glew {}'.format(local_url))
         with open(local_url, 'rb') as fd:
             ZipFile(fd).extractall(join(temp_dir, 'glew'))
@@ -615,6 +684,7 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
         lib = join(build_path, 'SDL2', 'lib')
         bin = join(build_path, 'SDL2', 'bin')
         include = join(build_path, 'SDL2', 'include')
+        env['KIVY_SDL2_PATH'] = ';'.join([lib, bin, join(include, 'SDL2')])
         for d in (lib, bin, include):
             if not exists(d):
                 makedirs(d)
@@ -633,7 +703,10 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
 
             print('\nGetting {}'.format(url))
             if not exists(local_url):
-                local_url, _ = urlretrieve(url, local_url)
+                print("Progress: 000.00%", end=' ')
+                local_url, _ = urlretrieve(url, local_url,
+                                           reporthook=report_hook)
+                print(" [Done]")
 
             exec_binary(
                 'Extracting {}'.format(local_url),
@@ -650,6 +723,47 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
             copy_files(join(base_dir, 'lib'), lib)
             copy_files(join(base_dir, 'bin'), bin)
             copy_files(join(base_dir, 'include'), include)
+
+        print('\nGetting patched SDL_platform.h')
+        local_url = join(temp_dir, 'SDL_platform.h')
+        if not exists(local_url):
+            local_url, _ = urlretrieve(
+            'https://hg.libsdl.org/SDL/raw-file/e217ed463f25/include/SDL_platform.h',
+            local_url)
+        copy2(local_url, join(include, 'SDL2'))
+
+    def get_gstreamer(self, build_path, arch, env):
+        temp_dir = self.temp_dir
+        bitness = 'x86_64' if arch == '64' else 'x86'
+        runtime_name = 'gstreamer-sdk-{}-{}.msi'.format(bitness, self.gst_ver)
+        devel_name = 'gstreamer-sdk-devel-{}-{}.msi'.format(bitness, self.gst_ver)
+
+        gst = join(temp_dir, 'gstreamer')
+        print('Removing gstreamer directory {}'.format(gst))
+        rmtree(gst, ignore_errors=True)
+        if not exists(gst):
+            makedirs(gst)
+
+        for name in (runtime_name, devel_name):
+            local_url = join(temp_dir, name)
+            url = (
+                'http://www.freedesktop.org/software/gstreamer-sdk/data/'
+                'packages/windows/{}/{}'.format(
+                'x86-64' if arch == '64' else 'x86', name))
+            if not exists(local_url):
+                print("Getting {}\nProgress: 000.00%".format(url), end=' ')
+                local_url, _ = urlretrieve(url, local_url, reporthook=report_hook)
+                print(" [Done]")
+
+            exec_binary(
+                "Extracting {} to {}".format(local_url, gst),
+                ['msiexec', '/a', local_url, '/qb', 'TARGETDIR={}'.format(gst)],
+                cwd=gst, shell=False)
+        gst = join(gst, 'gstreamer-sdk')
+        gst = join(gst, list(listdir(gst))[0], bitness)
+
+        print('Copying {} to {}'.format(gst, join(build_path, 'gstreamer')))
+        copy_files(gst, join(build_path, 'gstreamer'))
 
 
 if __name__ == '__main__':

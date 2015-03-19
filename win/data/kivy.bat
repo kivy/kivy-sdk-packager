@@ -14,7 +14,7 @@ ECHO GST_REGISTRY
 ECHO %GST_REGISTRY%
 ECHO ---------------
 
-set KIVY_SDL2_PATH=%kivy_portable_root%SDL2\lib:%kivy_portable_root%SDL2\include\SDL2:%kivy_portable_root%SDL2\bin
+set KIVY_SDL2_PATH=%kivy_portable_root%SDL2\lib;%kivy_portable_root%SDL2\include\SDL2;%kivy_portable_root%SDL2\bin
 ECHO KIVY_SDL2_PATH
 ECHO %KIVY_SDL2_PATH%
 ECHO ---------------

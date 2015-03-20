@@ -291,10 +291,10 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
                 print("-" * width)
                 if arch == '64':
                     mingw = self.do_mingw64(mingw, os.environ)
-                    self.get_pkg_config(mingw, arch)
                 else:
                     mingw = self.do_mingw(mingw, os.environ)
-                    self.get_pkg_config(mingw, arch)
+                self.get_pkg_config(mingw, arch)
+                self.do_msysgit(mingw, os.environ)
                 print('Done installing MinGW\n')
 
             env = os.environ.copy()
@@ -538,6 +538,12 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
             pass
         if isdir(url):
             copytree(url, mingw)
+            if not exists(join(mingw, 'bin', 'make.exe')):
+                try:
+                    copy2(join(mingw, 'bin', 'mingw32-make.exe'),
+                          join(mingw, 'bin', 'make.exe'))
+                except:
+                    pass
             return mingw
 
         local_url = join(self.temp_dir, url.split('/')[-1])
@@ -558,7 +564,31 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
             self.temp_dir, shell=True)
         print("Copying {}".format(mingw_extracted))
         copytree(mingw_extracted, mingw)
+        if not exists(join(mingw, 'bin', 'make.exe')):
+            try:
+                copy2(join(mingw, 'bin', 'mingw32-make.exe'),
+                      join(mingw, 'bin', 'make.exe'))
+            except:
+                pass
         return mingw
+
+    def do_msysgit(self, mingw, env):
+        temp_dir = self.temp_dir
+        url = 'https://github.com/msysgit/msysgit/releases/download/'
+        'Git-1.9.5-preview20150319/PortableGit-1.9.5-preview20150319.7z'
+
+        local_url = join(temp_dir, url.split('/')[-1])
+        if not exists(local_url):
+            print("*Downloading: {}".format(url))
+            print("Progress: 000.00%", end=' ')
+            local_url, _ = urlretrieve(url, local_url, reporthook=report_hook)
+            print(" [Done]")
+
+        exec_binary(
+            'Extracting mingw-w64',
+            [self.zip7, 'x', '-y', '-o{}'.format(join(mingw, 'msysgit')), local_url],
+            env, temp_dir, shell=True)
+
 
     def get_pip_deps(self, build_path, pydir, env, pywin):
         width = self.width

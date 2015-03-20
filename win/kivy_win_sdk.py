@@ -574,8 +574,9 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
 
     def do_msysgit(self, mingw, env):
         temp_dir = self.temp_dir
-        url = 'https://github.com/msysgit/msysgit/releases/download/'
-        'Git-1.9.5-preview20150319/PortableGit-1.9.5-preview20150319.7z'
+        url = (
+            'https://github.com/msysgit/msysgit/releases/download/'
+            'Git-1.9.5-preview20150319/PortableGit-1.9.5-preview20150319.7z')
 
         local_url = join(temp_dir, url.split('/')[-1])
         if not exists(local_url):
@@ -585,7 +586,7 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
             print(" [Done]")
 
         exec_binary(
-            'Extracting mingw-w64',
+            'Extracting msysgit',
             [self.zip7, 'x', '-y', '-o{}'.format(join(mingw, 'msysgit')), local_url],
             env, temp_dir, shell=True)
 

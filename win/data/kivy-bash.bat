@@ -86,7 +86,7 @@ start %COMSPEC% /c %BIN%rxvt -backspacekey  -sl 2500 -fg %FGCOLOR% -bg %BGCOLOR
 exit
 
 :startbash
-call %COMSPEC% /c %BIN%bash --login -i -c 'source $0' kivyenv.sh
+call %COMSPEC% /c %BIN%bash --rcfile kivybash.rc -i
 
 :EOF
 

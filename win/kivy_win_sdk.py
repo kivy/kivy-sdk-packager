@@ -293,7 +293,6 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
                     mingw = self.do_mingw64(mingw, os.environ)
                 else:
                     mingw = self.do_mingw(mingw, os.environ)
-                self.get_pkg_config(mingw, arch)
                 self.do_msysgit(mingw, os.environ)
                 print('Done installing MinGW\n')
 
@@ -635,6 +634,7 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
 
         exec_binary('Installing the wheel {}'.format(wheels[0]),
                     [wheel, 'install', '--force', wheels[0]], env, pydir, shell=True)
+        copy_files(join(pydir, 'Lib', 'site-packages', 'pywin32_system32'), pydir)
 
         if not self.kivy_lib:
             print('\nGetting kivy')
@@ -796,27 +796,22 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
         print('Copying {} to {}'.format(gst, join(build_path, 'gstreamer')))
         copy_files(gst, join(build_path, 'gstreamer'))
 
-    def get_pkg_config(self, mingw, arch):
-        temp_dir = self.temp_dir
         bittness = '64' if arch == '64' else '32'
         pkg_url = 'pkg-config_0.28-1_win{}.zip'.format(bittness)
-        glib_url = 'glib_2.34.3-1_win{}.zip'.format(bittness)
-        gettext = 'gettext_0.18.2.1-1_win{}.zip'.format(bittness)
+        url = 'http://win32builder.gnome.org/packages/3.6/{}'.format(pkg_url)
 
-        for name in (pkg_url, glib_url, gettext):
-            url = 'http://win32builder.gnome.org/packages/3.6/{}'.format(name)
-            local_url = join(temp_dir, name)
-            if not exists(local_url):
-                print("Getting {}\nProgress: 000.00%".format(url), end=' ')
-                local_url, _ = urlretrieve(url, local_url, reporthook=report_hook)
-                print(" [Done]")
+        local_url = join(temp_dir, pkg_url)
+        if not exists(local_url):
+            print("Getting {}\nProgress: 000.00%".format(url), end=' ')
+            local_url, _ = urlretrieve(url, local_url, reporthook=report_hook)
+            print(" [Done]")
 
-            base_dir = join(temp_dir, splitext(name)[0])
-            rmtree(base_dir, ignore_errors=True)
-            makedirs(base_dir)
-            with open(local_url, 'rb') as fd:
-                ZipFile(fd).extractall(base_dir)
-            copy_files(join(base_dir, 'bin'), join(mingw, 'bin'))
+        base_dir = join(temp_dir, splitext(pkg_url)[0])
+        rmtree(base_dir, ignore_errors=True)
+        makedirs(base_dir)
+        with open(local_url, 'rb') as fd:
+            ZipFile(fd).extractall(base_dir)
+        copy_files(join(base_dir, 'bin'), join(build_path, 'gstreamer', 'bin'))
 
 if __name__ == '__main__':
     WindowsPortablePythonBuild().run()

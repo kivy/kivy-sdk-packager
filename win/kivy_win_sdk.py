@@ -281,6 +281,7 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
                 print("*Creating build directory: {}".format(build_path))
                 makedirs(build_path)
             self.get_python(width, pydir, link, md5)
+            self.get_msvcr(build_path, pydir, arch)
             print('Done installing Python\n')
             patch_py = arch == '64'
 
@@ -812,6 +813,42 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
         with open(local_url, 'rb') as fd:
             ZipFile(fd).extractall(base_dir)
         copy_files(join(base_dir, 'bin'), join(build_path, 'gstreamer', 'bin'))
+
+    def get_msvcr(self, build_path, pydir, arch):
+        temp_dir = self.temp_dir
+        msvcr = join(temp_dir, 'msvcr')
+        rmtree(msvcr, ignore_errors=True)
+
+        temp_dir = self.temp_dir
+        if arch == '64':
+            url = ('http://download.microsoft.com/download/d/2/4/'
+                   'd242c3fb-da5a-4542-ad66-f9661d0a8d19/vcredist_x64.exe')
+        else:
+            url = ('http://download.microsoft.com/download/1/1/1/'
+                   '1116b75a-9ec3-481a-a3c8-1777b5381140/vcredist_x86.exe')
+        local_url = join(temp_dir, url.split('/')[-1])
+
+        try:
+            remove(local_url)
+        except:
+            pass
+        print("Progress: 000.00%", end=' ')
+        local_url, _ = urlretrieve(url, local_url, reporthook=report_hook)
+        print(" [Done]")
+
+        exec_binary(
+            'Extracting vcredist',
+            [self.zip7, 'x', '-y', '-o{}'.format(msvcr), local_url], env,
+            self.temp_dir, shell=True)
+        exec_binary(
+            '', ['msiexec', '/a', join(msvcr, 'vc_red.msi'), '/qb', 'TARGETDIR={}'.format(join(msvcr, 'msvcr_msi'))], shell=False)
+        if arch == '64':
+            msvcr = join(msvcr, 'msvcr_msi', 'Windows', 'winsxs', 'dlCRTx64')
+        else:
+            msvcr = join(msvcr, 'msvcr_msi', 'Windows', 'winsxs', 'dlCRTx86')
+        copy2(join(msvcr, 'msvcr90.dll'), pydir)
+        copy2(join(msvcr, 'msvcp90.dll'), pydir)
+
 
 if __name__ == '__main__':
     WindowsPortablePythonBuild().run()

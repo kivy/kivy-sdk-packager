@@ -44,7 +44,7 @@ export GST_PLUGIN_PATH=$KIVY_PORTABLE_ROOT/gstreamer/lib/gstreamer-1.0
 echo GST_PLUGIN_PATH is $GST_PLUGIN_PATH
 echo ----------------------------------
 
-export PATH=$KIVY_PORTABLE_ROOT:$KIVY_PORTABLE_ROOT/tools:$KIVY_PORTABLE_ROOT/Python:$KIVY_PORTABLE_ROOT/Python/Scripts:$KIVY_PORTABLE_ROOT/MinGW/bin:$kivy_portable_root/SDL2/bin:$KIVY_PORTABLE_ROOT/gstreamer/bin:$PATH
+export PATH=$KIVY_PORTABLE_ROOT:$KIVY_PORTABLE_ROOT/tools:$KIVY_PORTABLE_ROOT/Python:$KIVY_PORTABLE_ROOT/Python/Scripts:$KIVY_PORTABLE_ROOT/gstreamer/bin:$KIVY_PORTABLE_ROOT/MinGW/bin:$kivy_portable_root/SDL2/bin:$PATH
 echo PATH is $PATH
 echo ----------------------------------
 

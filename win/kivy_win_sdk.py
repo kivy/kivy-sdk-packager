@@ -105,13 +105,13 @@ class WindowsPortablePythonBuild(object):
         default=py_curr)
 
         mingw_default='http://iweb.dl.sourceforge.net\
-/project/mingw/Installer/mingw-get/mingw-get-0.6.2-beta-20131004-1\
-/mingw-get-0.6.2-mingw32-beta-20131004-1-bin.zip'
-        parser.add_argument("--mingw", help='''Path to MinGW.
-It is either a local path to a mingw installation (directory), a url path to download
-the mingw-get zip, or a local path to the mingw-get zip file. If not specified it will
-download mingw-get (from {}) and use it to install mingw, unless --no-mingw is
-specified.'''.format(mingw_default),
+/project/mingw-w64/Toolchains%20targetting%20Win32/Personal%20Builds/mingw-\
+builds/4.9.2/threads-win32/sjlj/i686-4.9.2-release-win32-sjlj-rt_v4-rev2.7z'
+        parser.add_argument("--mingw", help='''Path to MinGW-w64 32-bit. \
+It is either a local path to a mingw-w64 32-bit installation, a url path to download \
+mingw-w64 32-bit, or a local path to the mingw-w64 32-bit .7z file. If not supplied it will \
+download mingw-w64 32-bit (from {}) and install it, unless --no-mingw is \
+specified.'''.format(mingw_default.replace('%', '%%')),
         default=mingw_default)
         parser.add_argument(
             "--no-mingw",
@@ -281,7 +281,7 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
                 print("*Creating build directory: {}".format(build_path))
                 makedirs(build_path)
             self.get_python(width, pydir, link, md5)
-            self.get_msvcr(build_path, pydir, arch)
+            self.get_msvcr(build_path, pydir, arch, os.environ)
             print('Done installing Python\n')
             patch_py = arch == '64'
 
@@ -290,10 +290,7 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
                 print("-" * width)
                 print("Preparing MinGW")
                 print("-" * width)
-                if arch == '64':
-                    mingw = self.do_mingw64(mingw, os.environ)
-                else:
-                    mingw = self.do_mingw(mingw, os.environ)
+                mingw = self.do_mingw(mingw, arch, os.environ)
                 self.do_msysgit(mingw, os.environ)
                 print('Done installing MinGW\n')
 
@@ -302,8 +299,8 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
                    if 'mingw' not in d.lower() and 'python' not in d.lower()]
             env['PATH'] = ';'.join(
                 [join(build_path, 'SDL2', 'bin'), pydir, join(mingw, 'bin'),
-                join(mingw, 'msys', '1.0', 'bin'), join(pydir, 'Scripts'),
-                join(build_path, 'gstreamer', 'bin'), ';'.join(pth)])
+                join(pydir, 'Scripts'), join(build_path, 'gstreamer', 'bin'),
+                ';'.join(pth)])
             env['PYTHONPATH'] = ''
             env['USE_SDL2'] = '1'
             env['GST_REGISTRY'] = join(build_path, 'gstreamer', 'registry.bin')
@@ -474,63 +471,8 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
                 else:
                     fd.write(line)
 
-    def do_mingw(self, mingw, env):
-        url = self.mingw
-        rmtree(mingw, ignore_errors=True)
-        makedirs(mingw)
-        if isdir(url):
-            copytree(url, mingw)
-            return mingw
-
-        if not url.endswith('.zip'):
-            raise Exception('Expected mingw to be a zip file, got {}'.format(url))
-
-        local_url = join(self.temp_dir, url.split('/')[-1])
-        if not exists(local_url) and not exists(url):
-            print("*Downloading: {}".format(url))
-            print("Progress: 000.00%", end=' ')
-            f, _ = urlretrieve(url, local_url, reporthook=report_hook)
-            print(" [Done]")
-        elif exists(local_url):
-            f = local_url
-        elif exists(url):
-            f = url
-
-        print('\nExtracting mingw-get {}'.format(f))
-        with open(f, 'rb') as fd:
-            ZipFile(fd).extractall(mingw)
-        exec_binary(
-            'Installing MinGW', ['mingw-get.exe', 'install', 'gcc', 'msys-make', 'g++'],
-            env, join(mingw, 'bin'), shell=True)
-
-        url = 'http://zlib.net/zlib128-dll.zip'
-        local_url = join(self.temp_dir, 'zlib128-dll.zip')
-        if not exists(local_url):
-            print("*Downloading: {}".format(url))
-            print("Progress: 000.00%", end=' ')
-            f, _ = urlretrieve(url, local_url, reporthook=report_hook)
-            print(" [Done]")
-        else:
-            f = local_url
-
-        print('\nExtracting zlib {}'.format(f))
-        base_dir = join(self.temp_dir, 'zlib128-dll')
-        rmtree(base_dir, ignore_errors=True)
-        makedirs(base_dir)
-        with open(f, 'rb') as fd:
-            ZipFile(fd).extractall(base_dir)
-
-        files = [(join(base_dir, 'zlib1.dll'), join(mingw, 'bin'))]
-        files += [(join(base_dir, 'include', f), join(mingw, 'include'))
-                  for f in listdir(join(base_dir, 'include'))]
-        files += [(join(base_dir, 'lib', f), join(mingw, 'lib'))
-                  for f in listdir(join(base_dir, 'lib'))]
-        for src_f, dst_f in files:
-            copy2(src_f, dst_f)
-        return mingw
-
-    def do_mingw64(self, mingw, env):
-        url = self.mingw64
+    def do_mingw(self, mingw, arch, env):
+        url = self.mingw64 if arch == '64' else self.mingw
         rmtree(mingw, ignore_errors=True)
         try:
             remove(mingw)
@@ -557,10 +499,10 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
         elif exists(url):
             f = url
 
-        mingw_extracted = join(self.temp_dir, 'mingw64')
+        mingw_extracted = join(self.temp_dir, 'mingw' + ('64' if arch == '64' else '32'))
         rmtree(mingw_extracted, ignore_errors=True)
         exec_binary(
-            'Extracting mingw-w64', [self.zip7, 'x', '-y', f], env,
+            'Extracting mingw', [self.zip7, 'x', '-y', f], env,
             self.temp_dir, shell=True)
         print("Copying {}".format(mingw_extracted))
         copytree(mingw_extracted, mingw)
@@ -589,7 +531,6 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
             'Extracting msysgit',
             [self.zip7, 'x', '-y', '-o{}'.format(join(mingw, 'msysgit')), local_url],
             env, temp_dir, shell=True)
-
 
     def get_pip_deps(self, build_path, pydir, env, pywin):
         width = self.width
@@ -814,7 +755,7 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
             ZipFile(fd).extractall(base_dir)
         copy_files(join(base_dir, 'bin'), join(build_path, 'gstreamer', 'bin'))
 
-    def get_msvcr(self, build_path, pydir, arch):
+    def get_msvcr(self, build_path, pydir, arch, env):
         temp_dir = self.temp_dir
         msvcr = join(temp_dir, 'msvcr')
         rmtree(msvcr, ignore_errors=True)

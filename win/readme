@@ -3,11 +3,9 @@ create all 4 distributions.
 
 Requirements, 7zip (see --7zip) and for a 64 bit installation git as well.
 
-Notes:
-    mingw is huge and needs to be stripped (maybe remove cached downloads).
 
 Help:
-G:\Python\libs\kivy-sdk-packager\win>python kivy_win_sdk.py -h
+G:\Python\libs\kivy-sdk-packager\win>E:\Python27\python.exe kivy_win_sdk.py -h
 usage: kivy_win_sdk.py [-h] [--dir DIR] [--pythons PYTHONS] [--mingw MINGW]
                        [--no-mingw] [--mingw64 MINGW64] [--pywin PYWIN]
                        [--clean] [--strip-python] [--strip-tk]
@@ -39,22 +37,23 @@ optional arguments:
                        a .msi file. if not specified, the current python
                        process exe will be used
                        (py2.7.8_x64:E:\Python27\python.exe).
-  --mingw MINGW        Path to MinGW. It is either a local path to a mingw
-                       installation (directory), a url path to download the
-                       mingw-get zip, or a local path to the mingw-get zip
-                       file. If not specified it will download mingw-get (from
-                       http://iweb.dl.sourceforge.net/project/mingw/Installer
-                       /mingw-get/mingw-get-0.6.2-beta-20131004-1/mingw-
-                       get-0.6.2-mingw32-beta-20131004-1-bin.zip) and use it
-                       to install mingw, unless --no-mingw is specified.
+  --mingw MINGW        Path to MinGW-w64 32-bit. It is either a local path to
+                       a mingw-w64 32-bit installation, a url path to download
+                       mingw-w64 32-bit, or a local path to the mingw-w64
+                       32-bit .7z file. If not supplied it will download
+                       mingw-w64 32-bit (from http://iweb.dl.sourceforge.net/p
+                       roject/mingw-w64/Toolchains%20targetting%20Win32/Person
+                       al%20Builds/mingw-builds/4.9.2/threads-
+                       win32/sjlj/i686-4.9.2-release-win32-sjlj-rt_v4-rev2.7z)
+                       and install it, unless --no-mingw is specified.
   --no-mingw           Whether mingw (and/or mingw-w64) should be
                        downloaded.Defaults to False.
   --mingw64 MINGW64    Path to MinGW-w64. It is either a local path to a
                        mingw-w64 installation, a url path to download
                        mingw-w64, or a local path to the mingw-w64 .7z file.
-                       If not supplied it will download mingw-w64 (from
-                       http://iweb.dl.sourceforge.net\ /project/mingw-w64/Tool
-                       chains%20targetting%20Win64/Personal%20Builds/mingw-\
+                       If not supplied it will download mingw-w64 (from http:/
+                       /iweb.dl.sourceforge.net/project/mingw-w64/Toolchains%2
+                       0targetting%20Win64/Personal%20Builds/mingw-
                        builds/4.9.2/threads-win32/seh/x86_64-4.9.2-release-
                        win32-seh-rt_v3-rev1.7z) and install it, unless --no-
                        mingw is specified.

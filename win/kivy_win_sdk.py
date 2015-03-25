@@ -281,7 +281,7 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
                 print("*Creating build directory: {}".format(build_path))
                 makedirs(build_path)
             self.get_python(width, pydir, link, md5)
-            self.get_msvcr(build_path, pydir, arch, os.environ)
+            self.get_msvcr(build_path, pydir, arch, pyver, os.environ)
             print('Done installing Python\n')
             patch_py = arch == '64'
 
@@ -755,18 +755,25 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
             ZipFile(fd).extractall(base_dir)
         copy_files(join(base_dir, 'bin'), join(build_path, 'gstreamer', 'bin'))
 
-    def get_msvcr(self, build_path, pydir, arch, env):
+    def get_msvcr(self, build_path, pydir, arch, pyver, env):
         temp_dir = self.temp_dir
         msvcr = join(temp_dir, 'msvcr')
         rmtree(msvcr, ignore_errors=True)
 
         temp_dir = self.temp_dir
-        if arch == '64':
+        py2 = pyver.startswith('2')
+        if arch == '64' and py2:
             url = ('http://download.microsoft.com/download/d/2/4/'
                    'd242c3fb-da5a-4542-ad66-f9661d0a8d19/vcredist_x64.exe')
-        else:
+        elif py2:
             url = ('http://download.microsoft.com/download/1/1/1/'
                    '1116b75a-9ec3-481a-a3c8-1777b5381140/vcredist_x86.exe')
+        elif arch == '64':
+            url = ('http://download.microsoft.com/download/3/2/2/'
+                   '3224B87F-CFA0-4E70-BDA3-3DE650EFEBA5/vcredist_x64.exe')
+        else:
+            url = ('http://download.microsoft.com/download/5/B/C/'
+                   '5BC5DBB3-652D-4DCE-B14A-475AB85EEF6E/vcredist_x86.exe')
         local_url = join(temp_dir, url.split('/')[-1])
 
         try:
@@ -781,14 +788,39 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
             'Extracting vcredist',
             [self.zip7, 'x', '-y', '-o{}'.format(msvcr), local_url], env,
             self.temp_dir, shell=True)
+
+        # for VS2010 we need to create pretend files, otherwise the isnatller
+        # chokes looking for them since they do not actually exist
+        if pyver.startswith('3'):
+            for fname in (
+                'eula.1028.txt', 'eula.1031.txt', 'eula.1032.txt', 'eula.1033.txt',
+                'eula.1036.txt', 'eula.1040.txt', 'eula.1041.txt', 'eula.1042.txt',
+                'eula.1049.txt', 'eula.2052.txt', 'eula.3082.txt', 'globdata.ini',
+                'install.exe', 'install.ini', 'install.res.1028.dll', 'install.res.1031.dll',
+                'install.res.1033.dll', 'install.res.1036.dll', 'install.res.1040.dll',
+                'install.res.1041.dll', 'install.res.1042.dll', 'install.res.1049.dll',
+                'install.res.2052.dll', 'install.res.3082.dll', 'vcredist.bmp'):
+                if not exists(join(msvcr, fname)):
+                    with open(join(msvcr, fname), 'wb'):
+                        pass
+
         exec_binary(
-            '', ['msiexec', '/a', join(msvcr, 'vc_red.msi'), '/qb', 'TARGETDIR={}'.format(join(msvcr, 'msvcr_msi'))], shell=False)
-        if arch == '64':
-            msvcr = join(msvcr, 'msvcr_msi', 'Windows', 'winsxs', 'dlCRTx64')
+            '', ['msiexec', '/a', join(msvcr, 'vc_red.msi'), '/qb', 'TARGETDIR={}'.
+                 format(join(msvcr, 'msvcr_msi'))], shell=False)
+        if pyver.startswith('2'):
+            if arch == '64':
+                msvcr = join(msvcr, 'msvcr_msi', 'Windows', 'winsxs', 'dlCRTx64')
+            else:
+                msvcr = join(msvcr, 'msvcr_msi', 'Windows', 'winsxs', 'dlCRTx86')
+            copy2(join(msvcr, 'msvcr90.dll'), pydir)
+            copy2(join(msvcr, 'msvcp90.dll'), pydir)
         else:
-            msvcr = join(msvcr, 'msvcr_msi', 'Windows', 'winsxs', 'dlCRTx86')
-        copy2(join(msvcr, 'msvcr90.dll'), pydir)
-        copy2(join(msvcr, 'msvcp90.dll'), pydir)
+            if arch == '64':
+                msvcr = join(msvcr, 'msvcr_msi', 'Win', 'System64')
+            else:
+                msvcr = join(msvcr, 'msvcr_msi', 'Win', 'System')
+            copy2(join(msvcr, 'msvcr100.dll'), pydir)
+            copy2(join(msvcr, 'msvcp100.dll'), pydir)
 
 
 if __name__ == '__main__':

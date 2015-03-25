@@ -32,7 +32,7 @@ export GST_REGISTRY=$KIVY_PORTABLE_ROOT/gstreamer/registry.bin
 echo GST_REGISTRY is $GST_REGISTRY
 echo ----------------------------------
 
-export KIVY_SDL2_PATH=$kivy_portable_root/SDL2/lib:$kivy_portable_root/SDL2/include/SDL2:$kivy_portable_root/SDL2/bin
+export KIVY_SDL2_PATH=$kivy_portable_root/SDL2/lib;$kivy_portable_root/SDL2/include/SDL2;$kivy_portable_root/SDL2/bin
 echo KIVY_SDL2_PATH is $KIVY_SDL2_PATH
 echo ----------------------------------
 
@@ -44,7 +44,7 @@ export GST_PLUGIN_PATH=$KIVY_PORTABLE_ROOT/gstreamer/lib/gstreamer-1.0
 echo GST_PLUGIN_PATH is $GST_PLUGIN_PATH
 echo ----------------------------------
 
-export PATH=$KIVY_PORTABLE_ROOT:$KIVY_PORTABLE_ROOT/tools:$KIVY_PORTABLE_ROOT/Python:$KIVY_PORTABLE_ROOT/Python/Scripts:$KIVY_PORTABLE_ROOT/MinGW/bin:$KIVY_PORTABLE_ROOT/MinGW/msys/1.0/bin:$kivy_portable_root/SDL2/bin:$KIVY_PORTABLE_ROOT/gstreamer/bin:$PATH
+export PATH=$KIVY_PORTABLE_ROOT:$KIVY_PORTABLE_ROOT/tools:$KIVY_PORTABLE_ROOT/Python:$KIVY_PORTABLE_ROOT/Python/Scripts:$KIVY_PORTABLE_ROOT/MinGW/bin:$kivy_portable_root/SDL2/bin:$KIVY_PORTABLE_ROOT/gstreamer/bin:$PATH
 echo PATH is $PATH
 echo ----------------------------------
 
@@ -66,16 +66,6 @@ for i in $KIVY_PORTABLE_ROOT/gstreamer/bin/*.exe; do
 done
 
 for i in $KIVY_PORTABLE_ROOT/MinGW/bin/*.exe; do
-    echo $i to $(basename $i .exe)
-    alias $(basename $i .exe)="wine \"$i\""
-done
-
-for i in $KIVY_PORTABLE_ROOT/MinGW/msys/1.0/bin/*.exe; do
-    echo $i to $(basename $i .exe)
-    alias $(basename $i .exe)="wine \"$i\""
-done
-
-for i in $KIVY_PORTABLE_ROOT/MinGW/msysgit/bin/*.exe; do
     echo $i to $(basename $i .exe)
     alias $(basename $i .exe)="wine \"$i\""
 done

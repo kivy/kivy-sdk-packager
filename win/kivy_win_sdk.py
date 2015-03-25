@@ -313,6 +313,7 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
                 print("-" * width)
                 self.patch_python_x64(pydir, env, pyver)
                 print('Done patching python\n')
+            self.patch_cygwinccompiler(pydir)
 
             print("-" * width)
             print("Preparing Glew")
@@ -458,6 +459,7 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
                     ['git', 'apply', patch_name], env, include, shell=True)
         remove(patch)
 
+    def patch_cygwinccompiler(self, pydir):
         # see http://bugs.python.org/issue16472
         print('Patching cygwinccompiler.py')
         cyg = join(pydir, 'Lib', 'distutils', 'cygwinccompiler.py')
@@ -467,7 +469,7 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
         with open(cyg, 'w') as fd:
             for line in lines:
                 if line == '        self.dll_libraries = get_msvcr()\n':
-                    fd.write('        #self.dll_libraries = get_msvcr()\n')
+                    fd.write('        # self.dll_libraries = get_msvcr()\n')
                 else:
                     fd.write(line)
 

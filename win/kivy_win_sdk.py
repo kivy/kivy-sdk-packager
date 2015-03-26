@@ -320,6 +320,7 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
             print("-" * width)
             self.get_glew(pydir, mingw, arch, env)
             print('Done preparing Glew\n')
+
             if not self.no_sdl2:
                 print("-" * width)
                 print("Preparing SDL2")
@@ -331,7 +332,19 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
                 print("Preparing GStreamer")
                 print("-" * width)
                 self.get_gstreamer(build_path, arch, env)
+                sdl = join(build_path, 'SDL2', 'bin')
+                gst = join(build_path, 'gstreamer', 'bin')
+                if exists(sdl):
+                    print('Removing gst dlls existing in SDL2')
+                    for fname in set(listdir(sdl)) & set(listdir(gst)):
+                        names = (join(gst, fname), join(gst, fname + '.old'))
+                        try:
+                            rename(*names)
+                            print('Changed {} to {}'.format(*names))
+                        except:
+                            pass
                 print('Done preparing GStreamer\n')
+
             print("-" * width)
             print("Preparing pip deps")
             print("-" * width)

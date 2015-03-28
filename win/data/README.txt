@@ -17,8 +17,9 @@ Running portable Kivy
 =====================
 
 The same directory that has this README file in it, contains a file called kivy.bat
-running this kivy.bat file will set up the environment for kivy and starts the 
-python interpreter with any arguments you passed
+(or e.g. kivy-2.7.bat when isnstalled that way) running this kivy.bat file will set
+up the environment for kivy and starts the python interpreter with any arguments you
+passed.
 
 Example
 ~~~~~~~

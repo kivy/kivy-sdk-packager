@@ -190,9 +190,6 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
             '(e.g. kivy27, Python27, kivy-2.7.bat etc.)',
             action="store_false", dest='generic')
         parser.add_argument(
-            "--no-sdl2", help='If SDL2 should not be downloaded.',
-            action="store_true", dest='no_sdl2')
-        parser.add_argument(
             "--build-path", help='The directory name in --dir into which '
             'the python currently being build will be saved. Defaults to '
             '`py{pyver}_x{bitnes}`. The only available keywords are '

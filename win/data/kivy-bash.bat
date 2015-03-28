@@ -82,7 +82,7 @@ if "%MSYSTEM%" == "MSYS" set FGCOLOR=%MSYSFGCOLOR%
 if "%MSYSTEM%" == "MINGW32" set BGCOLOR=%MINGW32BGCOLOR%
 if "%MSYSTEM%" == "MINGW32" set FGCOLOR=%MINGW32FGCOLOR%
 
-start %COMSPEC% /c %BIN%rxvt -backspacekey  -sl 2500 -fg %FGCOLOR% -bg %BGCOLOR% -sr -fn Courier-12 -tn msys -geometry 80x25 -e MinGW/msys/bin/bash --login -i -c 'source $0' kivyenv.sh
+start %COMSPEC% /c %BIN%rxvt -backspacekey  -sl 2500 -fg %FGCOLOR% -bg %BGCOLOR% -sr -fn Courier-12 -tn msys -geometry 80x25 -e MinGW/msys/bin/bash --rcfile kivybash.rc -i
 exit
 
 :startbash

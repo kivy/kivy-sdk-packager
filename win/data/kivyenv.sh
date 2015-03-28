@@ -12,7 +12,10 @@
 
 # Get root directory of portable installation
 tmp=$(dirname $BASH_SOURCE)
+export PY_VER=
 export KIVY_PORTABLE_ROOT=$(cd $tmp; pwd)
+export PYTHON_DIR=Python$PY_VER
+export KIVY_DIR=kivy$PY_VER
 
 if [ ! -d $KIVY_PORTABLE_ROOT ]; then
 	echo "Usage: source /path/to/kivyenv.sh"
@@ -20,7 +23,7 @@ if [ ! -d $KIVY_PORTABLE_ROOT ]; then
 fi
 
 # bootstrapping
-echo bootstrapping Kivy @ $KIVY_PORTABLE_ROOT
+echo bootstrapping Kivy @ $KIVY_PORTABLE_ROOT with Python $KIVY_PORTABLE_ROOT/$PYTHON_DIR
 
 if [ "X$KIVY_PATHS_INITIALIZED" != "X1" ]; then
 
@@ -43,12 +46,12 @@ export GST_PLUGIN_PATH=$KIVY_PORTABLE_ROOT/gstreamer/lib/gstreamer-1.0
 echo GST_PLUGIN_PATH is $GST_PLUGIN_PATH
 echo ----------------------------------
 
-export PATH=$KIVY_PORTABLE_ROOT:$KIVY_PORTABLE_ROOT/Python:$KIVY_PORTABLE_ROOT/Python/Scripts:$KIVY_PORTABLE_ROOT/gstreamer/bin:$KIVY_PORTABLE_ROOT/MinGW/bin:$KIVY_PORTABLE_ROOT/SDL2/bin:$PATH
+export PATH=$KIVY_PORTABLE_ROOT:$KIVY_PORTABLE_ROOT/$PYTHON_DIR:$KIVY_PORTABLE_ROOT/$PYTHON_DIR/Scripts:$KIVY_PORTABLE_ROOT/gstreamer/bin:$KIVY_PORTABLE_ROOT/MinGW/bin:$KIVY_PORTABLE_ROOT/SDL2/bin:$PATH
 echo PATH is $PATH
 echo ----------------------------------
 
 echo 'Convert to windows path:' $KIVY_PORTABLE_ROOT
-KIVY_PORTABLE_ROOT_PY=$(python -c 'import os, sys; print(os.path.realpath(sys.argv[1]))' $KIVY_PORTABLE_ROOT/kivy)
+KIVY_PORTABLE_ROOT_PY=$(python -c 'import os, sys; print(os.path.realpath(sys.argv[1]))' $KIVY_PORTABLE_ROOT/$KIVY_DIR)
 export PYTHONPATH=$KIVY_PORTABLE_ROOT_PY\;$PYTHONPATH
 echo PYTHONPATH is $PYTHONPATH
 export PKG_CONFIG_PATH=$KIVY_PORTABLE_ROOT/gstreamer/lib/pkgconfig\;$PKG_CONFIG_PATH

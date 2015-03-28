@@ -75,6 +75,10 @@ class WindowsPortablePythonBuild(object):
     gst_ver = ''
     no_gst = False
     no_sdl2 = False
+    generic = True
+    arg_build_path = 'py{pyver}_x{bitnes}'
+    no_msysgit = False
+    no_kivy = False
 
     def parse_args(self):
         py_curr = 'py{}.{}.{}_x{}:{}'.format(
@@ -115,8 +119,9 @@ specified.'''.format(mingw_default.replace('%', '%%')),
         default=mingw_default)
         parser.add_argument(
             "--no-mingw",
-            help='Whether mingw (and/or mingw-w64) should be downloaded.'
-            'Defaults to False.', action="store_true",
+            help='Whether mingw (and/or mingw-w64) should be downloaded. '
+            'Defaults to False. If set, gcc needs to be in PATH, otherwise '
+            'kivy and other pip deps will fail to be compiled.', action="store_true",
             dest='no_mingw')
 
         mingw64_default='http://iweb.dl.sourceforge.net\
@@ -167,11 +172,39 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
             'http://www.freedesktop.org/software/gstreamer-sdk/data/packages/windows/. '
             'Defaults to 2013.6.', default='2013.6', dest='gst_ver')
         parser.add_argument(
-            "--no-gst", help='If Gstreamer should not be downloaded.',
+            "--no-gst", help='If Gstreamer should not be downloaded. '
+            'If specified, GST_REGISTRY, GST_PLUGIN_PATH, and PKG_CONFIG_PATH '
+            'should be set and gstreamer/bin should be in the PATH, otherwise, '
+            'kivy will fail to use gstreamer if compiled by the script.',
             action="store_true", dest='no_gst')
+        parser.add_argument(
+            "--no-sdl2", help='If SDL2 should not be downloaded. '
+            'If specified, KIVY_SDL2_PATH should be set to the SDL2 bin, include, '
+            'and lib diretories and SDL2 bin should be in the PATH, otherwise, '
+            'SDL2 will not be used by kivy if compiled by the script.',
+            action="store_true", dest='no_sdl2')
+        parser.add_argument(
+            "--no-generic", help='Whether the kivy directory, the python directory and all '
+            'kivy scripts referring to that directory will use just kivy, and Python '
+            '(the default) or if it will name it with the python version '
+            '(e.g. kivy27, Python27, kivy-2.7.bat etc.)',
+            action="store_false", dest='generic')
         parser.add_argument(
             "--no-sdl2", help='If SDL2 should not be downloaded.',
             action="store_true", dest='no_sdl2')
+        parser.add_argument(
+            "--build-path", help='The directory name in --dir into which '
+            'the python currently being build will be saved. Defaults to '
+            '`py{pyver}_x{bitnes}`. The only available keywords are '
+            'pyver for the python version, e.g. 27 and bitnes for the OS '
+            'arch, e.g. 86 or 64',
+            default='py{pyver}_x{bitnes}', dest='build_path')
+        parser.add_argument(
+            "--no-msysgit", help='If msysgit should not be included.',
+            action="store_true", dest='no_msysgit')
+        parser.add_argument(
+            "--no-kivy", help='If kivy should not be downloaded and/or compiled.',
+            action="store_true", dest='no_kivy')
 
         args = parser.parse_args()
         self.dist_dir = base = abspath(args.dir)
@@ -191,6 +224,10 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
         self.gst_ver = args.gst_ver
         self.no_gst = args.no_gst
         self.no_sdl2 = args.no_sdl2
+        self.generic = args.generic
+        self.arg_build_path = args.build_path
+        self.no_msysgit = args.no_msysgit
+        self.no_kivy = args.no_kivy
 
         if not exists(self.zip7):
             raise Exception('Valid 7-Zip installtion was not found at {}'.format(self.zip7))
@@ -266,13 +303,18 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
             print("-" * width)
             print("Preparing python {}".format(pyname))
             print("-" * width)
-            name = pyname.replace('.', '')
+            pyver_minor = pyver.replace('.', '')[:2]
+            name = self.arg_build_path.format(
+                **{'pyver': pyver_minor, 'bitnes': arch})
             build_path = join(dist_dir, name)
             patch_py = False
             if link.endswith('.exe'):  # already existing python
                 pydir = dirname(link)
             else:
-                pydir = join(build_path, 'Python')
+                if self.generic:
+                    pydir = join(build_path, 'Python')
+                else:
+                    pydir = join(build_path, 'Python{}'.format(pyver_minor))
 
             if self.clean and exists(build_path):
                 print("*Cleaning old build dir, {}".format(build_path))
@@ -291,16 +333,15 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
                 print("Preparing MinGW")
                 print("-" * width)
                 mingw = self.do_mingw(mingw, arch, os.environ)
-                self.do_msysgit(mingw, os.environ)
+                if not self.no_msysgit:
+                    self.do_msysgit(mingw, os.environ)
                 print('Done installing MinGW\n')
 
             env = os.environ.copy()
-            pth = [d for d in env['PATH'].split(';')
-                   if 'mingw' not in d.lower() and 'python' not in d.lower()]
             env['PATH'] = ';'.join(
                 [join(build_path, 'SDL2', 'bin'), pydir, join(mingw, 'bin'),
                 join(pydir, 'Scripts'), join(build_path, 'gstreamer', 'bin'),
-                ';'.join(pth)])
+                env['PATH']])
             env['PYTHONPATH'] = ''
             env['USE_SDL2'] = '1'
             env['GST_REGISTRY'] = join(build_path, 'gstreamer', 'registry.bin')
@@ -348,7 +389,7 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
             print("-" * width)
             print("Preparing pip deps")
             print("-" * width)
-            self.get_pip_deps(build_path, pydir, env, pywin_url)
+            self.get_pip_deps(build_path, pydir, pyver, env, pywin_url)
             print('Done preparing pip deps\n')
 
         print('Done')
@@ -376,8 +417,6 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
             elif exists(url):
                 f = url
 
-            if not exists(pydir):
-                makedirs(pydir)
             print('Removing old python {}'.format(pydir))
             rmtree(pydir, ignore_errors=True)
             exec_binary(
@@ -403,10 +442,10 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
         if not exists(join(pydir, 'Scripts')):
             makedirs(join(pydir, 'Scripts'))
 
-        if not self.clean:
+        if not self.strip_py:
             return
 
-        print("\nCleaning python")
+        print("\nStripping python")
         print("-" * width)
 
         dirs = ['Doc', join('Lib', 'test'), join('Lib', 'idlelib')]
@@ -440,7 +479,10 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
                     f.startswith('_tkinter')):
                     f = join(pydir, 'DLLs', f)
                     print('Removing {}'.format(f))
-                    remove(f)
+                    try:
+                        remove(f)
+                    except:
+                        pass
 
     def patch_python_x64(self, pydir, env, pyver):
         libs = join(pydir, 'libs')
@@ -451,15 +493,17 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
 
         # see http://bugs.python.org/issue4709 and
         # http://ascend4.org/Setting_up_a_MinGW-w64_build_environment
-        try: remove(join(libs, 'old_' + pylib))
-        except: pass
-        try: rename(join(libs, pylib), join(libs, 'old_' + pylib))
-        except: pass
-        exec_binary('Gendefing ' + pydll, ['gendef.exe', pydll], env, libs)
-        exec_binary('Generating libpython.a',
-                    ['dlltool', '--dllname', pydll, '--def', pydef,
-                     '--output-lib', 'lib' + py + '.a'], env, libs, shell=True)
-        remove(pydef)
+        if not exists(join(libs, 'lib' + py + '.a')):
+            if exists(join(libs, pylib)):
+                try: remove(join(libs, 'old_' + pylib))
+                except: pass
+                try: rename(join(libs, pylib), join(libs, 'old_' + pylib))
+                except: pass
+            exec_binary('Gendefing ' + pydll, ['gendef.exe', pydll], env, libs)
+            exec_binary('Generating lib' + py + '.a',
+                        ['dlltool', '--dllname', pydll, '--def', pydef,
+                         '--output-lib', 'lib' + py + '.a'], env, libs, shell=True)
+            remove(pydef)
 
         print('Getting python pyconfig.h patch')
         url = 'http://bugs.python.org/file12411/mingw-w64.patch'
@@ -547,7 +591,7 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
             [self.zip7, 'x', '-y', '-o{}'.format(join(mingw, 'msysgit')), local_url],
             env, temp_dir, shell=True)
 
-    def get_pip_deps(self, build_path, pydir, env, pywin):
+    def get_pip_deps(self, build_path, pydir, pyver, env, pywin):
         width = self.width
         temp_dir = self.temp_dir
         py = join(pydir, 'python.exe')
@@ -567,7 +611,8 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
         exec_binary('Installing easy install', [py, ez], env, pydir, shell=True)
 
         pip = join(pydir, 'Scripts', 'pip.exe')
-        for mod in self.pip_deps + ([self.kivy_zip] if self.kivy_lib else []):
+        for mod in self.pip_deps + (
+            [self.kivy_zip] if self.kivy_lib and not self.no_kivy else []):
             exec_binary('\nInstalling {}'.format(mod), [pip, 'install', mod],
                         env, pydir, shell=True)
 
@@ -593,7 +638,7 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
                     [wheel, 'install', '--force', wheels[0]], env, pydir, shell=True)
         copy_files(join(pydir, 'Lib', 'site-packages', 'pywin32_system32'), pydir)
 
-        if not self.kivy_lib:
+        if not self.kivy_lib and not self.no_kivy:
             print('\nGetting kivy')
             url = self.kivy_zip
             kivy = join(temp_dir, 'kivy.zip')
@@ -608,14 +653,55 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
             print('Extracting kivy {}'.format(kivy))
             with open(kivy, 'rb') as fd:
                 ZipFile(fd).extractall(join(temp_dir, 'kivy'))
+
+            kivy_path = join(build_path, 'kivy{}'.format(
+                '' if self.generic else pyver.replace('.', '')[:2]))
             copytree(
                 join(temp_dir, 'kivy', list(listdir(join(temp_dir, 'kivy')))[0]),
-                join(build_path, 'kivy'))
+                kivy_path)
             exec_binary('Compiling kivy', [py, 'setup.py', 'build_ext', '--inplace'],
-                        env, join(build_path, 'kivy'), shell=True)
+                        env, kivy_path, shell=True)
 
         print('Copying tools')
-        copy_files(join(dirname(__file__), 'data'), build_path)
+        if self.generic:
+            copy_files(join(dirname(__file__), 'data'), build_path)
+            return
+
+        data = join(temp_dir, 'kivy_data')
+        rmtree(data, ignore_errors=True)
+        copy_files(join(dirname(__file__), 'data'), data)
+
+        pyvdot = pyver[:3]
+        pyv = pyver.replace('.', '')[:2]
+        for fname in ('kivy.bat', 'kivyenv.sh', 'kivywineenv.sh'):
+            with open(join(data, fname)) as fh:
+                lines = fd.readlines()
+            with open(join(data, fname), 'w') as fh:
+                for line in lines:
+                    if 'PY_VER=' in line:
+                        line = line.replace('PY_VER=', 'PY_VER={}'.format(pyv))
+                    fh.write(line)
+            name, ext = splitext(fname)
+            rename(join(data, fname), join(data, name + '-' + pyvdot + ext))
+
+        with open(join(data, 'kivybash.rc')) as fh:
+            lines = fd.readlines()
+        with open(join(data, 'kivybash.rc'), 'w') as fh:
+            for line in lines:
+                if 'kivyenv.sh' in line:
+                    line = line.replace('kivyenv.sh', 'kivyenv-{}.sh'.format(pyvdot))
+                fh.write(line)
+        rename(join(data, 'kivybash.rc'), join(data, 'kivybash-{}.rc'.format(pyvdot)))
+
+        with open(join(data, 'kivy-bash.bat')) as fh:
+            lines = fd.readlines()
+        with open(join(data, 'kivy-bash.bat'), 'w') as fh:
+            for line in lines:
+                if 'kivybash.rc' in line:
+                    line = line.replace('kivybash.rc', 'kivybash-{}.rc'.format(pyvdot))
+                fh.write(line)
+        rename(join(data, 'kivy-bash.bat'), join(data, 'kivy-bash-{}.bat'.format(pyvdot)))
+
 
     def get_glew(self, pydir, mingw, arch, env):
         temp_dir = self.temp_dir

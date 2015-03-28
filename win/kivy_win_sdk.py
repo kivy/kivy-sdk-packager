@@ -672,7 +672,7 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
         pyv = pyver.replace('.', '')[:2]
         for fname in ('kivy.bat', 'kivyenv.sh', 'kivywineenv.sh'):
             with open(join(data, fname)) as fh:
-                lines = fd.readlines()
+                lines = fh.readlines()
             with open(join(data, fname), 'w') as fh:
                 for line in lines:
                     if 'PY_VER=' in line:
@@ -682,7 +682,7 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
             rename(join(data, fname), join(data, name + '-' + pyvdot + ext))
 
         with open(join(data, 'kivybash.rc')) as fh:
-            lines = fd.readlines()
+            lines = fh.readlines()
         with open(join(data, 'kivybash.rc'), 'w') as fh:
             for line in lines:
                 if 'kivyenv.sh' in line:
@@ -691,7 +691,7 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
         rename(join(data, 'kivybash.rc'), join(data, 'kivybash-{}.rc'.format(pyvdot)))
 
         with open(join(data, 'kivy-bash.bat')) as fh:
-            lines = fd.readlines()
+            lines = fh.readlines()
         with open(join(data, 'kivy-bash.bat'), 'w') as fh:
             for line in lines:
                 if 'kivybash.rc' in line:

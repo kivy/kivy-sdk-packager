@@ -35,7 +35,7 @@ export GST_REGISTRY=$KIVY_PORTABLE_ROOT/gstreamer/registry.bin
 echo GST_REGISTRY is $GST_REGISTRY
 echo ----------------------------------
 
-export KIVY_SDL2_PATH=$kivy_portable_root/SDL2/lib;$KIVY_PORTABLE_ROOT/SDL2/include/SDL2;$KIVY_PORTABLE_ROOT/SDL2/bin
+export KIVY_SDL2_PATH=$kivy_portable_root/SDL2/lib\;$KIVY_PORTABLE_ROOT/SDL2/include/SDL2\;$KIVY_PORTABLE_ROOT/SDL2/bin
 echo KIVY_SDL2_PATH is $KIVY_SDL2_PATH
 echo ----------------------------------
 

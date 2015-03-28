@@ -698,6 +698,7 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
                     line = line.replace('kivybash.rc', 'kivybash-{}.rc'.format(pyvdot))
                 fh.write(line)
         rename(join(data, 'kivy-bash.bat'), join(data, 'kivy-bash-{}.bat'.format(pyvdot)))
+        copy_files(data, build_path)
 
 
     def get_glew(self, pydir, mingw, arch, env):

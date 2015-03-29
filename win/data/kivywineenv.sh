@@ -35,10 +35,6 @@ export GST_REGISTRY=$KIVY_PORTABLE_ROOT/gstreamer/registry.bin
 echo GST_REGISTRY is $GST_REGISTRY
 echo ----------------------------------
 
-export KIVY_SDL2_PATH=$kivy_portable_root/SDL2/lib\;$KIVY_PORTABLE_ROOT/SDL2/include/SDL2\;$KIVY_PORTABLE_ROOT/SDL2/bin
-echo KIVY_SDL2_PATH is $KIVY_SDL2_PATH
-echo ----------------------------------
-
 export USE_SDL2=1
 echo USE_SDL2 is $USE_SDL2
 echo ----------------------------------
@@ -72,14 +68,22 @@ for i in $KIVY_PORTABLE_ROOT/MinGW/bin/*.exe; do
     echo $i to $(basename $i .exe)
     alias $(basename $i .exe)="wine \"$i\""
 done
+echo ----------------------------------
 
-echo 'Convert to windows path:' $KIVY_PORTABLE_ROOT
-KIVY_PORTABLE_ROOT_PY="$(python -c 'import os, sys; print(os.path.realpath(sys.argv[1]))' $KIVY_PORTABLE_ROOT/$KIVY_DIR)"
+
+KIVY_PORTABLE_ROOT_WIN="$(python -c 'import os, sys; print(os.path.realpath(sys.argv[1]))' $KIVY_PORTABLE_ROOT)"
+echo 'Convert to windows path:' $KIVY_PORTABLE_ROOT -\> $KIVY_PORTABLE_ROOT_WIN
+echo ----------------------------------
+
+export KIVY_SDL2_PATH=$KIVY_PORTABLE_ROOT_WIN\\SDL2\\lib\;$KIVY_PORTABLE_ROOT_WIN\\SDL2\\include\\SDL2\;$KIVY_PORTABLE_ROOT_WIN\\SDL2\\bin
+echo KIVY_SDL2_PATH is $KIVY_SDL2_PATH
+echo ----------------------------------
+
 # Weird bug happens if this check is not done.
 if [ -z $PYTHONPATH ]; then
-    export PYTHONPATH="$KIVY_PORTABLE_ROOT_PY\\"
+    export PYTHONPATH="$KIVY_PORTABLE_ROOT_WIN\\kivy\\"
 else
-    export PYTHONPATH="$KIVY_PORTABLE_ROOT_PY\;$PYTHONPATH"
+    export PYTHONPATH="$KIVY_PORTABLE_ROOT_WIN\\kivy\;$PYTHONPATH"
 fi
 
 echo PYTHONPATH is $PYTHONPATH

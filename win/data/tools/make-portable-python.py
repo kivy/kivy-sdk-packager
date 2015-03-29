@@ -7,21 +7,23 @@ python.exe.
 import sys
 import os
 from os import listdir, remove, rename
-from os.path import dirname, join
+from os.path import dirname, join, isfile
 from re import compile, sub
 from tempfile import mkstemp
 from shutil import copystat
 
-pypat = compile('#!(.+?)python.exe')
+pypat = compile(b'#!(.+?)python.exe')
 
 
 def make_portable():
     scripts = join(dirname(sys.executable), 'Scripts')
     for fname in listdir(scripts):
         f = join(scripts, fname)
+        if not isfile(f):
+            continue
         with open(f, 'rb') as fh:
             old = fh.read()
-        new = sub(pypat, '#!python.exe', old)
+        new = sub(pypat, b'#!python.exe', old)
         if old == new:
             continue
 

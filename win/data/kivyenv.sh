@@ -34,10 +34,6 @@ export GST_REGISTRY=$KIVY_PORTABLE_ROOT/gstreamer/registry.bin
 echo GST_REGISTRY is $GST_REGISTRY
 echo ----------------------------------
 
-export KIVY_SDL2_PATH=$KIVY_PORTABLE_ROOT/SDL2/lib\;$KIVY_PORTABLE_ROOT/SDL2/include/SDL2\;$KIVY_PORTABLE_ROOT/SDL2/bin
-echo KIVY_SDL2_PATH is $KIVY_SDL2_PATH
-echo ----------------------------------
-
 export USE_SDL2=1
 echo USE_SDL2 is $USE_SDL2
 echo ----------------------------------
@@ -50,9 +46,15 @@ export PATH=$KIVY_PORTABLE_ROOT:$KIVY_PORTABLE_ROOT/$PYTHON_DIR:$KIVY_PORTABLE_R
 echo PATH is $PATH
 echo ----------------------------------
 
-echo 'Convert to windows path:' $KIVY_PORTABLE_ROOT
-KIVY_PORTABLE_ROOT_PY=$(python -c 'import os, sys; print(os.path.realpath(sys.argv[1]))' $KIVY_PORTABLE_ROOT/$KIVY_DIR)
-export PYTHONPATH=$KIVY_PORTABLE_ROOT_PY\;$PYTHONPATH
+KIVY_PORTABLE_ROOT_WIN=$(python -c 'import os, sys; print(os.path.realpath(sys.argv[1]))' $KIVY_PORTABLE_ROOT)
+echo 'Convert to windows path:' $KIVY_PORTABLE_ROOT -\> $KIVY_PORTABLE_ROOT_WIN
+echo ----------------------------------
+
+export KIVY_SDL2_PATH=$KIVY_PORTABLE_ROOT_WIN\\SDL2\\lib\;$KIVY_PORTABLE_ROOT_WIN\\SDL2\\include\\SDL2\;$KIVY_PORTABLE_ROOT_WIN\\SDL2\\bin
+echo KIVY_SDL2_PATH is $KIVY_SDL2_PATH
+echo ----------------------------------
+
+export PYTHONPATH=$KIVY_PORTABLE_ROOT_WIN\\kivy\;$PYTHONPATH
 echo PYTHONPATH is $PYTHONPATH
 export PKG_CONFIG_PATH=$KIVY_PORTABLE_ROOT/gstreamer/lib/pkgconfig\;$PKG_CONFIG_PATH
 

@@ -562,10 +562,13 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
         elif exists(url):
             f = url
 
+        mingw_extracted = join(self.temp_dir, 'mingw' + ('64' if arch == '64' else '32'))
+        rmtree(mingw_extracted, ignore_errors=True)
         rmtree(mingw, ignore_errors=True)
         exec_binary(
-            'Extracting mingw', [self.zip7, 'x', '-y', '-o{}'.format(mingw), f], env,
+            'Extracting mingw', [self.zip7, 'x', '-y', f], env,
             self.temp_dir, shell=True)
+        rename(mingw_extracted, mingw)
         if not exists(join(mingw, 'bin', 'make.exe')):
             try:
                 copy2(join(mingw, 'bin', 'mingw32-make.exe'),

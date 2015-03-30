@@ -555,13 +555,10 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
         elif exists(url):
             f = url
 
-        mingw_extracted = join(self.temp_dir, 'mingw' + ('64' if arch == '64' else '32'))
-        rmtree(mingw_extracted, ignore_errors=True)
+        rmtree(mingw, ignore_errors=True)
         exec_binary(
-            'Extracting mingw', [self.zip7, 'x', '-y', f], env,
+            'Extracting mingw', [self.zip7, 'x', '-y', '-o{}'.format(mingw), f], env,
             self.temp_dir, shell=True)
-        print("Copying {}".format(mingw_extracted))
-        copytree(mingw_extracted, mingw)
         if not exists(join(mingw, 'bin', 'make.exe')):
             try:
                 copy2(join(mingw, 'bin', 'mingw32-make.exe'),
@@ -834,8 +831,10 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
         gst = join(gst, 'gstreamer')
         gst = join(gst, list(listdir(gst))[0], bitness)
 
-        print('Copying {} to {}'.format(gst, join(build_path, 'gstreamer')))
-        copy_files(gst, join(build_path, 'gstreamer'))
+        print('Removing {}'.format(join(build_path, 'gstreamer')))
+        rmtree(join(build_path, 'gstreamer'), ignore_errors=True)
+        print('Moving {} to {}'.format(gst, join(build_path, 'gstreamer')))
+        rename(gst, join(build_path, 'gstreamer'))
 
         bittness = '64' if arch == '64' else '32'
         pkg_url = 'pkg-config_0.28-1_win{}.zip'.format(bittness)

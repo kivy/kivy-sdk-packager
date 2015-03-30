@@ -22,6 +22,7 @@ except ImportError:
 import ssl
 from functools import partial
 import inspect
+from time import sleep
 
 
 if 'context' in inspect.getargspec(urlretrieve)[0]:
@@ -568,7 +569,15 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
         exec_binary(
             'Extracting mingw', [self.zip7, 'x', '-y', f], env,
             self.temp_dir, shell=True)
-        rename(mingw_extracted, mingw)
+
+        for i in range(10):
+            try:
+                rename(mingw_extracted, mingw)
+                break
+            except WindowsError:
+                if i == 9:
+                    raise
+                sleep(2.5)
         if not exists(join(mingw, 'bin', 'make.exe')):
             try:
                 copy2(join(mingw, 'bin', 'mingw32-make.exe'),
@@ -707,7 +716,6 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
         rename(join(data, 'kivy-bash.bat'), join(data, 'kivy-bash-{}.bat'.format(pyvdot)))
         copy_files(data, build_path)
 
-
     def get_glew(self, pydir, mingw, arch, env):
         temp_dir = self.temp_dir
         url = self.glew_zip
@@ -844,7 +852,15 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
         print('Removing {}'.format(join(build_path, 'gstreamer')))
         rmtree(join(build_path, 'gstreamer'), ignore_errors=True)
         print('Moving {} to {}'.format(gst, join(build_path, 'gstreamer')))
-        rename(gst, join(build_path, 'gstreamer'))
+
+        for i in range(10):
+            try:
+                rename(gst, join(build_path, 'gstreamer'))
+                break
+            except WindowsError:
+                if i == 9:
+                    raise
+                sleep(2.5)
 
         bittness = '64' if arch == '64' else '32'
         pkg_url = 'pkg-config_0.28-1_win{}.zip'.format(bittness)

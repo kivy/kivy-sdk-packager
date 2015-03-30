@@ -19,6 +19,13 @@ try:
     from urllib.request import urlretrieve
 except ImportError:
     from urllib import urlretrieve
+import ssl
+from functools import partial
+import inspect
+
+
+if 'context' in inspect.getargspec(urlretrieve)[0]:
+    urlretrieve = partial(urlretrieve, context=ssl._create_unverified_context())
 
 
 def report_hook(block_count, block_size, total_size):

@@ -8,25 +8,92 @@ import argparse
 from subprocess import Popen, PIPE
 from shutil import rmtree, copytree, copy2
 from glob import glob
+from collections import defaultdict
 import hashlib
 import re
 import csv
 import platform
 from zipfile import ZipFile
-from ConfigParser import ConfigParser
-import urlparse
 try:
-    from urllib.request import urlretrieve
-except ImportError:
+    from ConfigParser import ConfigParser
+    import urlparse
     from urllib import urlretrieve
+except ImportError:
+    from configparser import ConfigParser
+    from urllib import parse as urlparse
+    from urllib.request import urlretrieve
 import ssl
 from functools import partial
 import inspect
 from time import sleep
 
+MSYSGIT_STIPPED_FILES = 'msysgit_stripped_files'
+
 
 if 'context' in inspect.getargspec(urlretrieve)[0]:
     urlretrieve = partial(urlretrieve, context=ssl._create_unverified_context())
+
+
+def sha1OfFile(filename):
+    sha = hashlib.sha1()
+    with open(filename, 'rb') as f:
+        while True:
+            block = f.read(2 ** 10) # Magic number: one-megabyte blocks.
+            if not block:
+                break
+            sha.update(block)
+        return sha.hexdigest()
+
+
+def get_duplicates(basepath, min_size=0):
+    d = defaultdict(list)
+    for dirpath, dirnames, filenames in os.walk(basepath):
+        for f in filenames:
+            f = join(basepath, dirpath, f)
+            s = os.stat(f).st_size
+            if s >= min_size:
+                d[s].append(f)
+    d = {k:v for k, v in d.items() if len(v) > 1}
+
+    dsha1 = defaultdict(list)
+    for fnames in d.values():
+        for f in fnames:
+            dsha1[sha1OfFile(f)].append(f)
+    return [v for v in dsha1.values() if len(v) > 1]
+
+
+def get_file_duplicates(filename):
+    sha1 = sha1OfFile(filename)
+    basepath = dirname(filename)
+    fname = basename(filename)
+    files = []
+    for f in listdir(basepath):
+        if f == fname:
+            continue
+        full_f = join(basepath, f)
+        if isfile(full_f) and sha1OfFile(full_f) == sha1:
+            files.append(f)
+    return files
+
+
+def remove_from_dir(basepath, files):
+    if not files:
+        return
+    d = defaultdict(list)
+    for f in files:
+        d[f[0]].append(f[1:])
+
+    for f in listdir(basepath):
+        if f not in d:
+            f = join(basepath, f)
+            if isdir(f):
+                rmtree(f)
+            else:
+                remove(f)
+        else:
+            f_full = join(basepath, f)
+            if isdir(f_full):
+                remove_from_dir(f_full, [elems for elems in d[f] if elems])
 
 
 def report_hook(block_count, block_size, total_size):
@@ -86,6 +153,9 @@ class WindowsPortablePythonBuild(object):
     generic = True
     arg_build_path = 'py{pyver}_x{bitnes}'
     no_msysgit = False
+    no_msysgit_strip = False
+    mingw_strip = False
+    no_gst_strip = False
     no_kivy = False
 
     def parse_args(self):
@@ -210,6 +280,19 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
         parser.add_argument(
             "--no-kivy", help='If kivy should not be downloaded and/or compiled.',
             action="store_true", dest='no_kivy')
+        parser.add_argument(
+            "--no-msysgit-strip", help='Whether msysgit should not be stripped of all the '
+            'identical git.exe alias files. See the script that creates the symlinks '
+            'instead of the removed files. Default is False',
+            action="store_true", dest='no_msysgit_strip')
+        parser.add_argument(
+            "--mingw-strip", help='Whether we should strip mingw from '
+            'seemingly unneeded files. Default is False',
+            action="store_true", dest='mingw_strip')
+        parser.add_argument(
+            "--no-gst-strip", help='Whether we should strip gstreamer from '
+            'seemingly unneeded files. Default is False',
+            action="store_true", dest='no_gst_strip')
 
         args = parser.parse_args()
         self.dist_dir = base = abspath(args.dir)
@@ -233,6 +316,9 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
         self.arg_build_path = args.build_path
         self.no_msysgit = args.no_msysgit
         self.no_kivy = args.no_kivy
+        self.no_msysgit_strip = args.no_msysgit_strip
+        self.mingw_strip = args.mingw_strip
+        self.no_gst_strip = args.no_gst_strip
 
         if not exists(self.zip7):
             raise Exception('Valid 7-Zip installtion was not found at {}'.format(self.zip7))
@@ -338,6 +424,7 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
                 print("Preparing MinGW")
                 print("-" * width)
                 mingw = self.do_mingw(mingw, arch, os.environ)
+                self.do_strip_mingw(mingw)
                 if not self.no_msysgit:
                     self.do_msysgit(mingw, os.environ)
                 print('Done installing MinGW\n')
@@ -576,8 +663,9 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
                 break
             except WindowsError:
                 if i == 9:
-                    raise
-                sleep(2.5)
+                    copy_files(mingw_extracted, mingw)
+                else:
+                    sleep(2.5)
         if not exists(join(mingw, 'bin', 'make.exe')):
             try:
                 copy2(join(mingw, 'bin', 'mingw32-make.exe'),
@@ -585,6 +673,10 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
             except:
                 pass
         return mingw
+
+    def do_strip_mingw(self, mingw):
+        if not self.mingw_strip:
+            return
 
     def do_msysgit(self, mingw, env):
         temp_dir = self.temp_dir
@@ -603,6 +695,18 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
             'Extracting msysgit',
             [self.zip7, 'x', '-y', '-o{}'.format(join(mingw, 'msysgit')), local_url],
             env, temp_dir, shell=True)
+
+        if self.no_msysgit_strip:
+            return
+        core = join(mingw, 'msysgit', 'libexec', 'git-core')
+        git = join(core, 'git.exe')
+        files = get_file_duplicates(git)
+        with open(join(core, MSYSGIT_STIPPED_FILES), 'wb') as fh:
+            fh.write('\n'.join(files))
+        print('Writing {} containing git duplicates'.format(join(core, MSYSGIT_STIPPED_FILES)))
+        for f in files:
+            print('Removing {}'.format(join(core, f)))
+            remove(join(core, f))
 
     def get_pip_deps(self, build_path, pydir, pyver, env, pywin):
         width = self.width
@@ -859,8 +963,9 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
                 break
             except WindowsError:
                 if i == 9:
-                    raise
-                sleep(2.5)
+                    copy_files(gst, join(build_path, 'gstreamer'))
+                else:
+                    sleep(2.5)
 
         bittness = '64' if arch == '64' else '32'
         pkg_url = 'pkg-config_0.28-1_win{}.zip'.format(bittness)
@@ -878,6 +983,58 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
         with open(local_url, 'rb') as fd:
             ZipFile(fd).extractall(base_dir)
         copy_files(join(base_dir, 'bin'), join(build_path, 'gstreamer', 'bin'))
+
+        if self.no_gst_strip:
+            return
+
+        inc = join(build_path, 'gstreamer', 'include')
+        for f in listdir(inc):
+            if f in ('glib-2.0', 'gstreamer-1.0'):
+                continue
+            f = join(inc, f)
+            if isdir(f):
+                rmtree(f)
+            else:
+                remove(f)
+
+        gstreamer = join(inc, 'gstreamer-1.0')
+        for f in listdir(gstreamer):
+            if f == 'gst':
+                continue
+            f = join(gstreamer, f)
+            if isdir(f):
+                rmtree(f)
+            else:
+                remove(f)
+        gst = join(gstreamer, 'gst')
+        for f in listdir(gst):
+            f = join(gst, f)
+            if isdir(f):
+                rmtree(f)
+
+        lib_files = ['glib-2.0'
+            'glib-2.0.lib'
+            'gmodule-2.0.lib'
+            'gobject-2.0.lib'
+            'gstreamer-1.0.lib'
+            'intl.lib'
+            'libglib-2.0.dll.a'
+            'libglib-2.0.la'
+            'libgmodule-2.0.dll.a'
+            'libgmodule-2.0.la'
+            'libgobject-2.0.dll.a'
+            'libgobject-2.0.la'
+            'libgstreamer-1.0.a'
+            'libgstreamer-1.0.dll.a'
+            'libgstreamer-1.0.la'
+            'pkgconfig', 'glib-2.0.pc'
+            'pkgconfig', 'gmodule-2.0.pc'
+            'pkgconfig', 'gmodule-no-export-2.0.pc'
+            'pkgconfig', 'gobject-2.0.pc'
+            'pkgconfig', 'gstreamer-1.0.pc'
+            ]
+        remove_from_dir(join(build_path, 'gstreamer', 'lib'), lib_files)
+
 
     def get_msvcr(self, build_path, pydir, arch, pyver, env):
         temp_dir = self.temp_dir

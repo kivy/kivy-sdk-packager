@@ -490,6 +490,7 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
             print("-" * width)
             self.get_pip_deps(build_path, pydir, pyver, env, pywin_url)
             print('Done preparing pip deps\n')
+            self.do_strip_python(width, pydir)
 
         print('Done')
 
@@ -541,9 +542,9 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
         if not exists(join(pydir, 'Scripts')):
             makedirs(join(pydir, 'Scripts'))
 
+    def do_strip_python(self, width, pydir):
         if not self.strip_py:
             return
-
         print("\nStripping python")
         print("-" * width)
 
@@ -592,28 +593,24 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
 
         # see http://bugs.python.org/issue4709 and
         # http://ascend4.org/Setting_up_a_MinGW-w64_build_environment
-        if not exists(join(libs, 'lib' + py + '.a')):
-            if exists(join(libs, pylib)):
-                try: remove(join(libs, 'old_' + pylib))
-                except: pass
-                try: rename(join(libs, pylib), join(libs, 'old_' + pylib))
-                except: pass
-            exec_binary('Gendefing ' + pydll, ['gendef.exe', pydll], env, libs)
-            exec_binary('Generating lib' + py + '.a',
-                        ['dlltool', '--dllname', pydll, '--def', pydef,
-                         '--output-lib', 'lib' + py + '.a'], env, libs, shell=True)
-            remove(pydef)
+        if exists(join(libs, pylib)):
+            try: remove(join(libs, 'old_' + pylib))
+            except: pass
+            try: rename(join(libs, pylib), join(libs, 'old_' + pylib))
+            except: pass
+        exec_binary('Gendefing ' + pydll, ['gendef.exe', pydll], env, libs)
+        exec_binary('Generating lib' + py + '.a',
+                    ['dlltool', '--dllname', pydll, '--def', pydef,
+                     '--output-lib', 'lib' + py + '.a'], env, libs, shell=True)
+        remove(pydef)
 
-        print('Getting python pyconfig.h patch')
-        url = 'http://bugs.python.org/file12411/mingw-w64.patch'
+        # http://bugs.python.org/issue4709
         include = join(pydir, 'include')
-        patch_name = url.split('/')[-1]
-        patch = join(include, patch_name)
-        if not exists(patch):
-            patch, _ = urlretrieve(url, patch)
+        name = 'mingw-w64.patch'
+        copy2(join(dirname(__file__), 'resources', name), include)
         exec_binary('Patching {}\\pyconfig.h'.format(include),
-                    ['git', 'apply', patch_name], env, include, shell=True)
-        remove(patch)
+                    ['git', 'apply', name], env, include, shell=True)
+        remove(join(include, name))
 
     def patch_cygwinccompiler(self, pydir):
         # see http://bugs.python.org/issue16472

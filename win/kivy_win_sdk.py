@@ -1012,26 +1012,27 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
             if isdir(f):
                 rmtree(f)
 
-        lib_files = ['glib-2.0'
-            'glib-2.0.lib'
-            'gmodule-2.0.lib'
-            'gobject-2.0.lib'
-            'gstreamer-1.0.lib'
-            'intl.lib'
-            'libglib-2.0.dll.a'
-            'libglib-2.0.la'
-            'libgmodule-2.0.dll.a'
-            'libgmodule-2.0.la'
-            'libgobject-2.0.dll.a'
-            'libgobject-2.0.la'
-            'libgstreamer-1.0.a'
-            'libgstreamer-1.0.dll.a'
-            'libgstreamer-1.0.la'
-            'pkgconfig', 'glib-2.0.pc'
-            'pkgconfig', 'gmodule-2.0.pc'
-            'pkgconfig', 'gmodule-no-export-2.0.pc'
-            'pkgconfig', 'gobject-2.0.pc'
-            'pkgconfig', 'gstreamer-1.0.pc'
+        lib_files = [
+            ['glib-2.0'],
+            ['glib-2.0.lib'],
+            ['gmodule-2.0.lib'],
+            ['gobject-2.0.lib'],
+            ['gstreamer-1.0.lib'],
+            ['intl.lib'],
+            ['libglib-2.0.dll.a'],
+            ['libglib-2.0.la'],
+            ['libgmodule-2.0.dll.a'],
+            ['libgmodule-2.0.la'],
+            ['libgobject-2.0.dll.a'],
+            ['libgobject-2.0.la'],
+            ['libgstreamer-1.0.a'],
+            ['libgstreamer-1.0.dll.a'],
+            ['libgstreamer-1.0.la'],
+            ['pkgconfig', 'glib-2.0.pc'],
+            ['pkgconfig', 'gmodule-2.0.pc'],
+            ['pkgconfig', 'gmodule-no-export-2.0.pc'],
+            ['pkgconfig', 'gobject-2.0.pc'],
+            ['pkgconfig', 'gstreamer-1.0.pc'],
             ]
         remove_from_dir(join(build_path, 'gstreamer', 'lib'), lib_files)
 

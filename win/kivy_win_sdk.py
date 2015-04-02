@@ -460,6 +460,13 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
                 print("-" * width)
                 self.get_sdl2(build_path, arch, env)
                 print('Done preparing SDL2\n')
+            else:
+                lib = join(build_path, 'SDL2', 'lib')
+                bin = join(build_path, 'SDL2', 'bin')
+                include = join(build_path, 'SDL2', 'include')
+                env['KIVY_SDL2_PATH'] = (
+                    ';'.join([lib, bin, join(include, 'SDL2')]) + ';' +
+                    env.get('KIVY_SDL2_PATH', ''))
             if not self.no_gst:
                 print("-" * width)
                 print("Preparing GStreamer")
@@ -865,7 +872,10 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
              (join(z, 'lib', 'libglew32.dll.a'), join(mingw, 'lib')),
              (join(z, 'lib', 'libglew32.dll.a'), join(pydir, 'libs'))])
         for src_f, dst_f in files:
-            copy2(src_f, dst_f)
+            if not exists(dst_f):
+                copy2(src_f, dst_f)
+            else:
+                print('Skipping existing file {}'.format(dst_f))
 
     def get_sdl2(self, build_path, arch, env):
         sdl2_ver = '2.0.3'
@@ -1013,7 +1023,9 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
                 rmtree(f)
 
         lib_files = [
+            ['gio'],
             ['glib-2.0'],
+            ['gstreamer-1.0'],
             ['glib-2.0.lib'],
             ['gmodule-2.0.lib'],
             ['gobject-2.0.lib'],
@@ -1035,7 +1047,6 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
             ['pkgconfig', 'gstreamer-1.0.pc'],
             ]
         remove_from_dir(join(build_path, 'gstreamer', 'lib'), lib_files)
-
 
     def get_msvcr(self, build_path, pydir, arch, pyver, env):
         temp_dir = self.temp_dir
@@ -1094,15 +1105,16 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
                 msvcr = join(msvcr, 'msvcr_msi', 'Windows', 'winsxs', 'dlCRTx64')
             else:
                 msvcr = join(msvcr, 'msvcr_msi', 'Windows', 'winsxs', 'dlCRTx86')
-            copy2(join(msvcr, 'msvcr90.dll'), pydir)
-            copy2(join(msvcr, 'msvcp90.dll'), pydir)
+            files = ['msvcr90.dll', 'msvcp90.dll']
         else:
             if arch == '64':
                 msvcr = join(msvcr, 'msvcr_msi', 'Win', 'System64')
             else:
                 msvcr = join(msvcr, 'msvcr_msi', 'Win', 'System')
-            copy2(join(msvcr, 'msvcr100.dll'), pydir)
-            copy2(join(msvcr, 'msvcp100.dll'), pydir)
+            files = ['msvcr100.dll', 'msvcp100.dll']
+        for fname in files:
+            if not exists(join(pydir, fname)):
+                copy2(join(msvcr, fname), pydir)
 
 
 if __name__ == '__main__':

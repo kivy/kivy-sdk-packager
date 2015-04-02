@@ -828,6 +828,9 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
         copy_files(data, build_path)
 
     def get_glew(self, pydir, mingw, arch, env):
+        if exists(join(mingw, 'bin', 'glew32.dll')):
+            print('Skipping glew because it already exists')
+            return
         temp_dir = self.temp_dir
         url = self.glew_zip
         local_url = join(temp_dir, url.split('/')[-1])
@@ -872,10 +875,7 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
              (join(z, 'lib', 'libglew32.dll.a'), join(mingw, 'lib')),
              (join(z, 'lib', 'libglew32.dll.a'), join(pydir, 'libs'))])
         for src_f, dst_f in files:
-            if not exists(dst_f):
-                copy2(src_f, dst_f)
-            else:
-                print('Skipping existing file {}'.format(dst_f))
+            copy2(src_f, dst_f)
 
     def get_sdl2(self, build_path, arch, env):
         sdl2_ver = '2.0.3'

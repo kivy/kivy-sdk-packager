@@ -361,7 +361,7 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
                     fname += '.amd64'
                 fname += '.msi'
                 link = '/'.join(
-                    ['https://www.python.org/ftp/python', pyver, fname])
+                    ['https://www.python.org/ftp/python', pyver[:5], fname])
             else:
                 link = py[1]
                 if len(py) > 2:

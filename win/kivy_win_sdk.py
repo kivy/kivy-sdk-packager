@@ -605,24 +605,32 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
         remove(pydef)
 
         # http://bugs.python.org/issue4709
-        include = join(pydir, 'include')
-        name = 'mingw-w64.patch'
-        copy2(join(dirname(__file__), 'resources', name), include)
-        exec_binary('Patching {}\\pyconfig.h'.format(include),
-                    ['git', 'apply', name], env, include, shell=True)
-        remove(join(include, name))
+        config = join(pydir, 'include', 'pyconfig.h')
+        print('Patching {}'.format(config))
+        with open(config, 'rb') as fh:
+            lines = fh.readlines()
+
+        match_line = b'/* Compiler specific defines */'
+        with open(config, 'wb') as fh:
+            for line in lines:
+                if line.startswith(match_line):
+                    cr = line[len(match_line):]
+                    fh.write(
+                        cr.join([b'', b'#ifdef _WIN64', b'#define MS_WIN64',
+                                 b'#endif', b'', b'']))
+                fh.write(line)
 
     def patch_cygwinccompiler(self, pydir):
         # see http://bugs.python.org/issue16472
         print('Patching cygwinccompiler.py')
         cyg = join(pydir, 'Lib', 'distutils', 'cygwinccompiler.py')
-        with open(cyg) as fd:
+        with open(cyg, 'rb') as fd:
             lines = fd.readlines()
 
-        with open(cyg, 'w') as fd:
+        with open(cyg, 'wb') as fd:
             for line in lines:
-                if line == '        self.dll_libraries = get_msvcr()\n':
-                    fd.write('        # self.dll_libraries = get_msvcr()\n')
+                if line.startswith(b'        self.dll_libraries = get_msvcr()'):
+                    fd.write(b'        # self.dll_libraries = get_msvcr()\n')
                 else:
                     fd.write(line)
 

@@ -17,11 +17,11 @@ from zipfile import ZipFile
 try:
     from ConfigParser import ConfigParser
     import urlparse
-    from urllib import urlretrieve
+    from urllib import urlretrieve as pyurlretrieve
 except ImportError:
     from configparser import ConfigParser
     from urllib import parse as urlparse
-    from urllib.request import urlretrieve
+    from urllib.request import urlretrieve as pyurlretrieve
 import ssl
 from functools import partial
 import inspect
@@ -30,8 +30,16 @@ from time import sleep
 MSYSGIT_STIPPED_FILES = 'msysgit_stripped_files'
 
 
-if 'context' in inspect.getargspec(urlretrieve)[0]:
-    urlretrieve = partial(urlretrieve, context=ssl._create_unverified_context())
+if 'context' in inspect.getargspec(pyurlretrieve)[0]:
+    pyurlretrieve = partial(pyurlretrieve, context=ssl._create_unverified_context())
+
+
+def urlretrieve(*largs, **kwargs):
+    for i in range(5):
+        try:
+            return pyurlretrieve(*largs, **kwargs)
+        except IOError:
+            sleep(60)
 
 
 def sha1OfFile(filename):

@@ -886,7 +886,7 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
              (join(z, 'lib', 'libglew32.a'), join(mingw, 'lib')),
              (join(z, 'lib', 'libglew32.dll.a'), join(mingw, 'lib')),
              (join(z, 'lib', 'libglew32.dll.a'), join(pydir, 'libs'))])
-             if glew_exists else []))
+             if not glew_exists else []))
         for src_f, dst_f in files:
             copy2(src_f, dst_f)
 

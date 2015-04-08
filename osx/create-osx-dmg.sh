@@ -28,7 +28,7 @@ cp "data/${DMG_BACKGROUND_IMG}" "${STAGING_DIR}/.background/"
 # create the initial dmg
 echo "-- Create volume"
 du -sm ${STAGING_DIR} | awk '{print $1}' > _size
-expr $(cat _size) + 5 > _size
+expr $(cat _size) + 6 > _size
 hdiutil create -srcfolder "${STAGING_DIR}" -volname "${VOL_NAME}" -fs HFS+ \
 	-format UDRW -size $(cat _size)M \
 	"${DMG_TEMP}"

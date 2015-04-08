@@ -1,5 +1,7 @@
 #!/bin/bash
 
+VERSION=1.9.0
+
 set -x  # verbose
 set -e  # exit on error
 
@@ -17,7 +19,7 @@ $PLATYPUS -DBR -x -y \
 	-a "Kivy" \
 	-o "None" \
 	-p "/bin/bash" \
-	-V "1.9.0" \
+	-V "$VERSION" \
 	-I "org.kivy.osxlauncher" \
 	-X "*" \
 	"$SCRIPT_PATH/data/script" \
@@ -92,10 +94,10 @@ popd
 
 echo "-- Download and compile Kivy"
 pushd Kivy.app/Contents/Resources
-curl -L -O https://github.com/kivy/kivy/archive/master.zip
-unzip master.zip
-rm master.zip
-mv kivy-master kivy
+curl -L -O https://github.com/kivy/kivy/archive/$VERSION.zip
+unzip $VERSION.zip
+rm $VERSION.zip
+mv kivy-$VERSION kivy
 
 cd kivy
 USE_SDL2=1 make
@@ -104,7 +106,7 @@ popd
 
 # --- Relocation
 
-echo "-- Relocate everything"
+echo "-- Relocate frameworks"
 pushd Kivy.app
 osxrelocator -r . /Library/Frameworks/GStreamer.framework/ \
 	@executable_path/../Frameworks/GStreamer.framework/
@@ -122,6 +124,14 @@ osxrelocator -r . @rpath/SDL2_image.framework/Versions/A/SDL2_image \
 	@executable_path/../Frameworks/SDL2_image.framework/Versions/A/SDL2_image
 osxrelocator -r . @rpath/SDL2_mixer.framework/Versions/A/SDL2_mixer \
 	@executable_path/../Frameworks/SDL2_mixer.framework/Versions/A/SDL2_mixer
+popd
 
+# relocate the activate script
+echo "-- Relocate virtualenv"
+pushd Kivy.app/Contents/Resources/venv
+virtualenv --relocatable .
+gsed -i -r 's#^VIRTUAL_ENV=.*#VIRTUAL_ENV=$(cd $(dirname "$BASH_SOURCE"); dirname `pwd`)#' bin/activate
+rm bin/activate.csh
+rm bin/activate.fish
 
 echo "-- Done !"

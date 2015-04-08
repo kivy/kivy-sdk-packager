@@ -841,9 +841,7 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
         copy_files(data, build_path)
 
     def get_glew(self, pydir, mingw, arch, env):
-        if exists(join(mingw, 'bin', 'glew32.dll')):
-            print('Skipping glew because it already exists')
-            return
+        glew_exists = exists(join(mingw, 'bin', 'glew32.dll'))
         temp_dir = self.temp_dir
         url = self.glew_zip
         local_url = join(temp_dir, url.split('/')[-1])
@@ -858,18 +856,19 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
             ZipFile(fd).extractall(join(temp_dir, 'glew'))
 
         z = base_dir = join(temp_dir, 'glew', list(listdir(join(temp_dir, 'glew')))[0])
-        exec_binary(
-            'Compiling Glew',
-            ['gcc', '-DGLEW_NO_GLU', '-O2', '-Wall', '-W', '-Iinclude', '-DGLEW_BUILD',
-             '-o', 'src/glew.o', '-c', 'src/glew.c'], env, base_dir, shell=True)
-        exec_binary(
-            '',
-            ['gcc', '-shared', '-Wl,-soname,libglew32.dll',
-             '-Wl,--out-implib,lib/libglew32.dll.a', '-o', 'lib/glew32.dll',
-             'src/glew.o', '-L/mingw/lib', '-lglu32', '-lopengl32', '-lgdi32',
-             '-luser32', '-lkernel32'], env, base_dir, shell=True)
-        exec_binary(
-            '', ['ar', 'cr', 'lib/libglew32.a', 'src/glew.o'], env, base_dir, shell=True)
+        if not glew_exists:
+            exec_binary(
+                'Compiling Glew',
+                ['gcc', '-DGLEW_NO_GLU', '-O2', '-Wall', '-W', '-Iinclude', '-DGLEW_BUILD',
+                 '-o', 'src/glew.o', '-c', 'src/glew.c'], env, base_dir, shell=True)
+            exec_binary(
+                '',
+                ['gcc', '-shared', '-Wl,-soname,libglew32.dll',
+                 '-Wl,--out-implib,lib/libglew32.dll.a', '-o', 'lib/glew32.dll',
+                 'src/glew.o', '-L/mingw/lib', '-lglu32', '-lopengl32', '-lgdi32',
+                 '-luser32', '-lkernel32'], env, base_dir, shell=True)
+            exec_binary(
+                '', ['ar', 'cr', 'lib/libglew32.a', 'src/glew.o'], env, base_dir, shell=True)
 
         print('Distributing glew to mingw and python')
         include = join(mingw, 'include', 'GL')
@@ -881,12 +880,13 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
 
         files = glob(join(z, 'include', 'GL', '*'))
         files = (
-            zip(files, [include] * len(files)) +
             zip(files, [py_include] * len(files)) +
+            ((zip(files, [include] * len(files)) +
             [(join(z, 'lib', 'glew32.dll'), join(mingw, 'bin')),
              (join(z, 'lib', 'libglew32.a'), join(mingw, 'lib')),
              (join(z, 'lib', 'libglew32.dll.a'), join(mingw, 'lib')),
              (join(z, 'lib', 'libglew32.dll.a'), join(pydir, 'libs'))])
+             if glew_exists else []))
         for src_f, dst_f in files:
             copy2(src_f, dst_f)
 

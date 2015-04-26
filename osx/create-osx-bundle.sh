@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION=1.9.0
+VERSION=stable
 
 set -x  # verbose
 set -e  # exit on error
@@ -83,7 +83,9 @@ virtualenv -p /System/Library/Frameworks/Python.framework/Versions/2.7/Resources
 
 echo "-- Install dependencies"
 source venv/bin/activate
-pip install pygments docutils 
+pip install cython==0.21.2
+pip install pygments docutils
+pip install osxrelocator
 
 echo "-- Link python to the right location for relocation"
 ln -s venv/bin/python .

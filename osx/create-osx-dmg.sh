@@ -11,6 +11,7 @@ set -x
 
 APP_NAME="$(basename $1 .app)"
 DMG_BACKGROUND_IMG="background.png"
+SYMLINKS_SCRIPT="MakeSymlinks"
 VOL_NAME="${APP_NAME}"
 DMG_TEMP="${VOL_NAME}-temp.dmg"
 DMG="${VOL_NAME}.dmg"
@@ -24,6 +25,7 @@ cp -a $1 "${STAGING_DIR}"
 ln -s /Applications "${STAGING_DIR}/Applications"
 mkdir "${STAGING_DIR}/.background"
 cp "data/${DMG_BACKGROUND_IMG}" "${STAGING_DIR}/.background/"
+cp "data/${SYMLINKS_SCRIPT}" "${STAGING_DIR}/${SYMLINKS_SCRIPT}"
 
 # create the initial dmg
 echo "-- Create volume"

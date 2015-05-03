@@ -1,13 +1,4 @@
-Kivy for OSX
-============
+Kivy SDK Packager
+=================
 
-This repository contains the scripts for:
-
-- creating a Kivy.app directory from scratch
-- packaging a Kivy application using the previously generated Kivy.app
-- creating a package (.dmg) of an application (.app)
-
-This approach works starting from Kivy 1.9, with SDL2 and GStreamer in mind.
-Anything else is untested.
-
-Buildozer uses this repository for its OSX packaging process.
+This repository contains scripts for Kivy SDK generation on Windows and OS X.

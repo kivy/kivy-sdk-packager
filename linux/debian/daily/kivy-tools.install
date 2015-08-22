@@ -15,12 +15,8 @@ usr/lib/python2.7/dist-packages/kivy/tools/highlight/*.vim
 usr/lib/python2.7/dist-packages/kivy/tools/packaging/README.txt
 usr/lib/python2.7/dist-packages/kivy/tools/packaging/*.py
 usr/lib/python2.7/dist-packages/kivy/tools/packaging/*.pyc
-usr/lib/python2.7/dist-packages/kivy/tools/packaging/osx/Info.plist
-usr/lib/python2.7/dist-packages/kivy/tools/packaging/osx/InfoPlist.strings
-usr/lib/python2.7/dist-packages/kivy/tools/packaging/osx/kivy.sh
 usr/lib/python2.7/dist-packages/kivy/tools/packaging/pyinstaller_hooks/*.py
 usr/lib/python2.7/dist-packages/kivy/tools/packaging/pyinstaller_hooks/*.pyc
-usr/lib/python2.7/dist-packages/kivy/tools/packaging/win32/README.txt
 # Tests
 usr/lib/python2.7/dist-packages/kivy/tests/*.kv
 usr/lib/python2.7/dist-packages/kivy/tests/*.py
@@ -44,12 +40,8 @@ usr/lib/python3/dist-packages/kivy/tools/highlight/*.vim
 usr/lib/python3/dist-packages/kivy/tools/packaging/README.txt
 usr/lib/python3/dist-packages/kivy/tools/packaging/*.py
 usr/lib/python3/dist-packages/kivy/tools/packaging/__pycache__/*.cpython-*.pyc
-usr/lib/python3/dist-packages/kivy/tools/packaging/osx/Info.plist
-usr/lib/python3/dist-packages/kivy/tools/packaging/osx/InfoPlist.strings
-usr/lib/python3/dist-packages/kivy/tools/packaging/osx/kivy.sh
 usr/lib/python3/dist-packages/kivy/tools/packaging/pyinstaller_hooks/*.py
 usr/lib/python3/dist-packages/kivy/tools/packaging/pyinstaller_hooks/__pycache__/*.cpython-*.pyc
-usr/lib/python3/dist-packages/kivy/tools/packaging/win32/README.txt
 # Tests
 usr/lib/python3/dist-packages/kivy/tests/*.kv
 usr/lib/python3/dist-packages/kivy/tests/*.py

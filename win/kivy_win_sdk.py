@@ -674,8 +674,8 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
         rmtree(mingw_extracted, ignore_errors=True)
         rmtree(mingw, ignore_errors=True)
         exec_binary(
-            'Extracting mingw', [self.zip7, 'x', '-y', f, ' | findstr /v /b "Extracting"'],
-            env, self.temp_dir, shell=True)
+            'Extracting mingw', [self.zip7, 'x', '-y', f], env,
+            self.temp_dir, shell=True)
 
         for i in range(10):
             try:
@@ -713,8 +713,7 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
 
         exec_binary(
             'Extracting msysgit',
-            [self.zip7, 'x', '-y', '-o{}'.format(join(mingw, 'msysgit')), local_url,
-            ' | findstr /v /b "Extracting"'],
+            [self.zip7, 'x', '-y', '-o{}'.format(join(mingw, 'msysgit')), local_url],
             env, temp_dir, shell=True)
 
         if self.no_msysgit_strip:
@@ -927,12 +926,10 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
 
             exec_binary(
                 'Extracting {}'.format(local_url),
-                [self.zip7, 'x', '-y', local_url, ' | findstr /v /b "Extracting"'],
-                env, self.temp_dir, shell=True)
+                [self.zip7, 'x', '-y', local_url], env, self.temp_dir, shell=True)
             exec_binary(
                 'Extracting {}'.format(local_url[:-3]),
-                [self.zip7, 'x', '-y', local_url[:-3], ' | findstr /v /b "Extracting"'], 
-                env, self.temp_dir, shell=True)
+                [self.zip7, 'x', '-y', local_url[:-3]], env, self.temp_dir, shell=True)
 
             base_dir = local_url.replace('-mingw.tar.gz', '').replace('-devel', '')
             if arch == '64':
@@ -1095,8 +1092,7 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
 
         exec_binary(
             'Extracting vcredist',
-            [self.zip7, 'x', '-y', '-o{}'.format(msvcr), local_url,
-            ' | findstr /v /b "Extracting"'], env,
+            [self.zip7, 'x', '-y', '-o{}'.format(msvcr), local_url], env,
             self.temp_dir, shell=True)
 
         # for VS2010 we need to create pretend files, otherwise the isnatller

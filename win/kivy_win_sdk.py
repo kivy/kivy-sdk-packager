@@ -463,6 +463,7 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
                 self.patch_python_x64(pydir, env, pyver)
                 print('Done patching python\n')
             self.patch_cygwinccompiler(pydir)
+            exec_binary('GCC version', ['gcc -v'], env, shell=True)
 
             print("-" * width)
             print("Preparing Glew")

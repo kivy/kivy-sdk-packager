@@ -866,6 +866,7 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
 
         z = base_dir = join(temp_dir, 'glew', list(listdir(join(temp_dir, 'glew')))[0])
         if not glew_exists:
+            exec_binary('GCC', ['gcc', '-v'], env, base_dir, shell=True)
             exec_binary(
                 'Compiling Glew',
                 ['gcc', '-DGLEW_NO_GLU', '-O2', '-Wall', '-W', '-Iinclude', '-DGLEW_BUILD',

@@ -11,6 +11,7 @@ from glob import glob
 from collections import defaultdict
 import hashlib
 import re
+from re import match
 import csv
 import platform
 from zipfile import ZipFile
@@ -28,6 +29,7 @@ import inspect
 from time import sleep
 
 MSYSGIT_STIPPED_FILES = 'msysgit_stripped_files'
+zip_q = re.compile('^Extracting .*')
 
 
 if 'context' in inspect.getargspec(pyurlretrieve)[0]:
@@ -109,14 +111,20 @@ def report_hook(block_count, block_size, total_size):
     print("\b\b\b\b\b\b\b\b\b", "%06.2f%%" % p, end=' ')
 
 
-def exec_binary(status, cmd, env=None, cwd=None, shell=True):
+def exec_binary(status, cmd, env=None, cwd=None, shell=True, exclude=None):
     print(status)
     print(' '.join(cmd))
     proc = Popen(cmd, stdout=PIPE, stderr=PIPE, env=env, cwd=cwd, shell=shell)
     a, b = proc.communicate()
     if a:
+        if exclude is not None:
+            a = '\n'.join(
+                [l for l in a.splitlines() if match(exclude, l) is None])
         print(a, end='')
     if b:
+        if exclude is not None:
+            b = '\n'.join(
+                [l for l in b.splitlines() if match(exclude, l) is None])
         print(b, end='')
 
 
@@ -675,7 +683,7 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
         rmtree(mingw, ignore_errors=True)
         exec_binary(
             'Extracting mingw', [self.zip7, 'x', '-y', f], env,
-            self.temp_dir, shell=True)
+            self.temp_dir, shell=True, exclude=zip_q)
 
         for i in range(10):
             try:
@@ -714,7 +722,7 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
         exec_binary(
             'Extracting msysgit',
             [self.zip7, 'x', '-y', '-o{}'.format(join(mingw, 'msysgit')), local_url],
-            env, temp_dir, shell=True)
+            env, temp_dir, shell=True, exclude=zip_q)
 
         if self.no_msysgit_strip:
             return
@@ -926,10 +934,12 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
 
             exec_binary(
                 'Extracting {}'.format(local_url),
-                [self.zip7, 'x', '-y', local_url], env, self.temp_dir, shell=True)
+                [self.zip7, 'x', '-y', local_url], env, self.temp_dir, shell=True,
+                exclude=zip_q)
             exec_binary(
                 'Extracting {}'.format(local_url[:-3]),
-                [self.zip7, 'x', '-y', local_url[:-3]], env, self.temp_dir, shell=True)
+                [self.zip7, 'x', '-y', local_url[:-3]], env, self.temp_dir,
+                shell=True, exclude=zip_q)
 
             base_dir = local_url.replace('-mingw.tar.gz', '').replace('-devel', '')
             if arch == '64':
@@ -1093,7 +1103,7 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
         exec_binary(
             'Extracting vcredist',
             [self.zip7, 'x', '-y', '-o{}'.format(msvcr), local_url], env,
-            self.temp_dir, shell=True)
+            self.temp_dir, shell=True, exclude=zip_q)
 
         # for VS2010 we need to create pretend files, otherwise the isnatller
         # chokes looking for them since they do not actually exist

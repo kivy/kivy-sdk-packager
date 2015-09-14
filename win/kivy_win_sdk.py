@@ -875,7 +875,7 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
                 '',
                 ['gcc', '-shared', '-Wl,-soname,libglew32.dll',
                  '-Wl,--out-implib,lib/libglew32.dll.a', '-o', 'lib/glew32.dll',
-                 'src/glew.o', '-L/mingw/lib', '-lglu32', '-lopengl32', '-lgdi32',
+                 'src/glew.o', '-lglu32', '-lopengl32', '-lgdi32',
                  '-luser32', '-lkernel32'], env, base_dir, shell=True)
             exec_binary(
                 '', ['ar', 'cr', 'lib/libglew32.a', 'src/glew.o'], env, base_dir, shell=True)

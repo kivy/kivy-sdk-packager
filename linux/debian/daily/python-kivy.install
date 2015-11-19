@@ -33,3 +33,4 @@ usr/lib/python2.7/dist-packages/kivy/modules/*.py*
 usr/lib/python2.7/dist-packages/kivy/network/*.py*
 usr/lib/python2.7/dist-packages/kivy/storage/*.py*
 usr/lib/python2.7/dist-packages/kivy/uix/*.py*
+usr/lib/python2.7/dist-packages/kivy/uix/behaviors/*.py*

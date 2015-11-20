@@ -1,6 +1,6 @@
 from __future__ import absolute_import, print_function
 import sys
-from os.path import join
+from os.path import join, sep
 from os import walk
 from .common import *
 
@@ -56,9 +56,13 @@ def get_sdl2(build_path, arch, pyver, package, output):
 
     for d in ('lib', 'include', 'bin'):
         # bin goes to python/share/kivy_package
-        for dirpath, dirnames, filenames in walk(join(base_dir, d)):
+        src = join(base_dir, d)
+        for dirpath, dirnames, filenames in walk(src):
             root = join(base_dir, d, dirpath)
             base = d if d != 'bin' else join('share', 'kivy_{}'.format(package))
+            dirpath = dirpath.replace(base_dir, '')
+            if dirpath[0] == sep:
+                dirpath = dirpath[1:]
 
             for filename in filenames:
                 data.append((

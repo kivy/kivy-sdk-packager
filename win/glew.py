@@ -42,13 +42,13 @@ def get_glew(build_path, arch, pyver, package, output):
             fname, fname.replace(z, '').strip(sep), join('include', 'GL'), True))
 
     data.append((
-        join(z, 'lib', 'libglew32.a'), join('lib', 'libglew32.a'), 'lib', True))
+        join(z, 'lib', 'libglew32.a'), join('lib', 'libglew32.a'), 'libs', True))
     data.append((
-        join(z, 'lib', 'libglew32.dll.a'), join('lib', 'libglew32.dll.a'), 'lib', True))
+        join(z, 'lib', 'libglew32.dll.a'), join('lib', 'libglew32.dll.a'), 'libs', True))
 
     data.append((
         join(z, 'lib', 'glew32.dll'), join('bin', 'glew32.dll'),
-        join('shared', package, 'bin'), False))
+        join('share', package, 'bin'), False))
 
     make_package(join(build_path, 'project'), package, data, __version__, output)
 

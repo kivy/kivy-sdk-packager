@@ -59,7 +59,14 @@ def get_sdl2(build_path, arch, pyver, package, output):
         src = join(base_dir, d)
         for dirpath, dirnames, filenames in walk(src):
             root = dirpath
-            base = d if d != 'bin' else join('share', package, 'bin')
+
+            if d == 'bin':
+                base = join('share', package, 'bin')
+            elif d == 'lib':
+                base = 'libs'
+            else:
+                base = d
+
             dirpath = dirpath.replace(src, '')
             if dirpath and dirpath[0] == sep:
                 dirpath = dirpath[1:]

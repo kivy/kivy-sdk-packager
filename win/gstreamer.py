@@ -114,7 +114,7 @@ def get_gstreamer(build_path, arch, pyver, package, output):
             for filename in filenames:
                 data.append((
                     join(root, filename), join(d, dirpath, filename),
-                    join(d, dirpath), True))
+                    join('libs' if d == 'lib' else d, dirpath), True))
 
     for d in items:
         src = join(gst, d)

@@ -33,7 +33,7 @@ def get_gstreamer(build_path, arch, pyver, package, output):
     gst = join(gst, 'gstreamer')
     gst = join(gst, list(listdir(gst))[0], bitness)
 
-    pkg_url = 'pkg-config_0.28-1_win{}.zip'.format(bitness)
+    pkg_url = 'pkg-config_0.28-1_win{}.zip'.format('64' if arch == '64' else '32')
     url = 'http://win32builder.gnome.org/packages/3.6/{}'.format(pkg_url)
 
     local_url = join(build_path, pkg_url)
@@ -49,7 +49,7 @@ def get_gstreamer(build_path, arch, pyver, package, output):
     data.append((join(base_dir, 'bin', 'pkg-config.exe'), 'pkg-config.exe',
                  'Scripts', True))
 
-    inc = join(build_path, package, 'gstreamer', 'include')
+    inc = join(gst, 'include')
     for f in listdir(inc):
         if f in ('glib-2.0', 'gstreamer-1.0'):
             continue
@@ -68,9 +68,9 @@ def get_gstreamer(build_path, arch, pyver, package, output):
             rmtree(f)
         else:
             remove(f)
-    gst = join(gstreamer, 'gst')
-    for f in listdir(gst):
-        f = join(gst, f)
+    gstinc = join(gstreamer, 'gst')
+    for f in listdir(gstinc):
+        f = join(gstinc, f)
         if isdir(f):
             rmtree(f)
 
@@ -98,13 +98,13 @@ def get_gstreamer(build_path, arch, pyver, package, output):
         ['pkgconfig', 'gobject-2.0.pc'],
         ['pkgconfig', 'gstreamer-1.0.pc'],
         ]
-    remove_from_dir(join(build_path, package, 'gstreamer', 'lib'), lib_files)
-    items = list(listdir(join(build_path, package, 'gstreamer')))
+    remove_from_dir(join(gst, 'lib'), lib_files)
+    items = list(listdir(gst))
     items.remove('include')
     items.remove('lib')
 
     for d in ('lib', 'include'):
-        src = join(build_path, package, 'gstreamer', d)
+        src = join(gst, d)
         for dirpath, dirnames, filenames in walk(src):
             root = dirpath
             dirpath = dirpath.replace(src, '')
@@ -117,7 +117,7 @@ def get_gstreamer(build_path, arch, pyver, package, output):
                     join(d, dirpath), True))
 
     for d in items:
-        src = join(build_path, package, 'gstreamer', d)
+        src = join(gst, d)
         for dirpath, dirnames, filenames in walk(src):
             root = dirpath
             dirpath = dirpath.replace(src, '')

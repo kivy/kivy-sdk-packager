@@ -58,23 +58,19 @@ def get_sdl2(build_path, arch, pyver, package, output):
         # bin goes to python/share/kivy_package
         src = join(base_dir, d)
         for dirpath, dirnames, filenames in walk(src):
-            root = join(base_dir, d, dirpath)
-            base = d if d != 'bin' else join('share', 'kivy_{}'.format(package))
-            dirpath = dirpath.replace(base_dir, '')
-            if dirpath[0] == sep:
+            root = dirpath
+            base = d if d != 'bin' else join('share', package, 'bin')
+            dirpath = dirpath.replace(src, '')
+            if dirpath and dirpath[0] == sep:
                 dirpath = dirpath[1:]
 
             for filename in filenames:
                 data.append((
                     join(root, filename), join(d, dirpath, filename),
-                    join(base, dirpath, filename), d != 'bin'))
-
+                    join(base, dirpath), d != 'bin'))
 
     make_package(join(build_path, 'project'), package, data, __version__, output)
 
 
 if __name__ == '__main__':
-    args = sys.argv[1:]
-    if len(args) % 2:
-        raise Exception('Unmatched args')
-    get_sdl2(**dict(zip(args[0::2], args[1::2])))
+    parse_args(get_sdl2)

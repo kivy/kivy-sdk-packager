@@ -4,7 +4,7 @@ import sys
 import os
 from os import makedirs, listdir, remove, rename
 from os.path import exists, join, abspath, isdir, isfile, splitext, dirname
-from os.path import basename, split as path_split
+from os.path import basename, split as path_split, sep
 import argparse
 from subprocess import Popen, PIPE
 from shutil import rmtree, copytree, copy2
@@ -142,11 +142,13 @@ def copy_files(src, dst):
 
 
 setup = '''
-from os import environ
-if environ.get('KIVY_USE_SETUPTOOLS'):
-    from setuptools import setup
-else:
-    from distutils.core import setup
+import os
+from setuptools import setup
+from setuptools.dist import Distribution
+
+class BinaryDistribution(Distribution):
+    def is_pure(self):
+        return False
 
 data = [
     {}
@@ -154,12 +156,14 @@ data = [
 
 setup(
     name='{}',
-    version={},
+    version='{}',
     author='Kivy Crew',
     author_email='kivy-dev@googlegroups.com',
     url='http://kivy.org/',
-    license='MIT',s
-    packages=[{}],
+    license='MIT',
+    distclass=BinaryDistribution,
+    namespace_packages=['kivy', 'kivy.deps'],
+    packages=['kivy', 'kivy.deps', '{}'],
     data_files=data)
 '''
 
@@ -172,6 +176,7 @@ def make_package(build_path, name, files, version, output):
     data = defaultdict(list)
     data_dev = defaultdict(list)
     for src, dst, target, is_dev in files:
+        target = target.rstrip(sep)
         dst_full = join(setup_path, dst)
         dst_dir = path_split(dst_full)[0]
         if not exists(dst_dir):
@@ -183,17 +188,34 @@ def make_package(build_path, name, files, version, output):
         else:
             data[target].append(dst)
 
+    initial_files = list(listdir(setup_path))
     for dev, package_data in ((True, data_dev), (False, data)):
-        package_name = 'kivy_{}_dev' if dev else 'kivy_{}'
-        package_name = package_name.format(name)
+        package_name = '{}_dev' if dev else '{}'
+        mod_name = package_name = package_name.format(name)
+        package_name = 'kivy.deps.{}'.format(mod_name)
 
-        makedirs(join(setup_path, package_name))
-        with open(join(setup_path, package_name, '__init__.py'), 'wb'):
+        # remove any additional files from before
+        for fname in list(listdir(setup_path)):
+            if fname in initial_files:
+                continue
+
+            full_fname = join(setup_path, fname)
+            if isfile(full_fname):
+                remove(full_fname)
+            else:
+                rmtree(full_fname, ignore_errors=True)
+
+        makedirs(join(setup_path, 'kivy', 'deps', mod_name))
+        with open(join(setup_path, 'kivy', '__init__.py'), 'wb') as fh:
+            fh.write("__import__('pkg_resources').declare_namespace(__name__)\n")
+        with open(join(setup_path, 'kivy', 'deps', '__init__.py'), 'wb') as fh:
+            fh.write("__import__('pkg_resources').declare_namespace(__name__)\n")
+        with open(join(setup_path, 'kivy', 'deps', mod_name, '__init__.py'), 'wb'):
             pass
 
         for k, v in package_data.items():
             package_data[k] = "[\n        r'{}'\n    ]".format("',\n        r'".join(v))
-        data_files = ',\n    '.join((map(lambda x: "('{}', {})".format(*x), package_data.items())))
+        data_files = ',\n    '.join((map(lambda x: "(r'{}', {})".format(*x), package_data.items())))
         setup_f = setup.format(data_files, package_name, version, package_name)
 
         with open(join(setup_path, 'setup.py'), 'wb') as fh:
@@ -203,3 +225,9 @@ def make_package(build_path, name, files, version, output):
             'Making wheel',
             ['python', 'setup.py', 'bdist_wheel', '-d', output], cwd=setup_path,
             shell=True)
+
+def parse_args(func):
+    args = sys.argv[1:]
+    if len(args) % 2:
+        raise Exception('Unmatched args')
+    func(**dict(zip(args[0::2], args[1::2])))

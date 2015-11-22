@@ -186,7 +186,7 @@ setup(
 
 dep_init = '''
 import sys
-from os.path import dirname, join
+from os.path import dirname, join, isdir
 import ctypes
 from ctypes import wintypes
 {}

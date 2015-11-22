@@ -136,15 +136,19 @@ def get_gstreamer(cache, build_path, arch, pyver, package, output):
                     join(root, filename), join('gstreamer', d, dirpath, filename),
                     join('share', package, d, dirpath), False))
 
+                if filename in ('libintl-8.dll', 'libglib-2.0-0.dll'):
+                    data.append((join(root, filename), filename, 'Scripts', True))
+
     l_imports = 'from os import environ'
     l_code = '''
-root = dirname(sys.executable)
-mod_bin = join(root, 'share', '{}', 'bin')
-if isdir(mod_bin):
+if dep_bins and isdir(dep_bins[0]):
     if environ.get('GST_PLUGIN_PATH'):
-        environ['GST_PLUGIN_PATH'] = '{};{}'.format(environ['GST_PLUGIN_PATH'], mod_bin)
+        environ['GST_PLUGIN_PATH'] = '{};{}'.format(environ['GST_PLUGIN_PATH'], dep_bins[0])
     else:
-        environ['GST_PLUGIN_PATH'] = mod_bin
+        environ['GST_PLUGIN_PATH'] = dep_bins[0]
+
+    if not environ.get('GST_REGISTRY'):
+        environ['GST_REGISTRY'] = join(dirname(dep_bins[0]), 'registry.bin')
 '''
 
     make_package(join(build_path, 'project'), package, data, __version__, output,

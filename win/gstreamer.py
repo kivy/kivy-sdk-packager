@@ -1,6 +1,7 @@
 from __future__ import absolute_import, print_function
 import sys
 from os.path import join, sep
+from shutil import rmtree
 from os import walk, listdir
 from .common import *
 
@@ -9,7 +10,7 @@ __version__ = '0.1.0'
 gst_ver = '2013.6'
 
 
-def get_gstreamer(build_path, arch, pyver, package, output):
+def get_gstreamer(cache, build_path, arch, pyver, package, output):
     data = []
     bitness = 'x86_64' if arch == '64' else 'x86'
     runtime_name = 'gstreamer-1.0-{}-1.4.5.msi'.format(bitness, gst_ver)
@@ -19,12 +20,9 @@ def get_gstreamer(build_path, arch, pyver, package, output):
     makedirs(gst)
 
     for name in (runtime_name, devel_name):
-        local_url = join(build_path, name)
         url = (
             'http://gstreamer.freedesktop.org/data/pkg/windows/1.4.5/{}'.format(name))
-        print("Getting {}\nProgress: 000.00%".format(url), end=' ')
-        local_url, _ = urlretrieve(url, local_url, reporthook=report_hook)
-        print(" [Done]")
+        local_url = download_cache(cache, url, build_path)
 
         exec_binary(
             "Extracting {} to {}".format(local_url, gst),
@@ -35,11 +33,7 @@ def get_gstreamer(build_path, arch, pyver, package, output):
 
     pkg_url = 'pkg-config_0.28-1_win{}.zip'.format('64' if arch == '64' else '32')
     url = 'http://win32builder.gnome.org/packages/3.6/{}'.format(pkg_url)
-
-    local_url = join(build_path, pkg_url)
-    print("Getting {}\nProgress: 000.00%".format(url), end=' ')
-    local_url, _ = urlretrieve(url, local_url, reporthook=report_hook)
-    print(" [Done]")
+    local_url = download_cache(cache, url, build_path)
 
     base_dir = join(build_path, splitext(pkg_url)[0])
     makedirs(base_dir)
@@ -99,6 +93,14 @@ def get_gstreamer(build_path, arch, pyver, package, output):
         ['pkgconfig', 'gstreamer-1.0.pc'],
         ]
     remove_from_dir(join(gst, 'lib'), lib_files)
+
+    move_by_ext(join(gst, 'lib', 'gio'), '.dll', join(gst, 'bin'))
+    move_by_ext(join(gst, 'lib', 'gstreamer-1.0'), '.dll', join(gst, 'bin'))
+    move_by_ext(join(gst, 'lib', 'glib-2.0'), '.h', join(gst, 'include'))
+    rmtree(join(gst, 'lib', 'gio'))
+    rmtree(join(gst, 'lib', 'glib-2.0'))
+    rmtree(join(gst, 'lib', 'gstreamer-1.0'))
+
     items = list(listdir(gst))
     items.remove('include')
     items.remove('lib')
@@ -107,14 +109,19 @@ def get_gstreamer(build_path, arch, pyver, package, output):
         src = join(gst, d)
         for dirpath, dirnames, filenames in walk(src):
             root = dirpath
-            dirpath = dirpath.replace(src, '')
-            if dirpath and dirpath[0] == sep:
-                dirpath = dirpath[1:]
+            dirpath = dirpath.replace(src, '').strip(sep)
+            inc_dirpath = dirpath
+            if d == 'include':
+                # for these, copy the contents but not the high level directory
+                if inc_dirpath.startswith('glib-2.0'):
+                    inc_dirpath = inc_dirpath[8:].strip(sep)
+                if inc_dirpath.startswith('gstreamer-1.0'):
+                    inc_dirpath = inc_dirpath[13:].strip(sep)
 
             for filename in filenames:
                 data.append((
                     join(root, filename), join(d, dirpath, filename),
-                    join('libs' if d == 'lib' else d, dirpath), True))
+                    join('libs' if d == 'lib' else d, inc_dirpath), True))
 
     for d in items:
         src = join(gst, d)

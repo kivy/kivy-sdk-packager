@@ -9,14 +9,10 @@ __version__ = '0.1.0'
 glew_ver = '1.12.0'
 
 
-def get_glew(build_path, arch, pyver, package, output):
+def get_glew(cache, build_path, arch, pyver, package, output):
     url = ('http://iweb.dl.sourceforge.net/project/glew/glew/{0}/glew-{0}.zip'.
                          format(glew_ver))
-    local_url = join(build_path, url.split('/')[-1])
-
-    print("Progress: 000.00%", end=' ')
-    local_url, _ = urlretrieve(url, local_url, reporthook=report_hook)
-    print(" [Done]")
+    local_url = download_cache(cache, url, build_path)
 
     print('Extracting glew {}'.format(local_url))
     with open(local_url, 'rb') as fd:

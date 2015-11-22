@@ -12,8 +12,9 @@ sdl2_ttf_ver = '2.0.12'
 sdl2_image_ver = '2.0.0'
 
 
-def get_sdl2(build_path, arch, pyver, package, output):
+def get_sdl2(cache, build_path, arch, pyver, package, output):
     data = []
+
     for name, ver in (
         ('https://www.libsdl.org/release/SDL2-devel-{}-mingw.tar.gz',
          sdl2_ver),
@@ -24,14 +25,7 @@ def get_sdl2(build_path, arch, pyver, package, output):
         ('http://www.libsdl.org/projects/SDL_image/release/SDL2_image-devel-{}-mingw.tar.gz',
          sdl2_image_ver)):
         url = name.format(ver)
-        local_url = join(build_path, url.split('/')[-1])
-
-        print('\nGetting {}'.format(url))
-        if not exists(local_url):
-            print("Progress: 000.00%", end=' ')
-            local_url, _ = urlretrieve(url, local_url,
-                                       reporthook=report_hook)
-            print(" [Done]")
+        local_url = download_cache(cache, url, build_path)
 
         exec_binary(
             'Extracting {}'.format(local_url),
@@ -46,35 +40,34 @@ def get_sdl2(build_path, arch, pyver, package, output):
         else:
             base_dir = join(base_dir, 'i686-w64-mingw32')
 
-    print('\nGetting patched SDL_platform.h')
-    local_url = join(build_path, 'SDL_platform.h')
-    if not exists(local_url):
-        local_url, _ = urlretrieve(
-        'https://hg.libsdl.org/SDL/raw-file/e217ed463f25/include/SDL_platform.h',
-        local_url)
-    copy2(local_url, join(base_dir, 'include', 'SDL2'))
+        if url.split('/')[-1].startswith('SDL2-'):
+            print('\nGetting patched SDL_platform.h')
+            local_url, _ = urlretrieve(
+            'https://hg.libsdl.org/SDL/raw-file/e217ed463f25/include/SDL_platform.h',
+            join(build_path, 'SDL_platform.h'))
+            copy2(local_url, join(base_dir, 'include', 'SDL2'))
 
-    for d in ('lib', 'include', 'bin'):
-        # bin goes to python/share/kivy_package
-        src = join(base_dir, d)
-        for dirpath, dirnames, filenames in walk(src):
-            root = dirpath
+        for d in ('lib', 'include', 'bin'):
+            # bin goes to python/share/kivy_package
+            src = join(base_dir, d)
+            for dirpath, dirnames, filenames in walk(src):
+                root = dirpath
 
-            if d == 'bin':
-                base = join('share', package, 'bin')
-            elif d == 'lib':
-                base = 'libs'
-            else:
-                base = d
+                if d == 'bin':
+                    base = join('share', package, 'bin')
+                elif d == 'lib':
+                    base = 'libs'
+                else:
+                    base = d
 
-            dirpath = dirpath.replace(src, '')
-            if dirpath and dirpath[0] == sep:
-                dirpath = dirpath[1:]
+                dirpath = dirpath.replace(src, '')
+                if dirpath and dirpath[0] == sep:
+                    dirpath = dirpath[1:]
 
-            for filename in filenames:
-                data.append((
-                    join(root, filename), join(d, dirpath, filename),
-                    join(base, dirpath), d != 'bin'))
+                for filename in filenames:
+                    data.append((
+                        join(root, filename), join(d, dirpath, filename),
+                        join(base, dirpath), d != 'bin'))
 
     make_package(join(build_path, 'project'), package, data, __version__, output)
 

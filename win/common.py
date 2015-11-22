@@ -33,7 +33,7 @@ from functools import partial
 import inspect
 from time import sleep
 
-zip_q = re.compile('^Extracting .*')
+zip_q = re.compile(b'^Extracting .*')
 
 if 'context' in inspect.getargspec(pyurlretrieve)[0]:
     pyurlretrieve = partial(pyurlretrieve, context=ssl._create_unverified_context())
@@ -111,6 +111,17 @@ def remove_from_dir(basepath, files):
                 remove_from_dir(f_full, [elems for elems in d[f] if elems])
 
 
+def move_by_ext(root, ext, dest):
+    files = []
+    for dirpath, dirnames, filenames in os.walk(root):
+        for filename in filenames:
+            if filename.endswith(ext):
+                files.append((join(dirpath, filename), join(dest, filename)))
+
+    for src, dest in files:
+        rename(src, dest)
+
+
 def report_hook(block_count, block_size, total_size):
     p = block_count * block_size * (100.0 / total_size if total_size else 1)
     print("\b\b\b\b\b\b\b\b\b", "%06.2f%%" % p, end=' ')
@@ -123,14 +134,17 @@ def exec_binary(status, cmd, env=None, cwd=None, shell=True, exclude=None):
     a, b = proc.communicate()
     if a:
         if exclude is not None:
-            a = '\n'.join(
+            a = b'\n'.join(
                 [l for l in a.splitlines() if match(exclude, l) is None])
-        print(a, end='')
+        print(a.decode(), end='')
+        print()
+
     if b:
         if exclude is not None:
-            b = '\n'.join(
+            b = b'\n'.join(
                 [l for l in b.splitlines() if match(exclude, l) is None])
-        print(b, end='')
+        print(b.decode(), end='')
+        print()
 
 
 def copy_files(src, dst):
@@ -211,9 +225,9 @@ def make_package(build_path, name, files, version, output):
 
         makedirs(join(setup_path, 'kivy', 'deps', mod_name))
         with open(join(setup_path, 'kivy', '__init__.py'), 'wb') as fh:
-            fh.write("__import__('pkg_resources').declare_namespace(__name__)\n")
+            fh.write(b"__import__('pkg_resources').declare_namespace(__name__)\n")
         with open(join(setup_path, 'kivy', 'deps', '__init__.py'), 'wb') as fh:
-            fh.write("__import__('pkg_resources').declare_namespace(__name__)\n")
+            fh.write(b"__import__('pkg_resources').declare_namespace(__name__)\n")
         with open(join(setup_path, 'kivy', 'deps', mod_name, '__init__.py'), 'wb'):
             pass
 
@@ -223,7 +237,7 @@ def make_package(build_path, name, files, version, output):
         setup_f = setup.format(data_files, package_name, version, package_name)
 
         with open(join(setup_path, 'setup.py'), 'wb') as fh:
-            fh.write(setup_f)
+            fh.write(setup_f.encode('ascii'))
 
         exec_binary(
             'Making wheel',
@@ -241,3 +255,20 @@ def parse_args(func):
     if len(args) % 2:
         raise Exception('Unmatched args')
     func(**dict(zip(args[0::2], args[1::2])))
+
+
+def download_cache(cache, url, local_dir):
+    if not isdir(cache):
+        makedirs(cache)
+
+    fname = url.split('/')[-1]
+    cache_path = join(cache, fname)
+    local_path = join(local_dir, fname)
+
+    if not exists(cache_path):
+        print("Getting {}\nProgress: 000.00%".format(url), end=' ')
+        urlretrieve(url, cache_path, reporthook=report_hook)
+        print(" [Done]")
+
+    copy2(cache_path, local_path)
+    return local_path

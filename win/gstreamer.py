@@ -136,7 +136,19 @@ def get_gstreamer(cache, build_path, arch, pyver, package, output):
                     join(root, filename), join('gstreamer', d, dirpath, filename),
                     join('share', package, d, dirpath), False))
 
-    make_package(join(build_path, 'project'), package, data, __version__, output)
+    l_imports = 'from os import environ'
+    l_code = '''
+root = dirname(sys.executable)
+mod_bin = join(root, 'share', '{}', 'bin')
+if isdir(mod_bin):
+    if environ.get('GST_PLUGIN_PATH'):
+        environ['GST_PLUGIN_PATH'] = '{};{}'.format(environ['GST_PLUGIN_PATH'], mod_bin)
+    else:
+        environ['GST_PLUGIN_PATH'] = mod_bin
+'''
+
+    make_package(join(build_path, 'project'), package, data, __version__, output,
+                 (l_imports, l_code))
 
 
 if __name__ == '__main__':

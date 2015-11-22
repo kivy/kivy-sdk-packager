@@ -158,7 +158,6 @@ def copy_files(src, dst):
         else:
             copy2(s, d)
 
-
 setup = '''
 import os
 from setuptools import setup
@@ -185,7 +184,35 @@ setup(
     data_files=data)
 '''
 
-def make_package(build_path, name, files, version, output):
+dep_init = '''
+import sys
+from os.path import dirname, join
+import ctypes
+from ctypes import wintypes
+{}
+
+# See https://github.com/numpy/numpy/wiki/windows-dll-notes#python-dlls
+# and https://pytools.codeplex.com/workitem/1627
+try:
+    _AddDllDirectory = ctypes.windll.kernel32.AddDllDirectory
+    _AddDllDirectory.argtypes = [wintypes.c_wchar_p]
+    # Needed to initialize AddDllDirectory modifications
+    ctypes.windll.kernel32.SetDefaultDllDirectories(0x1000)
+except AttributeError:
+    _AddDllDirectory = ctypes.windll.kernel32.SetDllDirectoryW
+    _AddDllDirectory.argtypes = [wintypes.c_wchar_p]
+
+_root = dirname(sys.executable)
+dep_bins = [join(_root, 'share', '{}', 'bin')]
+if isdir(dep_bins[0]):
+    _AddDllDirectory(dep_bins[0])
+else:
+    dep_bins = []
+
+{}
+'''
+
+def make_package(build_path, name, files, version, output, loader=('', '')):
     setup_path = join(build_path, name)
     if exists(setup_path):
         raise IOError('{} already exists'.format(name))
@@ -228,8 +255,12 @@ def make_package(build_path, name, files, version, output):
             fh.write(b"__import__('pkg_resources').declare_namespace(__name__)\n")
         with open(join(setup_path, 'kivy', 'deps', '__init__.py'), 'wb') as fh:
             fh.write(b"__import__('pkg_resources').declare_namespace(__name__)\n")
-        with open(join(setup_path, 'kivy', 'deps', mod_name, '__init__.py'), 'wb'):
-            pass
+
+        deps_text = ''
+        if not dev:
+            deps_text = dep_init.format(loader[0], mod_name, loader[1])
+        with open(join(setup_path, 'kivy', 'deps', mod_name, '__init__.py'), 'wb') as fh:
+            fh.write(deps_text.encode('ascii'))
 
         for k, v in package_data.items():
             package_data[k] = "[\n        r'{}'\n    ]".format("',\n        r'".join(v))

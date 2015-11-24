@@ -4,7 +4,7 @@ from pydrive.auth import GoogleAuth
 from apiclient import errors
 from pydrive.drive import GoogleDrive
 
-
+cred = join(dirname(__file__), 'my_cred')
 settings = b'''
 client_config_backend: settings
 client_config:
@@ -15,18 +15,18 @@ client_config:
   redirect_uri: http://localhost:8080/
 
 save_credentials: True
-save_credentials_file: my_cred
+save_credentials_file: {}
 save_credentials_backend: file
 get_refresh_token: True
 '''.format(environ['GDRIVE_CLIENT_ID'].encode('ascii'),
-           environ['GDRIVE_CLIENT_SECRET'].encode('ascii'))
+           environ['GDRIVE_CLIENT_SECRET'].encode('ascii'), cred)
 
 
 def upload_directory(directory):
     with open(join(dirname(__file__), 'settings.yaml'), 'wb') as fh:
         fh.write(settings)
 
-    with open(join(dirname(__file__), 'my_cred'), 'wb') as fh:
+    with open(cred, 'wb') as fh:
         fh.write(environ['AIRPLANE_CHARGE'].encode('ascii'))
 
     gauth = GoogleAuth()

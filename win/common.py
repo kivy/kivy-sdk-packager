@@ -1,9 +1,5 @@
 from __future__ import print_function
 import subprocess
-try:
-    import dropbox
-except ImportError:
-    pass
 import sys
 import os
 from os import makedirs, listdir, remove, rename, environ
@@ -274,11 +270,6 @@ def make_package(build_path, name, files, version, output, loader=('', '')):
             'Making wheel',
             ['python', 'setup.py', 'bdist_wheel', '-d', output], cwd=setup_path,
             shell=True)
-
-    client = dropbox.client.DropboxClient(environ['PICKUPBOX_TOKEN'])
-    for fname in listdir(output):
-        with open(join(output, fname), 'rb') as fh:
-            client.put_file('/{}'.format(fname), fh, overwrite=True)
 
 
 def parse_args(func):

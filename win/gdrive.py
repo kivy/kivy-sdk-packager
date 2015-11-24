@@ -4,7 +4,7 @@ from pydrive.auth import GoogleAuth
 from apiclient import errors
 from pydrive.drive import GoogleDrive
 
-cred = join(dirname(__file__), 'my_cred')
+cred = 'my_cred'
 settings = b'''
 client_config_backend: settings
 client_config:
@@ -23,7 +23,7 @@ get_refresh_token: True
 
 
 def upload_directory(directory):
-    with open(join(dirname(__file__), 'settings.yaml'), 'wb') as fh:
+    with open('settings.yaml', 'wb') as fh:
         fh.write(settings)
 
     with open(cred, 'wb') as fh:

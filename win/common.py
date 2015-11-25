@@ -168,6 +168,9 @@ class BinaryDistribution(Distribution):
     def is_pure(self):
         return False
 
+    def has_ext_modules(self):
+        return True
+
 data = [
     {}
 ]
@@ -278,7 +281,7 @@ def make_package(build_path, name, files, version, output, license,
 
         exec_binary(
             'Making wheel',
-            ['python', 'setup.py', 'sdist', 'bdist_wheel', '-d', output],
+            ['python', 'setup.py', 'sdist', '-d', output, 'bdist_wheel', '-d', output],
             cwd=setup_path, shell=True)
 
 

@@ -69,7 +69,7 @@ def get_sdl2(cache, build_path, arch, pyver, package, output):
                         join(root, filename), join(d, dirpath, filename),
                         join(base, dirpath), d != 'bin'))
 
-    make_package(join(build_path, 'project'), package, data, __version__, output)
+    make_package(join(build_path, 'project'), package, data, __version__, output, 'zlib')
 
 
 if __name__ == '__main__':

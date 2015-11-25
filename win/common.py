@@ -41,8 +41,13 @@ def urlretrieve(*largs, **kwargs):
     for i in range(5):
         try:
             return pyurlretrieve(*largs, **kwargs)
-        except IOError:
-            sleep(60)
+        except IOError as e:
+            print('{} failed "{}"'.format(largs[0], e))
+            if i != 4:
+                print('Trying again')
+                sleep(10)
+            else:
+                raise
 
 
 def sha1OfFile(filename):
@@ -172,8 +177,9 @@ setup(
     version='{}',
     author='Kivy Crew',
     author_email='kivy-dev@googlegroups.com',
+    description='Repackaged binary dependency of Kivy.',
     url='http://kivy.org/',
-    license='MIT',
+    license='{}',
     distclass=BinaryDistribution,
     namespace_packages=['kivy', 'kivy.deps'],
     packages=['kivy', 'kivy.deps', '{}'],
@@ -208,7 +214,8 @@ else:
 {}
 '''
 
-def make_package(build_path, name, files, version, output, loader=('', '')):
+def make_package(build_path, name, files, version, output, license,
+                 loader=('', '')):
     setup_path = join(build_path, name)
     if exists(setup_path):
         raise IOError('{} already exists'.format(name))
@@ -261,15 +268,15 @@ def make_package(build_path, name, files, version, output, loader=('', '')):
         for k, v in package_data.items():
             package_data[k] = "[\n        r'{}'\n    ]".format("',\n        r'".join(v))
         data_files = ',\n    '.join((map(lambda x: "(r'{}', {})".format(*x), package_data.items())))
-        setup_f = setup.format(data_files, package_name, version, package_name)
+        setup_f = setup.format(data_files, package_name, version, license, package_name)
 
         with open(join(setup_path, 'setup.py'), 'wb') as fh:
             fh.write(setup_f.encode('ascii'))
 
         exec_binary(
             'Making wheel',
-            ['python', 'setup.py', 'bdist_wheel', '-d', output], cwd=setup_path,
-            shell=True)
+            ['python', 'setup.py', 'sdist', 'bdist_wheel', '-d', output],
+            cwd=setup_path, shell=True)
 
 
 def parse_args(func):

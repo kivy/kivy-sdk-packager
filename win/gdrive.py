@@ -22,7 +22,7 @@ get_refresh_token: True
            environ['GDRIVE_CLIENT_SECRET'].encode('ascii'), cred)
 
 
-def upload_directory(directory):
+def get_drive():
     with open('settings.yaml', 'wb') as fh:
         fh.write(settings)
 
@@ -36,11 +36,29 @@ def upload_directory(directory):
         gauth.Refresh()
 
     drive = GoogleDrive(gauth)
+    return drive
+
+
+def get_filelist(folder_id):
+    drive = get_drive()
+    l = drive.ListFile(
+        {'q': "'{}' in parents and trashed=false".format(folder_id)}).GetList()
+    files = [item['title'] for item in l
+             if item['mimeType'] != 'application/vnd.google-apps.folder']
+    return drive, files
+
+
+def upload_directory(directory):
+    drive, files = get_filelist(environ['GDRIVE_UPLOAD_ID'])
 
     for fname in listdir(directory):
         name = join(directory, fname)
         if not isfile(name):
             raise Exception('{} is not a file'.format(name))
+
+        if fname in files:
+            print('Skipping {}. Already exists on gdrive'.format(fname))
+            continue
 
         f = drive.CreateFile({'parents': [{'id': environ['GDRIVE_UPLOAD_ID']}],
                               'title': fname})

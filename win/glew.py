@@ -46,7 +46,7 @@ def get_glew(cache, build_path, arch, pyver, package, output):
         join(z, 'lib', 'glew32.dll'), join('bin', 'glew32.dll'),
         join('share', package, 'bin'), False))
 
-    make_package(join(build_path, 'project'), package, data, __version__, output)
+    make_package(join(build_path, 'project'), package, data, __version__, output, 'MIT')
 
 
 if __name__ == '__main__':

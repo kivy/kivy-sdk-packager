@@ -152,7 +152,7 @@ if dep_bins and isdir(dep_bins[0]):
 '''
 
     make_package(join(build_path, 'project'), package, data, __version__, output,
-                 (l_imports, l_code))
+                 'LGPL', (l_imports, l_code))
 
 
 if __name__ == '__main__':

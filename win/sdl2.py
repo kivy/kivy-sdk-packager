@@ -11,6 +11,20 @@ sdl2_mixer_ver = '2.0.0'
 sdl2_ttf_ver = '2.0.12'
 sdl2_image_ver = '2.0.0'
 
+drive_map = {
+    'SDL2-devel-{}-mingw.tar.gz'.format(sdl2_ver): '0B1_HB9J8mZepUXlqeDFPd0oybk0',
+    'SDL2_mixer-devel-{}-mingw.tar.gz'.format(sdl2_mixer_ver): '0B1_HB9J8mZepQ1l4WlUyT0t2ODQ',
+    'SDL2_ttf-devel-{}-mingw.tar.gz'.format(sdl2_ttf_ver): '0B1_HB9J8mZepdjRSdVVZdjBjWFE',
+    'SDL2_image-devel-{}-mingw.tar.gz'.format(sdl2_image_ver): '0B1_HB9J8mZepOXNoSWJCYlI3QW8',
+    'SDL_platform.h': '0B1_HB9J8mZepNmZjcVFtRklINzA'
+}
+
+
+def get_gdrive_link(fname):
+    gid = drive_map[fname]
+    url = 'https://drive.google.com/uc?export=download&id={}'.format(gid)
+    return url
+
 
 def get_sdl2(cache, build_path, arch, pyver, package, output):
     data = []
@@ -20,12 +34,14 @@ def get_sdl2(cache, build_path, arch, pyver, package, output):
          sdl2_ver),
         ('https://www.libsdl.org/projects/SDL_mixer/release/SDL2_mixer-devel-{}-mingw.tar.gz',
          sdl2_mixer_ver),
-        ('http://www.libsdl.org/projects/SDL_ttf/release/SDL2_ttf-devel-2.0.12-mingw.tar.gz',
+        ('http://www.libsdl.org/projects/SDL_ttf/release/SDL2_ttf-devel-{}-mingw.tar.gz',
          sdl2_ttf_ver),
         ('http://www.libsdl.org/projects/SDL_image/release/SDL2_image-devel-{}-mingw.tar.gz',
          sdl2_image_ver)):
         url = name.format(ver)
-        local_url = download_cache(cache, url, build_path)
+        fname = url.split('/')[-1]
+        url = get_gdrive_link(fname)
+        local_url = download_cache(cache, url, build_path, fname)
 
         exec_binary(
             'Extracting {}'.format(local_url),
@@ -40,12 +56,11 @@ def get_sdl2(cache, build_path, arch, pyver, package, output):
         else:
             base_dir = join(base_dir, 'i686-w64-mingw32')
 
-        if url.split('/')[-1].startswith('SDL2-'):
-            print('\nGetting patched SDL_platform.h')
-            local_url, _ = urlretrieve(
-            'https://hg.libsdl.org/SDL/raw-file/e217ed463f25/include/SDL_platform.h',
-            join(build_path, 'SDL_platform.h'))
-            copy2(local_url, join(base_dir, 'include', 'SDL2'))
+        if fname.startswith('SDL2-'):
+            url = 'https://hg.libsdl.org/SDL/raw-file/e217ed463f25/include/SDL_platform.h'
+            url = get_gdrive_link('SDL_platform.h')
+            local_url = download_cache(cache, url, join(base_dir, 'include', 'SDL2'),
+                                       'SDL_platform.h')
 
         for d in ('lib', 'include', 'bin'):
             # bin goes to python/share/kivy_package

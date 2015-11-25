@@ -292,11 +292,12 @@ def parse_args(func):
     func(**dict(zip(args[0::2], args[1::2])))
 
 
-def download_cache(cache, url, local_dir):
+def download_cache(cache, url, local_dir, fname=None):
     if not isdir(cache):
         makedirs(cache)
 
-    fname = url.split('/')[-1]
+    if fname is None:
+        fname = url.split('/')[-1]
     cache_path = join(cache, fname)
     local_path = join(local_dir, fname)
 

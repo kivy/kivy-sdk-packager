@@ -43,9 +43,23 @@ def get_filelist(folder_id):
     drive = get_drive()
     l = drive.ListFile(
         {'q': "'{}' in parents and trashed=false".format(folder_id)}).GetList()
-    files = [item['title'] for item in l
-             if item['mimeType'] != 'application/vnd.google-apps.folder']
+    files = {item['title']: item['id'] for item in l
+             if item['mimeType'] != 'application/vnd.google-apps.folder'}
     return drive, files
+
+
+def files_exist(*names):
+    drive, files = get_filelist(environ['GDRIVE_UPLOAD_ID'])
+    return all([name in files for name in names])
+
+
+def download_file(directory, filename):
+    drive, files = get_filelist(environ['GDRIVE_UPLOAD_ID'])
+    if filename not in files:
+        raise Exception("{} doesn't exist".format(filename))
+
+    f = drive.CreateFile({'id': files[filename]})
+    f.GetContentFile(join(directory, filename))
 
 
 def upload_directory(directory):
@@ -74,4 +88,10 @@ def upload_directory(directory):
 
 if __name__ == '__main__':
     import sys
-    upload_directory(sys.argv[1])
+    cmd = sys.argv[1]
+    if cmd == 'upload':
+        upload_directory(sys.argv[2])
+    elif cmd == 'exists':
+        print(files_exist(sys.argv[2:]))
+    elif cmd == 'download':
+        download_file(sys.argv[2:4])

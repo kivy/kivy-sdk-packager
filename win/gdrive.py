@@ -94,4 +94,4 @@ if __name__ == '__main__':
     elif cmd == 'exists':
         print(files_exist(sys.argv[2:]))
     elif cmd == 'download':
-        download_file(sys.argv[2:4])
+        download_file(*sys.argv[2:4])

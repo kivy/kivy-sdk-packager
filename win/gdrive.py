@@ -92,6 +92,6 @@ if __name__ == '__main__':
     if cmd == 'upload':
         upload_directory(sys.argv[2])
     elif cmd == 'exists':
-        print(files_exist(sys.argv[2:]))
+        print(files_exist(*sys.argv[2:]))
     elif cmd == 'download':
         download_file(*sys.argv[2:4])

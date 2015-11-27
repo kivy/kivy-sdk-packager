@@ -48,13 +48,13 @@ def get_filelist(folder_id):
     return drive, files
 
 
-def files_exist(*names):
-    drive, files = get_filelist(environ['GDRIVE_UPLOAD_ID'])
+def files_exist(folder_id, *names):
+    drive, files = get_filelist(folder_id)
     return all([name in files for name in names])
 
 
-def download_file(directory, filename):
-    drive, files = get_filelist(environ['GDRIVE_UPLOAD_ID'])
+def download_file(folder_id, directory, filename):
+    drive, files = get_filelist(folder_id)
     if filename not in files:
         raise Exception("{} doesn't exist".format(filename))
 
@@ -62,8 +62,8 @@ def download_file(directory, filename):
     f.GetContentFile(join(directory, filename))
 
 
-def upload_directory(directory):
-    drive, files = get_filelist(environ['GDRIVE_UPLOAD_ID'])
+def upload_directory(folder_id, directory):
+    drive, files = get_filelist(folder_id)
 
     for fname in listdir(directory):
         name = join(directory, fname)
@@ -74,7 +74,7 @@ def upload_directory(directory):
             print('Skipping {}. Already exists on gdrive'.format(fname))
             continue
 
-        f = drive.CreateFile({'parents': [{'id': environ['GDRIVE_UPLOAD_ID']}],
+        f = drive.CreateFile({'parents': [{'id': folder_id}],
                               'title': fname})
         f.SetContentFile(name)
         f.Upload()
@@ -88,10 +88,10 @@ def upload_directory(directory):
 
 if __name__ == '__main__':
     import sys
-    cmd = sys.argv[1]
+    cmd, folder_id = sys.argv[1:3]
     if cmd == 'upload':
-        upload_directory(sys.argv[2])
+        upload_directory(folder_id, sys.argv[3])
     elif cmd == 'exists':
-        print(files_exist(*sys.argv[2:]))
+        print(files_exist(folder_id, *sys.argv[3:]))
     elif cmd == 'download':
-        download_file(*sys.argv[2:4])
+        download_file(folder_id, *sys.argv[3:5])

@@ -1,5 +1,6 @@
-from os.path import join, isfile, dirname
+from os.path import join, isfile, dirname, basename
 from os import listdir, environ
+from glob import glob
 from pydrive.auth import GoogleAuth
 from apiclient import errors
 from pydrive.drive import GoogleDrive
@@ -62,14 +63,14 @@ def download_file(folder_id, directory, filename):
     f.GetContentFile(join(directory, filename))
 
 
-def upload_directory(folder_id, directory):
+def upload_directory(folder_id, pat):
     drive, files = get_filelist(folder_id)
 
-    for fname in listdir(directory):
-        name = join(directory, fname)
+    for name in glob(pat):
         if not isfile(name):
             raise Exception('{} is not a file'.format(name))
 
+        fname = basename(name)
         if fname in files:
             print('Skipping {}. Already exists on gdrive'.format(fname))
             continue

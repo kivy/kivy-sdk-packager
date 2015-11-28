@@ -190,11 +190,22 @@ setup(
 '''
 
 dep_init = '''
+"""The following code is required to make the dependency binaries available to
+kivy when it imports this package.
+"""
+
+__all__ = ('dep_bins', )
+
 import sys
 from os.path import dirname, join, isdir
 import ctypes
 from ctypes import wintypes
 {}
+
+dep_bins = []
+"""A list of paths that contain the binaries of this distribution.
+Can be used e.g. with pyinstaller to ensure it copies all the binaries.
+"""
 
 # See https://github.com/numpy/numpy/wiki/windows-dll-notes#python-dlls
 # and https://pytools.codeplex.com/workitem/1627
@@ -257,8 +268,13 @@ def make_package(build_path, name, files, version, output, license,
                 rmtree(full_fname, ignore_errors=True)
 
         makedirs(join(setup_path, 'kivy', 'deps', mod_name))
+        readme = b'''Binary dependency distribution of Kivy on Windows.
+
+This package is a distribution of the kivy binary dependency {0}. To use,
+just install it with `pip install kivy.deps.{0}`.\n'''.format(mod_name)
+
         with open(join(setup_path, 'README'), 'wb') as fh:
-            fh.write(b"Binary dependency distribution of Kivy on Windows.\n")
+            fh.write(readme)
 
         with open(join(setup_path, 'kivy', '__init__.py'), 'wb') as fh:
             fh.write(b"__import__('pkg_resources').declare_namespace(__name__)\n")

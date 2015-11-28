@@ -63,7 +63,7 @@ find -E . -regex '.*\.a$' -exec rm {} \;
 find -E . -regex '.*\.la$' -exec rm {} \;
 
 echo "-- Remove duplicate gstreamer libraries"
-python $SCRIPT_PATH/data/link_duplicate.py GStreamer.framework/Libraries
+python "$SCRIPT_PATH/data/link_duplicate.py" GStreamer.framework/Libraries
 
 echo "-- Remove broken symlink"
 find . -type l -exec sh -c "file -b {} | grep -q ^broken" \; -print

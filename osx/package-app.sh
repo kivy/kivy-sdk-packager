@@ -25,14 +25,14 @@ APPPATH="${SCRIPT_PATH}/${APPNAME}.app"
 echo "Hello, ${APPNAME}"
 
 echo "-- Duplicate the Kivy.app to ${APPNAME}.app"
-cp -a ${SCRIPT_PATH}/Kivy.app ${APPPATH}
+cp -a "${SCRIPT_PATH}/Kivy.app" "${APPPATH}"
 
 echo "-- Copy your application"
-cp -a $1 ${APPPATH}/Contents/Resources/yourapp
+cp -a "$1" "${APPPATH}/Contents/Resources/yourapp"
 
 echo "-- Optimize all python files"
-source ${APPPATH}/Contents/Resources/venv/bin/activate
-python -OO -m compileall ${APPPATH}
+source "${APPPATH}/Contents/Resources/venv/bin/activate"
+python -OO -m compileall "${APPPATH}"
 
 echo "-- Remove all py/pyc"
-find -E ${APPPATH} -regex ".*pyc?$" -exec rm {} \;
+find -E "${APPPATH}" -regex ".*pyc?$" -exec rm {} \;

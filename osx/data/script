@@ -6,7 +6,7 @@ fi
 SCRIPT_PATH=$(python -c "import os; print os.path.realpath(os.path.dirname('${SCRIPT_PATH}'))")
 
 # activate the virtualenv
-source ${SCRIPT_PATH}/venv/bin/activate
+source "${SCRIPT_PATH}/venv/bin/activate"
 
 # setup the environment to not mess with the system
 export PYTHONPATH="${SCRIPT_PATH}/kivy:${PYTHONPATH}"
@@ -23,17 +23,17 @@ export KIVY_HOME="${SCRIPT_PATH}/.kivy"
 if [ -d "${SCRIPT_PATH}/yourapp" ]; then
 	cd "${SCRIPT_PATH}/yourapp"
 	if [ -f "main.pyo" ]; then
-		exec ${SCRIPT_PATH}/python -OO -m main "$@"
+		exec "${SCRIPT_PATH}/python" -OO -m main "$@"
 	else
-		exec ${SCRIPT_PATH}/python -m main "$@"
+		exec "${SCRIPT_PATH}/python" -m main "$@"
 	fi
 
 # default drag & drop support
 elif [ $# -ne 0 ]; then
-	exec ${SCRIPT_PATH}/python "$@"
+	exec "${SCRIPT_PATH}/python" "$@"
 
 # start a python shell, only if we didn't double-clicked
 elif [ "$SHLVL" -gt 1 ]; then
-	exec ${SCRIPT_PATH}/python
+	exec "${SCRIPT_PATH}/python"
 
 fi

@@ -268,13 +268,13 @@ def make_package(build_path, name, files, version, output, license,
                 rmtree(full_fname, ignore_errors=True)
 
         makedirs(join(setup_path, 'kivy', 'deps', mod_name))
-        readme = b'''Binary dependency distribution of Kivy on Windows.
+        readme = '''Binary dependency distribution of Kivy on Windows.
 
 This package is a distribution of the kivy binary dependency {0}. To use,
 just install it with `pip install kivy.deps.{0}`.\n'''.format(mod_name)
 
         with open(join(setup_path, 'README'), 'wb') as fh:
-            fh.write(readme)
+            fh.write(readme.encode('ascii'))
 
         with open(join(setup_path, 'kivy', '__init__.py'), 'wb') as fh:
             fh.write(b"__import__('pkg_resources').declare_namespace(__name__)\n")

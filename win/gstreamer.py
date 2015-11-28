@@ -5,7 +5,7 @@ from shutil import rmtree
 from os import walk, listdir
 from .common import *
 
-__version__ = '0.1.0'
+__version__ = '0.1.1'
 
 gst_ver = '2013.6'
 

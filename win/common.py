@@ -205,7 +205,7 @@ try:
     ctypes.windll.kernel32.SetDefaultDllDirectories(0x1000)
 except AttributeError:
     _AddDllDirectory = ctypes.windll.kernel32.SetDllDirectoryW
-    _AddDllDirectory.argtypes = [wintypes.c_wchar_p]
+    _AddDllDirectory.argtypes = [ctypes.c_wchar_p]
 
 _root = dirname(sys.executable)
 dep_bins = [join(_root, 'share', '{}', 'bin')]

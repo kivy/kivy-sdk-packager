@@ -1,10 +1,9 @@
 #!/bin/bash
 
-VERSION=stable
-
 set -x  # verbose
 set -e  # exit on error
 
+VERSION=${VERSION:-stable}
 PLATYPUS=/usr/local/bin/platypus
 SCRIPT_PATH="${BASH_SOURCE[0]}";
 if([ -h "${SCRIPT_PATH}" ]) then
@@ -30,6 +29,9 @@ $PLATYPUS -DBR -x -y \
 echo "-- Create Frameworks directory"
 mkdir -p Kivy.app/Contents/Frameworks
 pushd Kivy.app/Contents/Frameworks
+
+echo "-- Ensure SDL2_image framework is patched"
+install_name_tool -change @executable_path/../Frameworks/SDL2.framework/Versions/A/SDL2 @rpath/../../../../SDL2.framework/Versions/A/SDL2 /Library/Frameworks/SDL2_mixer.framework/Versions/A/Frameworks/smpeg2.framework/Versions/A/smpeg2
 
 echo "-- Copy frameworks"
 cp -a /Library/Frameworks/GStreamer.framework .

@@ -1,0 +1,117 @@
+version: 1.0.{build}
+pull_requests:
+  do_not_increment_build_number: true
+branches:
+  only:
+  - master
+environment:
+  WHEEL_DIR: C:\kivy_wheels
+  KIVY_BUILD_DIR: C:\kivy_build
+  KIVY_BUILD_CACHE: C:\kivy_build_cache
+  AIRPLANE_CHARGE:
+    secure: +uoVGbtMLNGC5M65CCkHpWJ2/M9KsAEPf8ncHWQ1We7sQaITsp3dpFCqi8bX38PvQPSCS+C3ZuVZIbaUXPxO1owibcv+1gxdATOUfVVF/JrTFwgauCH4LKy3jSJp0tYxrD/WtPq3Fjnh+776AK1e0ktge4j0vzdg0ek53afz1Wip+3O+hB6iw1GE4UZsa0kK7TPI+25Lh2PRPCJQMI0HBKRtyKrGJI3cDbGF5XvmhD1KdsVAqD2GMH/nazufL0gq39dtFJeNwEGRfp73yhmev5hDysBza6ZOI26Udyk27oORJlVVVClagrde5or9jL8KManm5v7pP1RHNJrx9ZPdSKDwYHyUyrxygvvrY+Ln42R6Q6Y71oehy1cpixPEQOIdSzoSSpOBH5ZP+lXOwd+OLoLk0QynaX+b0b7cZA7lJsqYz+Ihzv0y1akFzk/os+8AI8or8+TiJytJJ7trrsUjIEAE8GNt5FkxX9isqalr3Qhw24HEY41FGVhru+05KAZLPB9ulQ9unbVvWLc+kue8ZKNTlTsQL7Un4OXBe4PBwpFbEDZaoA1zy6QiVorOfSEj108RYKOYtbWUZmfm4zUm3A7zWqTS64UndMBhMWjIjsJG7ZkiVoMV4yv2rPyXu75tSnsN6onbU3RE2VpT6C5VTMObIdJ9/confFuu10dITodcUr+Xp9709NL0/p9dS+mux/Hrs5llNV7eLo9mQj0z89Dv1geE46mnaLpKkiPK4U5287d9Xbiq54LSehpVsF5d7nIp0JKad2Ar8lVy2FGD3Felczgi9nv6uRnyMhWdWOFi920/yZQ2NXDoPop/sx2D7u6f2IiILftxWAtB8i317gCXdKYQBvBu33tvMx31OMYQOHzf51ziDe6SCnZd9iRKCM1U6U7Iqt8Bc92Y8IKk0LC56EeoHgGpCOD8/U5zCgPSUuAceawreb9EGcAp847+yG9MuepXOSu0V7wcz7H3RjlxIHqJZvErfN3h40uUwB5469WB/kcGO0RnOSCrQ7AS3cgbScie+Rx5SCVciodTTjEyUuWQUE6BEUxzRJGQlcJhJWfzEiaKAaGRak+/p715SqqftAQxnQggllPcO856WCvl0m1vG3N1e/Z3/Dl+UDj36uJ26040ieSN4SlABMbI99d5I0nHNyWa/e68YNNzLA==
+  GDRIVE_CLIENT_ID:
+    secure: k1HfJAdYOIq7NLIkPzbd/yqNIMZpQAta8kDwTZgoBItw2veFLm/AYdjXNITPXjWJThWtlq77XJ8mwUm6o+LxW+PPkveh7qdjlroxslGYYN8=
+  GDRIVE_CLIENT_SECRET:
+    secure: +xZKIrStupchU7jKj85HZzhiKFXRz36dhH+goxooqyE=
+  GDRIVE_sdl2_UPLOAD_ID: 0B1_HB9J8mZepTVJhenRET01VQTQ
+  GDRIVE_sdl2_dev_UPLOAD_ID: 0B1_HB9J8mZepWlZMNWVKVHE5R28
+  GDRIVE_glew_UPLOAD_ID: 0B1_HB9J8mZepUkJ3TTJhY0ZuWGs
+  GDRIVE_glew_dev_UPLOAD_ID: 0B1_HB9J8mZepak1KeGJ5MDdSQ0E
+  GDRIVE_gstreamer_UPLOAD_ID: 0B1_HB9J8mZepNzZ5aW91Q0tJU2s
+  GDRIVE_gstreamer_dev_UPLOAD_ID: 0B1_HB9J8mZepZzNSZVI2V19mQ00
+  matrix:
+  - PACKAGE_TARGET: sdl2
+    PYVER: 27
+    BITTNESS: 86
+  - PACKAGE_TARGET: glew
+    PYVER: 27
+    BITTNESS: 86
+  - PACKAGE_TARGET: gstreamer
+    PYVER: 27
+    BITTNESS: 86
+  - PACKAGE_TARGET: sdl2
+    PYVER: 34
+    BITTNESS: 86
+  - PACKAGE_TARGET: glew
+    PYVER: 34
+    BITTNESS: 86
+  - PACKAGE_TARGET: gstreamer
+    PYVER: 34
+    BITTNESS: 86
+  - PACKAGE_TARGET: sdl2
+    PYVER: 27
+    BITTNESS: 64
+  - PACKAGE_TARGET: glew
+    PYVER: 27
+    BITTNESS: 64
+  - PACKAGE_TARGET: gstreamer
+    PYVER: 27
+    BITTNESS: 64
+  - PACKAGE_TARGET: sdl2
+    PYVER: 34
+    BITTNESS: 64
+  - PACKAGE_TARGET: glew
+    PYVER: 34
+    BITTNESS: 64
+  - PACKAGE_TARGET: gstreamer
+    PYVER: 34
+    BITTNESS: 64
+cache: C:\kivy_build_cache
+build_script:
+- ps: >-
+    cd C:\projects\kivy-sdk-packager
+
+
+    mkdir "$env:KIVY_BUILD_DIR"
+
+    mkdir "$env:WHEEL_DIR"
+
+    if (!(Test-Path "$env:KIVY_BUILD_CACHE")) {
+      mkdir "$env:KIVY_BUILD_CACHE"
+    }
+
+    $GDRIVE_ID = [Environment]::GetEnvironmentVariable("GDRIVE_$env:PACKAGE_TARGET`_UPLOAD_ID", "Process")
+
+    $DEV_GDRIVE_ID = [Environment]::GetEnvironmentVariable("GDRIVE_$env:PACKAGE_TARGET`_dev_UPLOAD_ID", "Process")
+
+
+
+    if ($env:BITTNESS -eq "64") {
+      $PYTHON_ROOT = "C:\Python$env:PYVER-x64"
+      $WHELL_BITNESS = "win_amd64"
+    } else {
+      $PYTHON_ROOT = "C:\Python$env:PYVER"
+      $WHELL_BITNESS = "win32"
+    }
+
+    $env:PATH = "$PYTHON_ROOT;$PYTHON_ROOT\Scripts;$env:PATH"
+
+
+
+    $WHEEL_VERSION = python -c "import win.$env:PACKAGE_TARGET;print(win.$env:PACKAGE_TARGET.__version__)"
+
+    $WHEEL_BIN = "kivy.deps.$env:PACKAGE_TARGET-$WHEEL_VERSION-cp$env:PYVER-none-$WHELL_BITNESS.whl"
+
+    $WHEEL_DEV = "kivy.deps.$env:PACKAGE_TARGET`_dev-$WHEEL_VERSION-cp$env:PYVER-none-$WHELL_BITNESS.whl"
+
+
+    C:\Python27\Scripts\pip.exe install pydrive
+
+    $ALREADY_EXISTS = C:\Python27\python.exe win\gdrive.py exists "$GDRIVE_ID" "$WHEEL_BIN"
+
+    if ($ALREADY_EXISTS -eq "True") {
+      $ALREADY_EXISTS = C:\Python27\python.exe win\gdrive.py exists "$DEV_GDRIVE_ID" "$WHEEL_DEV"
+    }
+
+
+
+    if ($ALREADY_EXISTS -eq "False") {
+      python -m pip install pip wheel setuptools --upgrade
+      pip install -i https://pypi.anaconda.org/carlkl/simple mingwpy
+
+      python -m win.$env:PACKAGE_TARGET build_path "$env:KIVY_BUILD_DIR" arch $env:BITTNESS pyver $env:PYVER package $env:PACKAGE_TARGET output "$env:WHEEL_DIR" cache "$env:KIVY_BUILD_CACHE"
+
+      C:\Python27\python.exe win\gdrive.py upload "$DEV_GDRIVE_ID" "$env:WHEEL_DIR\kivy.deps.$env:PACKAGE_TARGET`_dev*"
+      C:\Python27\python.exe win\gdrive.py upload "$GDRIVE_ID" "$env:WHEEL_DIR\kivy.deps.$env:PACKAGE_TARGET-*"
+    }

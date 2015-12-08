@@ -199,7 +199,6 @@ __all__ = ('dep_bins', )
 import sys
 from os.path import dirname, join, isdir
 import ctypes
-from ctypes import wintypes
 {}
 
 dep_bins = []
@@ -211,7 +210,7 @@ Can be used e.g. with pyinstaller to ensure it copies all the binaries.
 # and https://pytools.codeplex.com/workitem/1627
 try:
     _AddDllDirectory = ctypes.windll.kernel32.AddDllDirectory
-    _AddDllDirectory.argtypes = [wintypes.c_wchar_p]
+    _AddDllDirectory.argtypes = [ctypes.c_wchar_p]
     # Needed to initialize AddDllDirectory modifications
     ctypes.windll.kernel32.SetDefaultDllDirectories(0x1000)
 except AttributeError:

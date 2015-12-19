@@ -34,34 +34,24 @@ echo "-- Optimize all python files"
 source ${APPPATH}/Contents/Resources/venv/bin/activate
 
 #check python Versions
-if python -c 'import sys; sys.exit(1 if sys.hexversion<0x03000000 else 0)'
+PYPATH=${APPPATH}/Contents/Resources
+if "$PYPATH/python" -c 'import sys; sys.exit(1 if sys.hexversion<0x03000000 else 0)'
 then
-	${APPPATH}/Contents/Resources/script -OO -m compileall -b ${APPPATH}/Contents/Resources/
-	mv ${APPPATH}/Contents/Resources/myapp ${APPPATH}/Contents/Resources/yourapp
+	${PYPATH}/script -OO -m compileall -b ${APPPATH}/Contents/Resources/
+	mv ${PYPATH}/myapp ${PYPATH}/yourapp
 	echo "Remove all __pycache__"
-  find -E ${APPPATH}/Contents/Resources -regex "(.*)\.py" | xargs rm
+	find -E ${PYPATH} -regex "(.*)\.py" | xargs rm
 	find -E ${APPPATH}/Contents/ -name "__pycache__"| xargs rm -rf
 else
-	${APPPATH}/Contents/Resources/script -OO -m compileall ${APPPATH}/Contents/Resources/
-	mv ${APPPATH}/Contents/Resources/myapp ${APPPATH}/Contents/Resources/yourapp
+	${PYPATH}/script -OO -m compileall ${APPPATH}/Contents/Resources/
+	mv ${PYPATH}/Contents/Resources/myapp ${APPPATH}/Contents/Resources/yourapp
 	echo "-- Remove all py/pyc"
   find -E ${APPPATH} -regex ".*pyc?$" | xargs rm -r
 fi
 
+#change icon
 
-# check for icon
-PYPATH="$APPPATH/Contents/Frameworks/pythoh"
-rm -rf "$PYPATH/3.5.0/lib/python3.5/sqlite3"
-rm -rf "$APPPATH/3.5.0/lib/python3.5/tkinter"
-rm -rf "$PYPATH/3.5.0/bin/{pygmentize,2to*,pip*,*-config,easy_install*,idle*,pydoc*,python3.5m*,rst*}"
-rm -rf "$PYPATH/3.5.0/lib/{lib*,pkgconfig,turtledemo,unittest}"
-rm -rf "$PYPATH/3.5.0/lib/pkgconfig"
-rm -rf "$PYPATH/3.5.0/lib/python3.5/{turtledemo,unittest,curses,distutils,ensurepip,idlelib,pydoc_data,setuptools*}"
-rm -rf "$APPPATH/Contents/Resources/kivy/doc"
-rm -rf "$APPPATH/Contents/Resources/kivy/kivy/tools"
-rm -rf "$APPPATH/Contents/Resources/kivy/examples"
-rm -rf "$APPPATH/Contents/Resources/kivy/build"
-rm -rf "$APPPATH/Contents/Resources/venv/lib/python2.7/site-packages/distutils"
-rm -rf "$APPPATH/Contents/Resources/venv/lib/python2.7/site-packages/pip"
-rm -rf "$APPPATH/Contents/Resources/venv/lib/python2.7/site-packages/pygments/"
-rm -rf "$APPPATH/Contents/Resources/venv/lib/python2.7/site-packages/Cython/"
+# install requirements
+#if []
+
+sh ./cleanup_app.sh

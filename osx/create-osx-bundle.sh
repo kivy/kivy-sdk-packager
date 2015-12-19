@@ -48,6 +48,8 @@ if [ "$1" == "python3" ]  ;then
   cp -a ~/.pyenv/versions/3.5.0 "$PYPATH"
   #find -E "$PYPATH/3.5.0" -regex '.*.pyc' | grep -v "opt-2.pyc" | xargs rm
   PYTHON="$PYPATH/3.5.0/bin/python3"
+  rm -rf python/3.5.0/{openssl,share}
+  rm -rf python/3.5.0/lib/python3.5/{test,unittest/test,turtledemo,tkinter}
 fi
 pushd Kivy.app/Contents/Frameworks
 
@@ -59,8 +61,6 @@ cp -a /Library/Frameworks/SDL2_ttf.framework .
 cp -a /Library/Frameworks/SDL2_mixer.framework .
 
 echo "-- Reduce frameworks size"
-rm -rf python/3.5.0/{openssl,share}
-rm -rf python/3.5.0/lib/{test,unittest/test,turtledemo,tkinter}
 rm -rf {SDL2,SDL2_image,SDL2_ttf,SDL2_mixer,GStreamer}.framework/Headers
 rm -rf {SDL2,SDL2_image,SDL2_ttf,SDL2_mixer}.framework/Versions/A/Headers
 rm -rf SDL2_ttf.framework/Versions/A/Frameworks/FreeType.framework/Versions/A/Headers
@@ -83,6 +83,7 @@ rm -rf GStreamer.framework/Versions/1.0/etc
 rm -rf GStreamer.framework/Versions/1.0/share/gstreamer
 find -E . -regex '.*\.a$' -exec rm {} \;
 find -E . -regex '.*\.la$' -exec rm {} \;
+find -E . -regex '.*\.exe$' -exec rm {} \;
 
 echo "-- Remove duplicate gstreamer libraries"
 $PYTHON $SCRIPT_PATH/data/link_duplicate.py GStreamer.framework/Libraries

@@ -22,7 +22,9 @@ export KIVY_HOME="${SCRIPT_PATH}/.kivy"
 # if an app is available, use it
 if [ -d "${SCRIPT_PATH}/yourapp" ]; then
 	cd "${SCRIPT_PATH}/yourapp"
-	if [ -f "main.pyo" ] || [ -f "main.opt-2.pyc" ]; then
+  if [ -f "main.so" ] then
+		exec ${SCRIPT_PATH}/python -c "import main"
+	else [ -f "main.pyo" ] || [ -f "main.opt-2.pyc" ]; then
 		exec ${SCRIPT_PATH}/python -OO -m main "$@"
 	else
 		exec ${SCRIPT_PATH}/python -m main "$@"

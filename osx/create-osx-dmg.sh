@@ -17,6 +17,8 @@ DMG_TEMP="${VOL_NAME}-temp.dmg"
 DMG="${VOL_NAME}.dmg"
 STAGING_DIR="_install"
 
+#cp ${APP_NAME}.app/Contents/Resources/appIcon.icns data/icon.icns
+
 rm -rf "${STAGING_DIR}" "${DMG}" "${DMG_TEMP}"
 
 echo "-- Copy application into install dir"
@@ -70,7 +72,7 @@ echo '
      end tell
    end tell
 ' | osascript
- 
+
 sync
 
 # unmount it
@@ -81,4 +83,3 @@ hdiutil convert "$DMG_TEMP" -format UDZO -imagekey zlib-level=9 -o "$DMG"
 
 # clean
 rm -rf $DMG_TEMP $STAGING_DIR
-

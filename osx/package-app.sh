@@ -38,20 +38,17 @@ PYPATH=${APPPATH}/Contents/Resources
 if "$PYPATH/python" -c 'import sys; sys.exit(1 if sys.hexversion<0x03000000 else 0)'
 then
 	${PYPATH}/script -OO -m compileall -b ${APPPATH}/Contents/Resources/
-	mv ${PYPATH}/myapp ${PYPATH}/yourapp
 	echo "Remove all __pycache__"
 	find -E ${PYPATH} -regex "(.*)\.py" | xargs rm
 	find -E ${APPPATH}/Contents/ -name "__pycache__"| xargs rm -rf
 else
-	${PYPATH}/script -OO -m compileall ${APPPATH}/Contents/Resources/
-	mv ${PYPATH}/Contents/Resources/myapp ${APPPATH}/Contents/Resources/yourapp
+	${PYPATH}/script -OO -m compileall ${APPPATH}/Contents
 	echo "-- Remove all py/pyc"
   find -E ${APPPATH} -regex ".*pyc?$" | xargs rm -r
 fi
+mv ${PYPATH}/myapp ${PYPATH}/yourapp
 
-#change icon
 
-# install requirements
-#if []
+sh -x ./cleanup_app.sh ${APPPATH}
 
-sh ./cleanup_app.sh
+echo "All Done!"

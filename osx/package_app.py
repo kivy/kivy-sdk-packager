@@ -4,10 +4,10 @@
 
 Usage:
     package-app <path_to_app> [--icon=<icon_path> --author=<copyright>\
-        --appname=<appname> --source-app=<source_app> --deps=<dep_list>\
-        --bundleid=<bundle_id> --displayname=<displayname>\
-        --bundlename=<bundle_name> --bundleversion=<bundleversion>\
-        --strip=<true_false>]
+ --appname=<appname> --source-app=<source_app> --deps=<dep_list>\
+ --bundleid=<bundle_id> --displayname=<displayname>\
+ --bundlename=<bundle_name> --bundleversion=<bundleversion>\
+ --strip=<true_false>]
     package-app -h | --help
     package-app --version
 

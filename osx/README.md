@@ -5,9 +5,10 @@ This repository contains the scripts for:
 
 - creating a Kivy.app directory from scratch 
 
-    - `./create-osx-bundle`: will create a Kivy.app using system python and stable branch of kivy
-    - `./create-osx-bundle python3` will create a Kivy.app embedding python3 and stable branch of kivy
-    - `./create-osx-bundle python3 master` will create a Kivy.app embedding python3 and master branch of kivy
+    - `./create-osx-bundle`: will create a Kivy.app using system python and stable branch of kivy.
+    - `./create-osx-bundle python2 master`: will create a Kivy.app using system python and master branch of kivy.
+    - `./create-osx-bundle python3`: will create a Kivy.app embedding python3 and stable branch of kivy.
+    - `./create-osx-bundle python3 master`: will create a Kivy.app embedding python3 and master branch of kivy.
     
 - packaging a Kivy application using the previously generated Kivy.app
 

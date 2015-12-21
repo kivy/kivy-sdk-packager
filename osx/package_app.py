@@ -14,12 +14,11 @@ Usage:
 Options:
     -h  --help                      Show this screen.
     --icon=<icon_path>              Path to source icon
-                                    [default: data/logo/kivy-icon-512.png].
     --author=<copyright>            Copyright attribution
                                     [default: © 2015 Kivy team].
     --appname=<app_name>            Name of the resulting .app file.
     --source-app=<source_app>       Path to the Kivy.app to use as base
-                                    [default: ./Kivy.app].
+                                    [default: Kivy.app].
     --entrypoint=<entrypoint>       Entry point module to your application
                                     [default: main].
     --displayname=<displayname>     Bundle display name of the application.
@@ -93,7 +92,7 @@ def fill_meta(appname, arguments):
     import plistlib
     info_plist = appname+'/Contents/info.plist'
     rootObject = plistlib.readPlist(info_plist)
-    rootObject['NSHumanReadableCopyright'] = arguments.get('--author')
+    rootObject['NSHumanReadableCopyright'] = arguments.get('--author').decode('utf-8')
     rootObject['Bundle Display Name'] = arguments.get('--displayname')
     rootObject['Bundle Identifier'] = arguments.get('--bundleid')
     rootObject['Bundle Name'] = arguments.get('--bundlename')
@@ -134,8 +133,7 @@ def compile_app(appname):
             ['find -E {} -regex "(.*)\.py" | xargs rm'.format(pypath)],
              shell=True)
         check_call(
-            ['find -E {}/Contents/'.format(appname) +\
-             '-name "__pycache__"| xargs rm -rf'],
+            ['find -E {}/Contents/ -name "__pycache__"| xargs rm -rf'.format(appname)],
             shell=True)
     else:
         print('using system python...')
@@ -163,22 +161,24 @@ def install_deps(appname, deps):
 
 def main(arguments):
     path_to_app = arguments.get('<path_to_app>')
-    source_app = arguments.get('--source_app', dirname(abspath(__file__)) + '/kivy.app')
+    source_app = arguments.get('--source-app')
     confirm = arguments.get('-y')
     appname = arguments.get('--appname')
     if not appname:
         appname = path_to_app.split('/')[-1] + '.app'
     else:
         appname = appname + '.app'
-    icon = arguments.get('--icon', appname + '/Contents/Resources/kivy/kivy/data/logo/kivy-icon-512.png')
+    icon = arguments.get('--icon')
     strip = arguments.get('--strip', True)
     deps = arguments.get('--deps', [])
 
     bootstrap(source_app, appname, confirm)
     insert_app(path_to_app, appname)
-    install_deps(appname, deps)
+    if deps:
+        install_deps(appname, deps)
     compile_app(appname)
-    setup_icon(appname, icon)
+    if icon:
+        setup_icon(appname, icon)
     fill_meta(appname, arguments)
     cleanup(appname, strip)
     print("All done!")

@@ -93,7 +93,7 @@ def fill_meta(appname, arguments):
     info_plist = appname+'/Contents/info.plist'
     rootObject = plistlib.readPlist(info_plist)
     rootObject['NSHumanReadableCopyright'] = arguments.get('--author').decode('utf-8')
-    rootObject['Bundle Display Name'] = arguments.get('--displayname')
+    rootObject['Bundle display name'] = arguments.get('--displayname')
     rootObject['Bundle Identifier'] = arguments.get('--bundleid')
     rootObject['Bundle Name'] = arguments.get('--bundlename')
     rootObject['Bundle Version'] = arguments.get('--bundleversion')

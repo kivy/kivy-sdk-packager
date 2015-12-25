@@ -94,9 +94,9 @@ def fill_meta(appname, arguments):
     rootObject = plistlib.readPlist(info_plist)
     rootObject['NSHumanReadableCopyright'] = arguments.get('--author').decode('utf-8')
     rootObject['Bundle display name'] = arguments.get('--displayname')
-    rootObject['Bundle Identifier'] = arguments.get('--bundleid')
-    rootObject['Bundle Name'] = arguments.get('--bundlename')
-    rootObject['Bundle Version'] = arguments.get('--bundleversion')
+    rootObject['Bundle identifier'] = arguments.get('--bundleid')
+    rootObject['Bundle name'] = arguments.get('--bundlename')
+    rootObject['Bundle version'] = arguments.get('--bundleversion')
     plistlib.writePlist(rootObject, info_plist)
 
 def setup_icon(path_to_app, path_to_icon):

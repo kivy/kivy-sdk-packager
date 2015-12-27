@@ -113,8 +113,7 @@ echo "-- Install dependencies"
 source venv/bin/activate
 pip install cython==0.23
 pip install pygments docutils
-#FIXME
-pip install git+http://github.com/akshayaurora/osxrelocator
+pip install git+http://github.com/tito/osxrelocator
 
 echo "-- Link python to the right location for relocation"
 ln -s ./venv/bin/python ./python

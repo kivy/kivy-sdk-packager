@@ -130,10 +130,10 @@ def compile_app(appname):
             shell=True)
         print("Remove all __pycache__")
         check_call(
-            ['find -E {} -regex "(.*)\.py" | xargs rm'.format(pypath)],
+            ['find -E {} -regex "(.*)\.py" -print0 | xargs -0 rm'.format(pypath)],
              shell=True)
         check_call(
-            ['find -E {}/Contents/ -name "__pycache__"| xargs rm -rf'.format(appname)],
+            ['find -E {}/Contents/ -name "__pycache__" -print0 | xargs -0 rm -rf'.format(appname)],
             shell=True)
     else:
         print('using system python...')
@@ -142,10 +142,10 @@ def compile_app(appname):
             shell=True)
         print("-- Remove all py/pyc")
         check_call(
-            ['find -E {} -regex "(.*)\.pyc" | xargs rm'.format(appname)],
+            ['find -E {} -regex "(.*)\.pyc" -print0 | xargs -0 rm'.format(appname)],
             shell=True)
         check_call(
-            ['find -E {} -regex "(.*)\.py" | xargs rm'.format(appname)],
+            ['find -E {} -regex "(.*)\.py" -print0 | xargs -0 rm'.format(appname)],
             shell=True)
     sh.command('mv', pypath + '/myapp', pypath + '/yourapp')
 

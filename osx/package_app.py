@@ -106,6 +106,8 @@ def setup_icon(path_to_app, path_to_icon):
         print('Downloading ' + path_to_icon)
         check_output(['curl', '-O', '-L', path_to_icon])
         path_to_icon = path_to_icon.split('/')[-1]
+    if not exists(path_to_icon):
+        return
     height = check_output(['sips', '-g', 'pixelHeight', path_to_icon])[-5:]
     width = check_output(['sips', '-g', 'pixelHeight', path_to_icon])[-5:]
     if height != width:

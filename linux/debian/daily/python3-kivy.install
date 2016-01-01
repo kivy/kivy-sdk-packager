@@ -13,7 +13,6 @@ usr/lib/python3/dist-packages/kivy/core/text/*.py*
 usr/lib/python3/dist-packages/kivy/core/text/*.pxd
 usr/lib/python3/dist-packages/kivy/core/video/*.py*
 usr/lib/python3/dist-packages/kivy/core/window/*.py*
-usr/lib/python3/dist-packages/kivy/deps/*.py*
 usr/lib/python3/dist-packages/kivy/effects/*.py*
 usr/lib/python3/dist-packages/kivy/ext/*.py*
 usr/lib/python3/dist-packages/kivy/extras/*.py*
@@ -34,17 +33,14 @@ usr/lib/python3/dist-packages/kivy/modules/*.py*
 usr/lib/python3/dist-packages/kivy/network/*.py*
 usr/lib/python3/dist-packages/kivy/storage/*.py*
 usr/lib/python3/dist-packages/kivy/uix/*.py*
-usr/lib/python3/dist-packages/kivy/uix/behaviors/*.py*
 
 usr/lib/python3/dist-packages/kivy/adapters/__pycache__
-usr/lib/python3/dist-packages/kivy/deps/__pycache__
 usr/lib/python3/dist-packages/kivy/lib/vidcore_lite/__pycache__
 usr/lib/python3/dist-packages/kivy/lib/__pycache__
 usr/lib/python3/dist-packages/kivy/lib/osc/__pycache__
 usr/lib/python3/dist-packages/kivy/lib/gstplayer/__pycache__
 usr/lib/python3/dist-packages/kivy/storage/__pycache__
 usr/lib/python3/dist-packages/kivy/uix/__pycache__
-usr/lib/python3/dist-packages/kivy/uix/behaviors/__pycache__
 usr/lib/python3/dist-packages/kivy/network/__pycache__
 usr/lib/python3/dist-packages/kivy/__pycache__
 usr/lib/python3/dist-packages/kivy/modules/__pycache__

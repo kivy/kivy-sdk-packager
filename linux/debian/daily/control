@@ -213,7 +213,6 @@ Depends: ${misc:Depends},
          python3-kivy-bin (= ${binary:Version}),
          python3-docutils,
          python3-pygments,
-         python3-gst-1.0
 Provides: ${python3:Provides}
 Suggests: ${python3:Suggests},
           python3-pygame,

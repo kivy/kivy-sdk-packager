@@ -29,8 +29,8 @@ cp "data/${SYMLINKS_SCRIPT}" "${STAGING_DIR}/${SYMLINKS_SCRIPT}"
 
 # create the initial dmg
 echo "-- Create volume"
-du -sm "${STAGING_DIR}" | awk '{print $1}' > _size
-expr $(cat _size) + 9 > _size
+du -sm ${STAGING_DIR} | awk '{print $1}' > _size
+expr $(cat _size) + 6 > _size
 hdiutil create -srcfolder "${STAGING_DIR}" -volname "${VOL_NAME}" -fs HFS+ \
 	-format UDRW -size $(cat _size)M \
 	"${DMG_TEMP}"
@@ -38,7 +38,7 @@ hdiutil create -srcfolder "${STAGING_DIR}" -volname "${VOL_NAME}" -fs HFS+ \
 rm _size
 
 # mount possible previous dmg
-hdiutil unmount "/Volumes/${VOL_NAME}" || true
+hdiutil unmount /Volumes/${VOL_NAME} || true
 
 # mount the dmg
 DEVICE=$(hdiutil attach -readwrite -noverify "${DMG_TEMP}" | \
@@ -80,5 +80,5 @@ hdiutil detach "${DEVICE}"
 hdiutil convert "$DMG_TEMP" -format UDZO -imagekey zlib-level=9 -o "$DMG"
 
 # clean
-rm -rf "$DMG_TEMP" "$STAGING_DIR"
+rm -rf $DMG_TEMP $STAGING_DIR
 

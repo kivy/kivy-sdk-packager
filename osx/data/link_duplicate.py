@@ -1,19 +1,21 @@
 import sys
 import os
 import hashlib
-import subprocess
 
 HASHS = {}
 
 
 def md5sum(filename, blocksize=65536):
-    return subprocess.check_output(['md5', filename])
+    hash = hashlib.md5()
+    with open(filename, "r+b") as f:
+        for block in iter(lambda: f.read(blocksize), ""):
+            hash.update(block)
+    return hash.hexdigest()
 
 
 def parse_dir(dir_path, filters=[".dylib", ".so"]):
     for dirpath, dirnames, filenames in os.walk(dir_path):
         for f in filenames:
-            print(f)
             if filters is not None and \
                     os.path.splitext(f)[1] not in filters:
                 continue
@@ -27,15 +29,15 @@ def parse_dir(dir_path, filters=[".dylib", ".so"]):
                 HASHS[h] = [fn]
 
 if __name__ == "__main__":
-    print("-- analyse", sys.argv[1])
+    print "-- analyse", sys.argv[1]
     parse_dir(sys.argv[1])
-    print("-- fix similar md5", sys.argv[1])
+    print "-- fix similar md5", sys.argv[1]
     basedir = os.getcwd()
-    for _, items in HASHS.items():
+    for _, items in HASHS.iteritems():
         directory, md5 = _
         if len(items) <= 1:
             continue
-        print(" - fix duplicate", md5, items)
+        print " - fix duplicate", md5, items
         source = items[0]
         for dest in items[1:]:
             os.unlink(dest)

@@ -1,4 +1,5 @@
-from __future__ import print_function
+from __future__ import print_function, absolute_import
+from .common import *
 import subprocess
 import sys
 import os
@@ -11,125 +12,17 @@ from glob import glob
 from collections import defaultdict
 import hashlib
 import re
+from re import match
 import csv
 import platform
 from zipfile import ZipFile
-try:
-    from ConfigParser import ConfigParser
-    import urlparse
-    from urllib import urlretrieve as pyurlretrieve
-except ImportError:
-    from configparser import ConfigParser
-    from urllib import parse as urlparse
-    from urllib.request import urlretrieve as pyurlretrieve
 import ssl
 from functools import partial
 import inspect
 from time import sleep
 
+
 MSYSGIT_STIPPED_FILES = 'msysgit_stripped_files'
-
-
-if 'context' in inspect.getargspec(pyurlretrieve)[0]:
-    pyurlretrieve = partial(pyurlretrieve, context=ssl._create_unverified_context())
-
-
-def urlretrieve(*largs, **kwargs):
-    for i in range(5):
-        try:
-            return pyurlretrieve(*largs, **kwargs)
-        except IOError:
-            sleep(60)
-
-
-def sha1OfFile(filename):
-    sha = hashlib.sha1()
-    with open(filename, 'rb') as f:
-        while True:
-            block = f.read(2 ** 10) # Magic number: one-megabyte blocks.
-            if not block:
-                break
-            sha.update(block)
-        return sha.hexdigest()
-
-
-def get_duplicates(basepath, min_size=0):
-    d = defaultdict(list)
-    for dirpath, dirnames, filenames in os.walk(basepath):
-        for f in filenames:
-            f = join(basepath, dirpath, f)
-            s = os.stat(f).st_size
-            if s >= min_size:
-                d[s].append(f)
-    d = {k:v for k, v in d.items() if len(v) > 1}
-
-    dsha1 = defaultdict(list)
-    for fnames in d.values():
-        for f in fnames:
-            dsha1[sha1OfFile(f)].append(f)
-    return [v for v in dsha1.values() if len(v) > 1]
-
-
-def get_file_duplicates(filename):
-    sha1 = sha1OfFile(filename)
-    basepath = dirname(filename)
-    fname = basename(filename)
-    files = []
-    for f in listdir(basepath):
-        if f == fname:
-            continue
-        full_f = join(basepath, f)
-        if isfile(full_f) and sha1OfFile(full_f) == sha1:
-            files.append(f)
-    return files
-
-
-def remove_from_dir(basepath, files):
-    if not files:
-        return
-    d = defaultdict(list)
-    for f in files:
-        d[f[0]].append(f[1:])
-
-    for f in listdir(basepath):
-        if f not in d:
-            f = join(basepath, f)
-            if isdir(f):
-                rmtree(f)
-            else:
-                remove(f)
-        else:
-            f_full = join(basepath, f)
-            if isdir(f_full):
-                remove_from_dir(f_full, [elems for elems in d[f] if elems])
-
-
-def report_hook(block_count, block_size, total_size):
-    p = block_count * block_size * (100.0 / total_size if total_size else 1)
-    print("\b\b\b\b\b\b\b\b\b", "%06.2f%%" % p, end=' ')
-
-
-def exec_binary(status, cmd, env=None, cwd=None, shell=True):
-    print(status)
-    print(' '.join(cmd))
-    proc = Popen(cmd, stdout=PIPE, stderr=PIPE, env=env, cwd=cwd, shell=shell)
-    a, b = proc.communicate()
-    if a:
-        print(a, end='')
-    if b:
-        print(b, end='')
-
-
-def copy_files(src, dst):
-    if not exists(dst):
-        makedirs(dst)
-    for item in listdir(src):
-        s = os.path.join(src, item)
-        d = os.path.join(dst, item)
-        if os.path.isdir(s):
-            copy_files(s, d)
-        else:
-            copy2(s, d)
 
 
 class WindowsPortablePythonBuild(object):
@@ -455,6 +348,7 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
                 self.patch_python_x64(pydir, env, pyver)
                 print('Done patching python\n')
             self.patch_cygwinccompiler(pydir)
+            exec_binary('GCC version', ['gcc -v'], env, shell=True)
 
             print("-" * width)
             print("Preparing Glew")
@@ -675,7 +569,7 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
         rmtree(mingw, ignore_errors=True)
         exec_binary(
             'Extracting mingw', [self.zip7, 'x', '-y', f], env,
-            self.temp_dir, shell=True)
+            self.temp_dir, shell=True, exclude=zip_q)
 
         for i in range(10):
             try:
@@ -714,7 +608,7 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
         exec_binary(
             'Extracting msysgit',
             [self.zip7, 'x', '-y', '-o{}'.format(join(mingw, 'msysgit')), local_url],
-            env, temp_dir, shell=True)
+            env, temp_dir, shell=True, exclude=zip_q)
 
         if self.no_msysgit_strip:
             return
@@ -857,6 +751,7 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
 
         z = base_dir = join(temp_dir, 'glew', list(listdir(join(temp_dir, 'glew')))[0])
         if not glew_exists:
+            exec_binary('GCC', ['gcc', '-v'], env, base_dir, shell=True)
             exec_binary(
                 'Compiling Glew',
                 ['gcc', '-DGLEW_NO_GLU', '-O2', '-Wall', '-W', '-Iinclude', '-DGLEW_BUILD',
@@ -865,7 +760,7 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
                 '',
                 ['gcc', '-shared', '-Wl,-soname,libglew32.dll',
                  '-Wl,--out-implib,lib/libglew32.dll.a', '-o', 'lib/glew32.dll',
-                 'src/glew.o', '-L/mingw/lib', '-lglu32', '-lopengl32', '-lgdi32',
+                 'src/glew.o', '-lglu32', '-lopengl32', '-lgdi32',
                  '-luser32', '-lkernel32'], env, base_dir, shell=True)
             exec_binary(
                 '', ['ar', 'cr', 'lib/libglew32.a', 'src/glew.o'], env, base_dir, shell=True)
@@ -926,10 +821,12 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
 
             exec_binary(
                 'Extracting {}'.format(local_url),
-                [self.zip7, 'x', '-y', local_url], env, self.temp_dir, shell=True)
+                [self.zip7, 'x', '-y', local_url], env, self.temp_dir, shell=True,
+                exclude=zip_q)
             exec_binary(
                 'Extracting {}'.format(local_url[:-3]),
-                [self.zip7, 'x', '-y', local_url[:-3]], env, self.temp_dir, shell=True)
+                [self.zip7, 'x', '-y', local_url[:-3]], env, self.temp_dir,
+                shell=True, exclude=zip_q)
 
             base_dir = local_url.replace('-mingw.tar.gz', '').replace('-devel', '')
             if arch == '64':
@@ -1093,7 +990,7 @@ specified.'''.format(mingw64_default.replace('%', '%%')),
         exec_binary(
             'Extracting vcredist',
             [self.zip7, 'x', '-y', '-o{}'.format(msvcr), local_url], env,
-            self.temp_dir, shell=True)
+            self.temp_dir, shell=True, exclude=zip_q)
 
         # for VS2010 we need to create pretend files, otherwise the isnatller
         # chokes looking for them since they do not actually exist

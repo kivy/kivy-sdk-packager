@@ -13,6 +13,7 @@ usr/lib/python2.7/dist-packages/kivy/core/text/*.py*
 usr/lib/python2.7/dist-packages/kivy/core/text/*.pxd
 usr/lib/python2.7/dist-packages/kivy/core/video/*.py*
 usr/lib/python2.7/dist-packages/kivy/core/window/*.py*
+usr/lib/python2.7/dist-packages/kivy/deps/*.py*
 usr/lib/python2.7/dist-packages/kivy/effects/*.py*
 usr/lib/python2.7/dist-packages/kivy/ext/*.py*
 usr/lib/python2.7/dist-packages/kivy/extras/*.py*
@@ -33,3 +34,4 @@ usr/lib/python2.7/dist-packages/kivy/modules/*.py*
 usr/lib/python2.7/dist-packages/kivy/network/*.py*
 usr/lib/python2.7/dist-packages/kivy/storage/*.py*
 usr/lib/python2.7/dist-packages/kivy/uix/*.py*
+usr/lib/python2.7/dist-packages/kivy/uix/behaviors/*.py*

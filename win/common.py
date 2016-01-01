@@ -217,7 +217,7 @@ except AttributeError:
     _AddDllDirectory = ctypes.windll.kernel32.SetDllDirectoryW
     _AddDllDirectory.argtypes = [ctypes.c_wchar_p]
 
-_root = dirname(sys.executable)
+_root = sys.prefix
 dep_bins = [join(_root, 'share', '{}', 'bin')]
 if isdir(dep_bins[0]):
     _AddDllDirectory(dep_bins[0])

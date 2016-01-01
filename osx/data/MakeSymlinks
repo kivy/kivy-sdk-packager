@@ -1,4 +1,4 @@
-if [ -d /Applications/Kivy.App ];
+if [ -d /Applications/Kivy.app ];
 then
     ln -s /Applications/Kivy.app/Contents/Resources/script /usr/local/bin/kivy
     osascript -e 'display notification "Symlink created" with title "Kivy: Make Symlinks"'

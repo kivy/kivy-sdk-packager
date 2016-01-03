@@ -4,19 +4,18 @@ from os.path import join, sep
 from os import walk
 from .common import *
 
-__version__ = '0.1.3'
+__version__ = '0.1.4'
 
-sdl2_ver = '2.0.3'
+sdl2_ver = '2.0.4'
 sdl2_mixer_ver = '2.0.0'
 sdl2_ttf_ver = '2.0.12'
 sdl2_image_ver = '2.0.0'
 
 drive_map = {
-    'SDL2-devel-{}-mingw.tar.gz'.format(sdl2_ver): '0B1_HB9J8mZepUXlqeDFPd0oybk0',
+    'SDL2-devel-{}-mingw.tar.gz'.format(sdl2_ver): '0B1_HB9J8mZepNDMwVjJCRWVqT2M',
     'SDL2_mixer-devel-{}-mingw.tar.gz'.format(sdl2_mixer_ver): '0B1_HB9J8mZepQ1l4WlUyT0t2ODQ',
     'SDL2_ttf-devel-{}-mingw.tar.gz'.format(sdl2_ttf_ver): '0B1_HB9J8mZepdjRSdVVZdjBjWFE',
-    'SDL2_image-devel-{}-mingw.tar.gz'.format(sdl2_image_ver): '0B1_HB9J8mZepOXNoSWJCYlI3QW8',
-    'SDL_platform.h': '0B1_HB9J8mZepNmZjcVFtRklINzA'
+    'SDL2_image-devel-{}-mingw.tar.gz'.format(sdl2_image_ver): '0B1_HB9J8mZepOXNoSWJCYlI3QW8'
 }
 
 
@@ -55,12 +54,6 @@ def get_sdl2(cache, build_path, arch, pyver, package, output):
             base_dir = join(base_dir, 'x86_64-w64-mingw32')
         else:
             base_dir = join(base_dir, 'i686-w64-mingw32')
-
-        if fname.startswith('SDL2-'):
-            url = 'https://hg.libsdl.org/SDL/raw-file/e217ed463f25/include/SDL_platform.h'
-            url = get_gdrive_link('SDL_platform.h')
-            local_url = download_cache(cache, url, join(base_dir, 'include', 'SDL2'),
-                                       'SDL_platform.h')
 
         for d in ('lib', 'include', 'bin'):
             # bin goes to python/share/kivy_package

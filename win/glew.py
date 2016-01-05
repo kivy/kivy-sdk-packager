@@ -4,7 +4,7 @@ from os.path import join, sep
 from os import walk
 from .common import *
 
-__version__ = '0.1.3'
+__version__ = '0.1.4'
 
 glew_ver = '1.12.0'
 

@@ -198,7 +198,7 @@ __all__ = ('dep_bins', )
 
 import sys
 import os
-from os.path import join, isdir
+from os.path import join, isdir, dirname
 {}
 
 dep_bins = []

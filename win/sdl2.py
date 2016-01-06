@@ -39,7 +39,7 @@ def get_sdl2(cache, build_path, arch, pyver, package, output):
          sdl2_image_ver)):
         url = name.format(ver)
         fname = url.split('/')[-1]
-        url = get_gdrive_link(fname)
+        # url = get_gdrive_link(fname)
         local_url = download_cache(cache, url, build_path, fname)
 
         exec_binary(

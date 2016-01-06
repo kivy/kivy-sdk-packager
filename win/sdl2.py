@@ -4,12 +4,12 @@ from os.path import join, sep
 from os import walk
 from .common import *
 
-__version__ = '0.1.5'
+__version__ = '0.1.6'
 
 sdl2_ver = '2.0.4'
-sdl2_mixer_ver = '2.0.0'
-sdl2_ttf_ver = '2.0.12'
-sdl2_image_ver = '2.0.0'
+sdl2_mixer_ver = '2.0.1'
+sdl2_ttf_ver = '2.0.13'
+sdl2_image_ver = '2.0.1'
 
 drive_map = {
     'SDL2-devel-{}-mingw.tar.gz'.format(sdl2_ver): '0B1_HB9J8mZepNDMwVjJCRWVqT2M',

@@ -17,7 +17,7 @@ rm -rf "$APPPATH/"Contents/Resources/venv/lib/python2.7/site-packages/{pip*,Cyth
 rm -rf "$APPPATH/"Contents/Resources/venv/lib/python2.7/site-packages/wheel/test
 rm -rf "$APPPATH/"Contents/Resources/venv/lib/python3.5/site-packages/{pip*,Cython*,setuptools*,osxrelocator*,cython*,wheel/test*}
 rm -rf "$APPPATH/"Contents/Resources/venv/lib/python3.5/site-packages/wheel/test
-rm -rf "$PYPATH/"3.5.0/lib/python3.5/{turtledemo,test,unittest,curses,distutils,ensurepip,idlelib,pydoc_data,setuptools*}
+rm -rf "$PYPATH/"3.5.0/lib/python3.5/{turtledemo,test,unittest,curses,ensurepip,idlelib,pydoc_data,setuptools*}
 rm -rf "$PYPATH/"3.5.0/lib/python3.5/site-packages/{easy_install*,pip*}
 rm -rf "$PYPATH/"3.5.0/lib/python3.5/site-packages/wheel/test
 rm -rf "$PYPATH/3.5.0/lib/python3.5/sqlite3"

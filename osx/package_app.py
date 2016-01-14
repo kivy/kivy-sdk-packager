@@ -5,7 +5,7 @@
 Usage:
     package-app <path_to_app> [--icon=<icon_path> --author=<copyright>\
  --appname=<appname> --source-app=<source_app> --deps=<dep_list>\
- --bundleid=<bundle_id> --displayname=<displayname>\
+ --gardendeps=<sep_list> --bundleid=<bundle_id> --displayname=<displayname>\
  --bundlename=<bundle_name> --bundleversion=<bundleversion>\
  --strip=<true_false>]
     package-app -h | --help
@@ -32,6 +32,7 @@ Options:
     --strip=<True_False>            Greatly reduce app size, by removing a
                                     lot of unneeded files. [default: True].
     --deps=<deplist>                Dependencies list.
+    --gardendeps=<deplist>          Garden Dependencies list.
 '''
 
 __version__ = '0.1'
@@ -159,6 +160,20 @@ def install_deps(appname, deps):
             (appname + '/Contents/Resources/script -m' +\
              ' pip install --upgrade --force-reinstall ' + dep),
             shell=True)
+
+def install_garden_deps(appname, deps):
+    print('managing garden dependencies {}'.format(deps))
+    check_call(
+        ['curl','-O', '-L',
+        'https://raw.githubusercontent.com/kivy-garden/garden/master/bin/garden'],
+        cwd=appname+'/Contents/Resources/venv/bin')
+    for dep in deps.split(','):
+        print('Installing {} into {}'.format(dep, appname))
+        check_call(
+            ('../script '+\
+             '../venv/bin/garden' +\
+             ' install --upgrade --app' + dep),
+            shell=True, cwd=pypath+'/yourapp')
 
 
 def main(arguments):

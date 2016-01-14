@@ -163,17 +163,19 @@ def install_deps(appname, deps):
 
 def install_garden_deps(appname, deps):
     print('managing garden dependencies {}'.format(deps))
+    pypath = appname + '/Contents/Resources'
     check_call(
         ['curl','-O', '-L',
         'https://raw.githubusercontent.com/kivy-garden/garden/master/bin/garden'],
-        cwd=appname+'/Contents/Resources/venv/bin')
+        cwd=pypath+'/venv/bin')
+    check_call(pypath+'/python -m pip install --upgrade requests', shell=True)
     for dep in deps.split(','):
         print('Installing {} into {}'.format(dep, appname))
         check_call(
             ('../script '+\
              '../venv/bin/garden' +\
-             ' install --upgrade --app' + dep),
-            shell=True, cwd=pypath+'/yourapp')
+             ' install --upgrade --app ' + dep),
+            shell=True, cwd=pypath+'/myapp')
 
 
 def main(arguments):
@@ -188,11 +190,14 @@ def main(arguments):
     icon = arguments.get('--icon')
     strip = arguments.get('--strip', True)
     deps = arguments.get('--deps', [])
+    gardendeps = arguments.get('--gardendeps', [])
 
     bootstrap(source_app, appname, confirm)
     insert_app(path_to_app, appname)
     if deps:
         install_deps(appname, deps)
+    if gardendeps:
+        install_garden_deps(appname, deps)
     compile_app(appname)
     if icon:
         setup_icon(appname, icon)

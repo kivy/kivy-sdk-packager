@@ -129,11 +129,11 @@ def compile_app(appname):
     if exists(py3):
         print('python3 detected...')
         check_call(
-            [pypath + '/script -OO -m compileall -b ' + pypath],
+            [pypath + '/script -OO -m compileall -b ' + pypath+'/yourapp'],
             shell=True)
         print("Remove all __pycache__")
         check_call(
-            ['find -E {} -regex "(.*)\.py" -print0 | xargs -0 rm'.format(pypath)],
+            ['find -E {} -regex "(.*)\.py" -print0 | xargs -0 rm'.format(pypath+'/yourapp')],
              shell=True)
         check_call(
             ['find -E {}/Contents/ -name "__pycache__" -print0 | xargs -0 rm -rf'.format(appname)],

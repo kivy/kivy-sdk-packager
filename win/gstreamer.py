@@ -5,23 +5,23 @@ from shutil import rmtree
 from os import walk, listdir
 from .common import *
 
-__version__ = '0.1.5'
+__version__ = '0.1.6'
 
-gst_ver = '2013.6'
+gst_ver = '1.7.1'
 
 
 def get_gstreamer(cache, build_path, arch, pyver, package, output):
     data = []
     bitness = 'x86_64' if arch == '64' else 'x86'
-    runtime_name = 'gstreamer-1.0-{}-1.4.5.msi'.format(bitness, gst_ver)
-    devel_name = 'gstreamer-1.0-devel-{}-1.4.5.msi'.format(bitness, gst_ver)
+    runtime_name = 'gstreamer-1.0-{}-{}.msi'.format(bitness, gst_ver)
+    devel_name = 'gstreamer-1.0-devel-{}-{}.msi'.format(bitness, gst_ver)
 
     gst = join(build_path, package)
     makedirs(gst)
 
     for name in (runtime_name, devel_name):
         url = (
-            'http://gstreamer.freedesktop.org/data/pkg/windows/1.4.5/{}'.format(name))
+            'http://gstreamer.freedesktop.org/data/pkg/windows/{}/{}'.format(gst_ver, name))
         local_url = download_cache(cache, url, build_path)
 
         exec_binary(

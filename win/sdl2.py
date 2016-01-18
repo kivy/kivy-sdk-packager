@@ -4,7 +4,7 @@ from os.path import join, sep
 from os import walk
 from .common import *
 
-__version__ = '0.1.10'
+__version__ = '0.1.11'
 
 sdl2_ver = '2.0.4'
 sdl2_mixer_ver = '2.0.1'
@@ -14,7 +14,7 @@ sdl2_image_ver = '2.0.1'
 drive_map = {
     'SDL2-devel-{}-mingw.tar.gz'.format(sdl2_ver): '0B1_HB9J8mZepNDMwVjJCRWVqT2M',
     'SDL2_mixer-devel-{}-mingw.tar.gz'.format(sdl2_mixer_ver): '0B1_HB9J8mZepQ1l4WlUyT0t2ODQ',
-    'SDL2_ttf-devel-{}-mingw.tar.gz'.format(sdl2_ttf_ver): '0B1_HB9J8mZepTldYQWVKc2tzems',
+    'SDL2_ttf-devel-{}-mingw.tar.gz'.format(sdl2_ttf_ver): '0B1_HB9J8mZepcWIwTjNoQ3ZnWlU',
     'SDL2_image-devel-{}-mingw.tar.gz'.format(sdl2_image_ver): '0B1_HB9J8mZepOXNoSWJCYlI3QW8'
 }
 

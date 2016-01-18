@@ -41,7 +41,9 @@ def get_sdl2(cache, build_path, arch, pyver, package, output):
         fname = url.split('/')[-1]
         if 'ttf' in name:
             url = get_gdrive_link(fname)
-        local_url = download_cache(cache, url, build_path, fname)
+            local_url = download_cache(r'C:\kivy_no_cache', url, build_path, fname)
+        else:
+            local_url = download_cache(cache, url, build_path, fname)
 
         exec_binary(
             'Extracting {}'.format(local_url),

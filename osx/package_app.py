@@ -197,7 +197,7 @@ def main(arguments):
     if deps:
         install_deps(appname, deps)
     if gardendeps:
-        install_garden_deps(appname, deps)
+        install_garden_deps(appname, gardendeps)
     compile_app(appname)
     if icon:
         setup_icon(appname, icon)

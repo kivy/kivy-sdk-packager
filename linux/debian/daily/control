@@ -145,7 +145,6 @@ Depends: ${misc:Depends},
          python-kivy-bin    (= ${binary:Version}),
          python-docutils,
          python-pygments,
-         python-gst0.10,
          xclip,
          xsel,
 Provides: ${python:Provides}

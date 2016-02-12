@@ -37,7 +37,6 @@ usr/lib/python3/dist-packages/kivy/uix/*.py*
 usr/lib/python3/dist-packages/kivy/uix/behaviors/*.py*
 
 usr/lib/python3/dist-packages/kivy/adapters/__pycache__
-usr/lib/python3/dist-packages/kivy/deps/__pycache__
 usr/lib/python3/dist-packages/kivy/lib/vidcore_lite/__pycache__
 usr/lib/python3/dist-packages/kivy/lib/__pycache__
 usr/lib/python3/dist-packages/kivy/lib/osc/__pycache__
@@ -64,5 +63,6 @@ usr/lib/python3/dist-packages/kivy/core/gl/__pycache__
 usr/lib/python3/dist-packages/kivy/core/audio/__pycache__
 usr/lib/python3/dist-packages/kivy/core/window/__pycache__
 usr/lib/python3/dist-packages/kivy/core/spelling/__pycache__
+usr/lib/python3/dist-packages/kivy/deps/__pycache__
 usr/lib/python3/dist-packages/kivy/ext/__pycache__
 usr/lib/python3/dist-packages/kivy/graphics/__pycache__

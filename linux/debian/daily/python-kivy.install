@@ -25,6 +25,7 @@ usr/lib/python2.7/dist-packages/kivy/graphics/*.pxi
 usr/lib/python2.7/dist-packages/kivy/input/*.py*
 usr/lib/python2.7/dist-packages/kivy/input/postproc/*.py*
 usr/lib/python2.7/dist-packages/kivy/input/providers/*.py*
+usr/lib/python2.7/dist-packages/kivy/lang/*.py*
 usr/lib/python2.7/dist-packages/kivy/lib/*.py*
 usr/lib/python2.7/dist-packages/kivy/lib/gstplayer/*.py*
 usr/lib/python2.7/dist-packages/kivy/lib/osc/*.py*

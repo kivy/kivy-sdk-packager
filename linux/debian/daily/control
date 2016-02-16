@@ -175,7 +175,7 @@ Depends: ${misc:Depends},
          ${python:Depends},
          python-kivy  (= ${binary:Version})
 Provides: ${python:Provides}
-Conflicts: python-kivy (< ${binary:Version})
+Conflicts: python-kivy (<< ${binary:Version})
 Description: Kivy - Multimedia / Multitouch framework - Python 2.7 binaries
  Kivy is an open source library for developing multi-touch applications. It is
  completely cross platform (Linux/OSX/Win/Android) and released under the terms
@@ -196,7 +196,7 @@ Depends: ${misc:Depends},
          ${python:Depends},
          python-kivy  (= ${binary:Version})
 Provides: ${python:Provides}
-Conflicts: python-kivy (< ${binary:Version})
+Conflicts: python-kivy (<< ${binary:Version})
 Description: Kivy - Multimedia / Multitouch framework - Python 2.7 common files
  Kivy is an open source library for developing multi-touch applications. It is
  completely cross platform (Linux/OSX/Win/Android) and released under the terms
@@ -246,7 +246,7 @@ Depends: ${misc:Depends},
          ${python3:Depends},
          python3-kivy  (= ${binary:Version})
 Provides: ${python3:Provides}
-Conflicts: python3-kivy (< ${binary:Version})
+Conflicts: python3-kivy (<< ${binary:Version})
 Description: Kivy - Multimedia / Multitouch framework - Python 3.x binaries
  Kivy is an open source library for developing multi-touch applications. It is
  completely cross platform (Linux/OSX/Win/Android) and released under the terms
@@ -267,7 +267,7 @@ Depends: ${misc:Depends},
          ${python3:Depends},
          python3-kivy  (= ${binary:Version})
 Provides: ${python3:Provides}
-Conflicts: python3-kivy (< ${binary:Version})
+Conflicts: python3-kivy (<< ${binary:Version})
 Description: Kivy - Multimedia / Multitouch framework - Python 3.x common files
  Kivy is an open source library for developing multi-touch applications. It is
  completely cross platform (Linux/OSX/Win/Android) and released under the terms

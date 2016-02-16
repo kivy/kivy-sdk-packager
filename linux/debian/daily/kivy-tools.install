@@ -3,8 +3,7 @@
 
 ## Python2
 # Lang
-usr/lib/python3/dist-packages/kivy/lang/*.py*
-usr/lib/python3/dist-packages/kivy/lang/__pycache__
+usr/lib/python2.7/dist-packages/kivy/lang/*.py*
 # Tools
 usr/lib/python2.7/dist-packages/kivy/tools/*.py
 usr/lib/python2.7/dist-packages/kivy/tools/*.pyc
@@ -31,6 +30,7 @@ usr/lib/python2.7/dist-packages/kivy/tests/unicode_files.zip
 ## Python3
 # Lang
 usr/lib/python3/dist-packages/kivy/lang/*.py*
+usr/lib/python3/dist-packages/kivy/lang/__pycache__
 # Tools
 usr/lib/python3/dist-packages/kivy/tools/*.py
 usr/lib/python3/dist-packages/kivy/tools/__pycache__/*.cpython-*.pyc

@@ -25,7 +25,6 @@ usr/lib/python3/dist-packages/kivy/graphics/*.pxi
 usr/lib/python3/dist-packages/kivy/input/*.py*
 usr/lib/python3/dist-packages/kivy/input/postproc/*.py*
 usr/lib/python3/dist-packages/kivy/input/providers/*.py*
-usr/lib/python3/dist-packages/kivy/lang/*.py*
 usr/lib/python3/dist-packages/kivy/lib/*.py*
 usr/lib/python3/dist-packages/kivy/lib/gstplayer/*.py*
 usr/lib/python3/dist-packages/kivy/lib/osc/*.py*
@@ -38,7 +37,6 @@ usr/lib/python3/dist-packages/kivy/uix/*.py*
 usr/lib/python3/dist-packages/kivy/uix/behaviors/*.py*
 
 usr/lib/python3/dist-packages/kivy/adapters/__pycache__
-usr/lib/python3/dist-packages/kivy/lang/__pycache__
 usr/lib/python3/dist-packages/kivy/lib/vidcore_lite/__pycache__
 usr/lib/python3/dist-packages/kivy/lib/__pycache__
 usr/lib/python3/dist-packages/kivy/lib/osc/__pycache__

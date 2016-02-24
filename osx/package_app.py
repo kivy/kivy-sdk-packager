@@ -7,7 +7,8 @@ Usage:
  --appname=<appname> --source-app=<source_app> --deps=<dep_list>\
  --gardendeps=<sep_list> --bundleid=<bundle_id> --displayname=<displayname>\
  --bundlename=<bundle_name> --bundleversion=<bundleversion>\
- --strip=<true_false>]
+ --strip=<true_false> --with-gstreamer=<yes_no> --whitelist=<path/to/whitelist>\
+ --blacklist=<path/to/blacklist>]
     package-app -h | --help
     package-app --version
 
@@ -33,6 +34,9 @@ Options:
                                     lot of unneeded files. [default: True].
     --deps=<deplist>                Dependencies list.
     --gardendeps=<deplist>          Garden Dependencies list.
+    --with-gstreamer=<yes|no>       Include GStreamer framework. [default: yes]
+    --whitelist=<path/to/whitelist> file to use as include list when copying app
+    --blacklist=<path/to/blacklist> file to use as exclude list when copying app
 '''
 
 __version__ = '0.1'
@@ -75,16 +79,24 @@ def bootstrap(source_app, appname, confirm):
     sh.cp('-a', source_app, appname)
 
 
-def insert_app(path_to_app, appname):
+def insert_app(path_to_app, appname, blacklist=None, whitelist=None):
     # insert appname into our source_app
-    sh.cp('-a', path_to_app, appname+'/Contents/Resources/myapp')
+    params = ['-r', path_to_app + '/', appname + '/Contents/Resources/myapp']
+    if whitelist:
+        params.append('--include-from={}'.format(whitelist))
+    if blacklist:
+        params.append('--exclude-from={}'.format(blacklist))
+    sh.rsync(*params)
 
-def cleanup(appname, strip, whitelist=None, blacklist=None):
+def cleanup(appname, strip, gstreamer=True):
     if not strip:
         return
     print("stripping app")
     from subprocess import call
     call(["sh", "-x", "cleanup_app.sh" , "./"+appname])
+    if gstreamer == 'no':
+        sh.rm('-rf', '{}/Contents/Frameworks/GStreamer.framework'.format(appname))
+
     print("Stripping complete")
 
 def fill_meta(appname, arguments):
@@ -133,7 +145,7 @@ def compile_app(appname):
             shell=True)
         print("Remove all __pycache__")
         check_call(
-            ['find -E {} -regex "(.*)\.py" -print0 | xargs -0 rm'.format(pypath+'/yourapp')],
+            ['find -E {} -regex "(.*)\.py" -print0 |grep -v __init__| xargs -0 rm'.format(pypath+'/yourapp')],
              shell=True)
         check_call(
             ['find -E {}/Contents/ -name "__pycache__" -print0 | xargs -0 rm -rf'.format(appname)],
@@ -143,12 +155,19 @@ def compile_app(appname):
         check_call(
             [pypath + '/script -OO -m compileall ' + appname],
             shell=True)
-        print("-- Remove all py/pyc")
+        print("-- Remove all py/pyc/pyo")
         check_call(
             ['find -E {} -regex "(.*)\.pyc" -print0 | xargs -0 rm'.format(appname)],
             shell=True)
         check_call(
-            ['find -E {} -regex "(.*)\.py" -print0 | xargs -0 rm'.format(appname)],
+            ['find -E {} -regex "(.*)\.pyo" -print0 | xargs -0 rm'.format(appname)],
+            shell=True)
+        check_call(
+            ['find -E {} -regex "(.*)\.py" -print0 | grep -v __init__ | xargs -0 rm'.format(appname)],
+            shell=True)
+        print("-- Remove all .c")
+        check_call(
+            ['find -E {} -regex "(.*)\.c" -print0 | xargs -0 rm'.format(appname)],
             shell=True)
     sh.command('mv', pypath + '/myapp', pypath + '/yourapp')
 
@@ -189,11 +208,14 @@ def main(arguments):
         appname = appname + '.app'
     icon = arguments.get('--icon')
     strip = arguments.get('--strip', True)
+    gstreamer = arguments.get('--with-gstreamer', True)
     deps = arguments.get('--deps', [])
     gardendeps = arguments.get('--gardendeps', [])
+    blacklist = arguments.get('--blacklist')
+    whitelist = arguments.get('--whitelist')
 
     bootstrap(source_app, appname, confirm)
-    insert_app(path_to_app, appname)
+    insert_app(path_to_app, appname, blacklist=blacklist, whitelist=whitelist)
     if deps:
         install_deps(appname, deps)
     if gardendeps:
@@ -202,7 +224,7 @@ def main(arguments):
     if icon:
         setup_icon(appname, icon)
     fill_meta(appname, arguments)
-    cleanup(appname, strip)
+    cleanup(appname, strip, gstreamer=gstreamer)
     print("All done!")
 
 

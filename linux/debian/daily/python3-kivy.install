@@ -36,6 +36,7 @@ usr/lib/python3/dist-packages/kivy/network/*.py*
 usr/lib/python3/dist-packages/kivy/storage/*.py*
 usr/lib/python3/dist-packages/kivy/uix/*.py*
 usr/lib/python3/dist-packages/kivy/uix/behaviors/*.py*
+usr/lib/python3/dist-packages/kivy/uix/recycleview/*.py*
 
 usr/lib/python3/dist-packages/kivy/adapters/__pycache__
 usr/lib/python3/dist-packages/kivy/lang/__pycache__
@@ -46,6 +47,7 @@ usr/lib/python3/dist-packages/kivy/lib/gstplayer/__pycache__
 usr/lib/python3/dist-packages/kivy/storage/__pycache__
 usr/lib/python3/dist-packages/kivy/uix/__pycache__
 usr/lib/python3/dist-packages/kivy/uix/behaviors/__pycache__
+usr/lib/python3/dist-packages/kivy/uix/recycleview/__pycache__
 usr/lib/python3/dist-packages/kivy/network/__pycache__
 usr/lib/python3/dist-packages/kivy/__pycache__
 usr/lib/python3/dist-packages/kivy/modules/__pycache__

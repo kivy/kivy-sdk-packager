@@ -21,7 +21,7 @@ def get_gstreamer(cache, build_path, arch, pyver, package, output, compiler='min
 
     for name in (runtime_name, devel_name):
         url = (
-            'http://gstreamer.freedesktop.org/data/pkg/windows/{}/{}'.format(gst_ver, name))
+            'https://gstreamer.freedesktop.org/data/pkg/windows/{}/{}'.format(gst_ver, name))
         local_url = download_cache(cache, url, build_path)
 
         exec_binary(

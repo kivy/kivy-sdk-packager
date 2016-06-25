@@ -136,6 +136,15 @@ environment:
 cache: C:\kivy_build_cache2
 build_script:
 - ps: >-
+    function Check-Error
+    {
+      param([int]$SuccessVal = 0)
+      if ($SuccessVal -ne $LastExitCode) {
+        throw "Failed with exit code $LastExitCode"
+      }
+    }
+
+
     cd C:\projects\kivy-sdk-packager
 
 
@@ -167,6 +176,8 @@ build_script:
 
     $WHEEL_VERSION = python -c "import win.$env:PACKAGE_TARGET;print(win.$env:PACKAGE_TARGET.__version__)"
 
+    Check-Error
+
     $WHEEL_BIN = "kivy.deps.$env:PACKAGE_TARGET-$WHEEL_VERSION-cp$env:PYVER-none-$WHELL_BITNESS.whl"
 
     $WHEEL_DEV = "kivy.deps.$env:PACKAGE_TARGET`_dev-$WHEEL_VERSION-cp$env:PYVER-none-$WHELL_BITNESS.whl"
@@ -174,22 +185,34 @@ build_script:
 
     C:\Python27\Scripts\pip.exe install pydrive
 
+    Check-Error
+
     $ALREADY_EXISTS = C:\Python27\python.exe win\gdrive.py exists "$GDRIVE_ID" "$WHEEL_BIN"
+
+    Check-Error
 
     if ($ALREADY_EXISTS -eq "True" -and $DEV_GDRIVE_ID -ne "fake") {
       $ALREADY_EXISTS = C:\Python27\python.exe win\gdrive.py exists "$DEV_GDRIVE_ID" "$WHEEL_DEV"
+      Check-Error
     }
 
+    echo "Already exists=$ALREADY_EXISTS $WHEEL_BIN $WHEEL_DEV"
 
 
     if ($ALREADY_EXISTS -eq "False") {
       python -m pip install pip wheel setuptools --upgrade
+      Check-Error
       pip install -i https://pypi.anaconda.org/carlkl/simple mingwpy
+      Check-Error
 
+      echo "Executing win.$env:PACKAGE_TARGET build_path $env:KIVY_BUILD_DIR arch $env:BITTNESS pyver $env:PYVER package $env:PACKAGE_TARGET output $env:WHEEL_DIR cache $env:KIVY_BUILD_CACHE compiler $env:COMPILER"
       python -m win.$env:PACKAGE_TARGET build_path "$env:KIVY_BUILD_DIR" arch $env:BITTNESS pyver $env:PYVER package $env:PACKAGE_TARGET output "$env:WHEEL_DIR" cache "$env:KIVY_BUILD_CACHE" compiler "$env:COMPILER"
+      Check-Error
 
       if ($DEV_GDRIVE_ID -ne "fake") {
         C:\Python27\python.exe win\gdrive.py upload "$DEV_GDRIVE_ID" "$env:WHEEL_DIR\kivy.deps.$env:PACKAGE_TARGET`_dev*"
+        Check-Error
       }
       C:\Python27\python.exe win\gdrive.py upload "$GDRIVE_ID" "$env:WHEEL_DIR\kivy.deps.$env:PACKAGE_TARGET-*"
+      Check-Error
     }

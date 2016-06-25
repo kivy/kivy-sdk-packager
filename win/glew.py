@@ -17,7 +17,7 @@ msbuild .\\build\\vc12\\glew.sln /property:Configuration=Release /property:Platf
 
 def get_glew(cache, build_path, arch, pyver, package, output, compiler='mingw'):
     url = ('http://jaist.dl.sourceforge.net/project/glew/glew/{}/glew-{}.zip'.
-                         format(glew_ver))
+           format(glew_ver, glew_ver))
     local_url = download_cache(cache, url, build_path)
 
     print('Extracting glew {}'.format(local_url))

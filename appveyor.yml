@@ -178,9 +178,9 @@ build_script:
 
     Check-Error
 
-    $WHEEL_BIN = "kivy.deps.$env:PACKAGE_TARGET-$WHEEL_VERSION-cp$env:PYVER-cp$env:PYVERm-$WHELL_BITNESS.whl"
+    $WHEEL_BIN = "kivy.deps.$env:PACKAGE_TARGET-$WHEEL_VERSION-cp$env:PYVER-cp$env:PYVER`m-$WHELL_BITNESS.whl"
 
-    $WHEEL_DEV = "kivy.deps.$env:PACKAGE_TARGET`_dev-$WHEEL_VERSION-cp$env:PYVER-cp$env:PYVERm-$WHELL_BITNESS.whl"
+    $WHEEL_DEV = "kivy.deps.$env:PACKAGE_TARGET`_dev-$WHEEL_VERSION-cp$env:PYVER-cp$env:PYVER`m-$WHELL_BITNESS.whl"
 
 
     C:\Python27\Scripts\pip.exe install pydrive

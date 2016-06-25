@@ -8,7 +8,7 @@ __version__ = '0.1.1'
 
 batch = '''
 call "C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat" {}
-msbuild .\\angle.sln /property:Configuration=Release /property:Platform={}
+msbuild .\\src\\angle.sln /property:Configuration=Release /property:Platform={}
 '''
 
 

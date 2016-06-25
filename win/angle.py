@@ -26,10 +26,6 @@ def get_angle(cache, build_path, arch, pyver, package, output, compiler='mingw')
     if compiler == 'mingw':
         raise Exception('Cannot compile angle with mingw')
 
-    templates = join(base_dir, 'templates')
-    exec_binary(
-        '', [join(templates, 'install.bat')], cwd=templates, shell=True)
-
     src = 'x86_amd64' if arch == '64' else 'x86'
     target = 'x64' if arch == '64' else 'Win32'
     with open(join(base_dir, 'compile.bat'), 'w') as fh:

@@ -275,9 +275,12 @@ just install it with `pip install kivy.deps.{0}`.\n'''.format(mod_name)
         with open(join(setup_path, 'kivy', 'deps', mod_name, '__init__.py'), 'wb') as fh:
             fh.write(deps_text.encode('ascii'))
 
-        for k, v in package_data.items():
-            package_data[k] = "[\n        r'{}'\n    ]".format("',\n        r'".join(v))
-        data_files = ',\n    '.join((map(lambda x: "(r'{}', {})".format(*x), package_data.items())))
+        if package_data:
+            for k, v in package_data.items():
+                package_data[k] = "[\n        r'{}'\n    ]".format("',\n        r'".join(v))
+            data_files = ',\n    '.join((map(lambda x: "(r'{}', {})".format(*x), package_data.items())))
+        else:
+            data_files = ''
         setup_f = setup.format(data_files, package_name, version, license, package_name)
 
         with open(join(setup_path, 'setup.py'), 'wb') as fh:
@@ -296,7 +299,7 @@ def parse_args(func):
     func(**dict(zip(args[0::2], args[1::2])))
 
 
-def download_cache(cache, url, local_dir, fname=None):
+def download_cache(cache, url, local_dir, fname=None, force=False):
     if not isdir(cache):
         makedirs(cache)
 

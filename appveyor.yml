@@ -6,6 +6,7 @@ branches:
   - master
 environment:
   WHEEL_DIR: C:\kivy_wheels
+  COMPILER: mingw
   KIVY_BUILD_DIR: C:\kivy_build
   KIVY_BUILD_CACHE: C:\kivy_build_cache2
   AIRPLANE_CHARGE:
@@ -20,6 +21,8 @@ environment:
   GDRIVE_glew_dev_UPLOAD_ID: 0B1_HB9J8mZepak1KeGJ5MDdSQ0E
   GDRIVE_gstreamer_UPLOAD_ID: 0B1_HB9J8mZepNzZ5aW91Q0tJU2s
   GDRIVE_gstreamer_dev_UPLOAD_ID: 0B1_HB9J8mZepZzNSZVI2V19mQ00
+  GDRIVE_angle_UPLOAD_ID: 0B1_HB9J8mZepRDltSDB6Z0FVT00
+  GDRIVE_angle_dev_UPLOAD_ID: fake
   matrix:
   - PACKAGE_TARGET: sdl2
     PYVER: 27
@@ -30,6 +33,21 @@ environment:
   - PACKAGE_TARGET: gstreamer
     PYVER: 27
     BITTNESS: 86
+  - PACKAGE_TARGET: angle
+    PYVER: 27
+    BITTNESS: 86
+  - PACKAGE_TARGET: sdl2
+    PYVER: 33
+    BITTNESS: 86
+  - PACKAGE_TARGET: glew
+    PYVER: 33
+    BITTNESS: 86
+  - PACKAGE_TARGET: gstreamer
+    PYVER: 33
+    BITTNESS: 86
+  - PACKAGE_TARGET: angle
+    PYVER: 33
+    BITTNESS: 86
   - PACKAGE_TARGET: sdl2
     PYVER: 34
     BITTNESS: 86
@@ -38,6 +56,23 @@ environment:
     BITTNESS: 86
   - PACKAGE_TARGET: gstreamer
     PYVER: 34
+    BITTNESS: 86
+  - PACKAGE_TARGET: angle
+    PYVER: 34
+    BITTNESS: 86
+  - PACKAGE_TARGET: sdl2
+    PYVER: 35
+    BITTNESS: 86
+    COMPILER: msvc
+  - PACKAGE_TARGET: glew
+    PYVER: 35
+    BITTNESS: 86
+    COMPILER: msvc
+  - PACKAGE_TARGET: gstreamer
+    PYVER: 35
+    BITTNESS: 86
+  - PACKAGE_TARGET: angle
+    PYVER: 35
     BITTNESS: 86
   - PACKAGE_TARGET: sdl2
     PYVER: 27
@@ -48,6 +83,21 @@ environment:
   - PACKAGE_TARGET: gstreamer
     PYVER: 27
     BITTNESS: 64
+  - PACKAGE_TARGET: angle
+    PYVER: 27
+    BITTNESS: 64
+  - PACKAGE_TARGET: sdl2
+    PYVER: 33
+    BITTNESS: 64
+  - PACKAGE_TARGET: glew
+    PYVER: 33
+    BITTNESS: 64
+  - PACKAGE_TARGET: gstreamer
+    PYVER: 33
+    BITTNESS: 64
+  - PACKAGE_TARGET: angle
+    PYVER: 33
+    BITTNESS: 64
   - PACKAGE_TARGET: sdl2
     PYVER: 34
     BITTNESS: 64
@@ -56,6 +106,23 @@ environment:
     BITTNESS: 64
   - PACKAGE_TARGET: gstreamer
     PYVER: 34
+    BITTNESS: 64
+  - PACKAGE_TARGET: angle
+    PYVER: 34
+    BITTNESS: 64
+  - PACKAGE_TARGET: sdl2
+    PYVER: 35
+    BITTNESS: 64
+    COMPILER: msvc
+  - PACKAGE_TARGET: glew
+    PYVER: 35
+    BITTNESS: 64
+    COMPILER: msvc
+  - PACKAGE_TARGET: gstreamer
+    PYVER: 35
+    BITTNESS: 64
+  - PACKAGE_TARGET: angle
+    PYVER: 35
     BITTNESS: 64
 cache: C:\kivy_build_cache2
 build_script:
@@ -100,7 +167,7 @@ build_script:
 
     $ALREADY_EXISTS = C:\Python27\python.exe win\gdrive.py exists "$GDRIVE_ID" "$WHEEL_BIN"
 
-    if ($ALREADY_EXISTS -eq "True") {
+    if ($ALREADY_EXISTS -eq "True" -and $DEV_GDRIVE_ID -ne "fake") {
       $ALREADY_EXISTS = C:\Python27\python.exe win\gdrive.py exists "$DEV_GDRIVE_ID" "$WHEEL_DEV"
     }
 
@@ -110,8 +177,10 @@ build_script:
       python -m pip install pip wheel setuptools --upgrade
       pip install -i https://pypi.anaconda.org/carlkl/simple mingwpy
 
-      python -m win.$env:PACKAGE_TARGET build_path "$env:KIVY_BUILD_DIR" arch $env:BITTNESS pyver $env:PYVER package $env:PACKAGE_TARGET output "$env:WHEEL_DIR" cache "$env:KIVY_BUILD_CACHE"
+      python -m win.$env:PACKAGE_TARGET build_path "$env:KIVY_BUILD_DIR" arch $env:BITTNESS pyver $env:PYVER package $env:PACKAGE_TARGET output "$env:WHEEL_DIR" cache "$env:KIVY_BUILD_CACHE" compiler "$env:COMPILER"
 
-      C:\Python27\python.exe win\gdrive.py upload "$DEV_GDRIVE_ID" "$env:WHEEL_DIR\kivy.deps.$env:PACKAGE_TARGET`_dev*"
+      if ($DEV_GDRIVE_ID -ne "fake") {
+        C:\Python27\python.exe win\gdrive.py upload "$DEV_GDRIVE_ID" "$env:WHEEL_DIR\kivy.deps.$env:PACKAGE_TARGET`_dev*"
+      }
       C:\Python27\python.exe win\gdrive.py upload "$GDRIVE_ID" "$env:WHEEL_DIR\kivy.deps.$env:PACKAGE_TARGET-*"
     }

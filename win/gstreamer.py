@@ -5,12 +5,12 @@ from shutil import rmtree
 from os import walk, listdir
 from .common import *
 
-__version__ = '0.1.6'
+__version__ = '0.1.7'
 
-gst_ver = '1.7.1'
+gst_ver = '1.8.2'
 
 
-def get_gstreamer(cache, build_path, arch, pyver, package, output):
+def get_gstreamer(cache, build_path, arch, pyver, package, output, compiler='mingw'):
     data = []
     bitness = 'x86_64' if arch == '64' else 'x86'
     runtime_name = 'gstreamer-1.0-{}-{}.msi'.format(bitness, gst_ver)

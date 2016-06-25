@@ -4,7 +4,7 @@ from os.path import join, sep
 from os import walk
 from .common import *
 
-__version__ = '0.1.12'
+__version__ = '0.1.13'
 
 sdl2_ver = '2.0.4'
 sdl2_mixer_ver = '2.0.1'
@@ -25,21 +25,24 @@ def get_gdrive_link(fname):
     return url
 
 
-def get_sdl2(cache, build_path, arch, pyver, package, output):
+def get_sdl2(cache, build_path, arch, pyver, package, output, compiler='mingw'):
     data = []
+    suffix = 'VC.zip' if compiler == 'msvc' else 'mingw.tar.gz'
 
     for name, ver in (
-        ('https://www.libsdl.org/release/SDL2-devel-{}-mingw.tar.gz',
+        ('https://www.libsdl.org/release/SDL2-devel-{}-{}',
          sdl2_ver),
-        ('https://www.libsdl.org/projects/SDL_mixer/release/SDL2_mixer-devel-{}-mingw.tar.gz',
+        ('https://www.libsdl.org/projects/SDL_mixer/release/SDL2_mixer-devel-{}-{}',
          sdl2_mixer_ver),
-        ('http://www.libsdl.org/projects/SDL_ttf/release/SDL2_ttf-devel-{}-mingw.tar.gz',
+        ('http://www.libsdl.org/projects/SDL_ttf/release/SDL2_ttf-devel-{}-{}',
          sdl2_ttf_ver),
-        ('http://www.libsdl.org/projects/SDL_image/release/SDL2_image-devel-{}-mingw.tar.gz',
+        ('http://www.libsdl.org/projects/SDL_image/release/SDL2_image-devel-{}-{}',
          sdl2_image_ver)):
-        url = name.format(ver)
+        url = name.format(ver, suffix)
         fname = url.split('/')[-1]
-        if 'ttf' in name:
+        if 'ttf' in name and compiler == 'mingw':
+            # see https://github.com/kivy/kivy/issues/3889 and
+            # https://bugzilla.libsdl.org/show_bug.cgi?id=3241
             url = get_gdrive_link(fname)
             local_url = download_cache(r'C:\kivy_no_cache', url, build_path, fname)
         else:
@@ -48,19 +51,28 @@ def get_sdl2(cache, build_path, arch, pyver, package, output):
         exec_binary(
             'Extracting {}'.format(local_url),
             [zip7, 'x', '-y', local_url], cwd=build_path, shell=True, exclude=zip_q)
-        exec_binary(
-            'Extracting {}'.format(local_url[:-3]),
-            [zip7, 'x', '-y', local_url[:-3]], cwd=build_path, shell=True, exclude=zip_q)
+        if compiler == 'mingw':
+            exec_binary(
+                'Extracting {}'.format(local_url[:-3]),
+                [zip7, 'x', '-y', local_url[:-3]], cwd=build_path, shell=True, exclude=zip_q)
 
-        base_dir = local_url.replace('-mingw.tar.gz', '').replace('-devel', '')
-        if arch == '64':
-            base_dir = join(base_dir, 'x86_64-w64-mingw32')
+        base_dir = local_url.replace('-{}'.format(suffix), '').replace('-devel', '')
+
+        if compiler == 'mingw':
+            if arch == '64':
+                base_dir = join(base_dir, 'x86_64-w64-mingw32')
+            else:
+                base_dir = join(base_dir, 'i686-w64-mingw32')
+            sources = {p: join(base_dir, p) for p in ('lib', 'include', 'bin')}
         else:
-            base_dir = join(base_dir, 'i686-w64-mingw32')
+            sources = {
+                'lib': join(base_dir, 'lib', 'x64' if arch == '64' else 'x86'),
+                'include': join(base_dir, 'include')
+                }
 
-        for d in ('lib', 'include', 'bin'):
+        for d in sources.keys():
             # bin goes to python/share/kivy_package
-            src = join(base_dir, d)
+            src = sources[d]
             for dirpath, dirnames, filenames in walk(src):
                 root = dirpath
 
@@ -68,8 +80,11 @@ def get_sdl2(cache, build_path, arch, pyver, package, output):
                     base = join('share', package, 'bin')
                 elif d == 'lib':
                     base = 'libs'
-                else:
-                    base = d
+                elif d == 'include':
+                    if compiler == 'mingw':
+                        base = d
+                    else:
+                        base = join(d, 'SDL2')
 
                 dirpath = dirpath.replace(src, '')
                 if dirpath and dirpath[0] == sep:

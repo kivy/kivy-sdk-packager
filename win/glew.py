@@ -9,9 +9,9 @@ __version__ = '0.1.5'
 glew_ver = '1.13.0'
 
 batch = '''
-"C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE\devenv.exe" .\build\vc12\glew.sln /upgrade
-call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" {}
-msbuild .\build\vc12\glew.sln /property:Configuration=Release /property:Platform={}
+"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\Common7\\IDE\\devenv.exe" .\\build\\vc12\\glew.sln /upgrade
+call "C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat" {}
+msbuild .\\build\\vc12\\glew.sln /property:Configuration=Release /property:Platform={}
 '''
 
 

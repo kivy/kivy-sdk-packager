@@ -75,6 +75,7 @@ environment:
   - PACKAGE_TARGET: gstreamer
     PYVER: 35
     BITTNESS: 86
+    COMPILER: msvc
   - PACKAGE_TARGET: angle
     PYVER: 35
     BITTNESS: 86
@@ -129,6 +130,7 @@ environment:
   - PACKAGE_TARGET: gstreamer
     PYVER: 35
     BITTNESS: 64
+    COMPILER: msvc
   - PACKAGE_TARGET: angle
     PYVER: 35
     BITTNESS: 64
@@ -143,6 +145,8 @@ build_script:
         throw "Failed with exit code $LastExitCode"
       }
     }
+
+    $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 
 
     cd C:\projects\kivy-sdk-packager

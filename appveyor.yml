@@ -146,8 +146,8 @@ build_script:
       }
     }
 
-    $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 
+    $env:SSL_CERT_FILE="C:\projects\kivy-sdk-packager\win\DST Root CA X3.pem"
 
     cd C:\projects\kivy-sdk-packager
 

@@ -41,25 +41,24 @@ def get_drive():
     return drive
 
 
-def get_filelist(folder_id):
+def get_files(folder_id, filters=''):
     drive = get_drive()
     l = drive.ListFile(
-        {'q': "'{}' in parents and trashed=false".format(folder_id)}).GetList()
-    files = {item['title']: item['id'] for item in l
-             if item['mimeType'] != 'application/vnd.google-apps.folder'}
+        {'q': "'{}' in parents and trashed=false".format(folder_id) + filters}).GetList()
+    files = [item for item in l
+             if item['mimeType'] != 'application/vnd.google-apps.folder']
     return drive, files
 
 
+def get_filelist(folder_id):
+    drive, files = get_files(folder_id)
+    return drive, {item['title']: item['id'] for item in files}
+
+
 def delete_older(folder_id, age):
-    drive = get_drive()
     t = datetime.now() - timedelta(days=int(age))
     t = t.strftime('%Y-%m-%dT00:00:00')
-
-    l = drive.ListFile(
-        {'q': "'{}' in parents and trashed=false and \
-         modifiedDate < '{}'".format(folder_id, t)}).GetList()
-    files = (item for item in l
-             if item['mimeType'] != 'application/vnd.google-apps.folder')
+    drive, files = get_files(folder_id, " and modifiedDate < '{}'".format(t))
 
     for item in files:
         try:
@@ -84,7 +83,8 @@ def download_file(folder_id, directory, filename):
 
 
 def upload_directory(folder_id, pat):
-    drive, files = get_filelist(folder_id)
+    drive, files = get_files(folder_id)
+    files = {item['title']: item for item in files}
 
     for name in glob(pat):
         if not isfile(name):
@@ -95,8 +95,11 @@ def upload_directory(folder_id, pat):
             print('Skipping {}. Already exists on gdrive'.format(fname))
             continue
 
-        f = drive.CreateFile({'parents': [{'id': folder_id}],
-                              'title': fname})
+        if fname in files:
+            f = files[fname]
+        else:
+            f = drive.CreateFile({'parents': [{'id': folder_id}],
+                                  'title': fname})
         f.SetContentFile(name)
         f.Upload()
         print('Uploaded {}'.format(f['title']))

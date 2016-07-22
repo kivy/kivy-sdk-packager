@@ -64,7 +64,7 @@ def delete_older(folder_id, age):
     for item in files:
         try:
             print('Deleting {}'.format(item['title']))
-            # item.auth.service.files().delete(fileId=item['id']).execute()
+            item.auth.service.files().delete(fileId=item['id']).execute()
         except Exception as e:
             print('An error occurred deleting "{}": {}'.format(item['title'], e))
 

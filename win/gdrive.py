@@ -1,6 +1,7 @@
 from os.path import join, isfile, dirname, basename
 from os import listdir, environ
 from glob import glob
+from datetime import datetime, timedelta
 from pydrive.auth import GoogleAuth
 from apiclient import errors
 from pydrive.drive import GoogleDrive
@@ -49,6 +50,25 @@ def get_filelist(folder_id):
     return drive, files
 
 
+def delete_older(folder_id, age):
+    drive = get_drive()
+    t = datetime.now() - timedelta(days=int(age))
+    t = t.strftime('%Y-%m-%dT00:00:00')
+
+    l = drive.ListFile(
+        {'q': "'{}' in parents and trashed=false and \
+         modifiedDate < '{}'".format(folder_id, t)}).GetList()
+    files = (item for item in l
+             if item['mimeType'] != 'application/vnd.google-apps.folder')
+
+    for item in files:
+        try:
+            print('Deleting {}'.format(item['title']))
+            # item.auth.service.files().delete(fileId=item['id']).execute()
+        except Exception as e:
+            print('An error occurred deleting "{}": {}'.format(item['title'], e))
+
+
 def files_exist(folder_id, *names):
     drive, files = get_filelist(folder_id)
     return all([name in files for name in names])
@@ -71,7 +91,7 @@ def upload_directory(folder_id, pat):
             raise Exception('{} is not a file'.format(name))
 
         fname = basename(name)
-        if fname in files:
+        if fname in files and not fname.startswith('nightly-'):
             print('Skipping {}. Already exists on gdrive'.format(fname))
             continue
 
@@ -81,17 +101,14 @@ def upload_directory(folder_id, pat):
         f.Upload()
         print('Uploaded {}'.format(f['title']))
 
-#     try:
-#         gauth.service.files().delete(fileId='0B1_HB9J8mZepdHFWaDB5VjJFQWM').execute()
-#     except errors.HttpError, error:
-#         print 'An error occurred: %s' % error
-
 
 if __name__ == '__main__':
     import sys
     cmd, folder_id = sys.argv[1:3]
     if cmd == 'upload':
         upload_directory(folder_id, sys.argv[3])
+    elif cmd == 'delete_older':
+        delete_older(folder_id, sys.argv[3])
     elif cmd == 'exists':
         print(files_exist(folder_id, *sys.argv[3:]))
     elif cmd == 'download':

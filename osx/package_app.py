@@ -145,10 +145,10 @@ def compile_app(appname):
             shell=True)
         print("Remove all __pycache__")
         check_call(
-            ['find -E {} -regex "(.*)\.py" -print0 |grep -v __init__| xargs -0 rm'.format(pypath+'/yourapp')],
+            ['/usr/bin/find -E {} -regex "(.*)\.py" -print0 |/usr/bin/grep -v __init__| /usr/bin/xargs -0 /bin/rm'.format(pypath+'/yourapp')],
              shell=True)
         check_call(
-            ['find -E {}/Contents/ -name "__pycache__" -print0 | xargs -0 rm -rf'.format(appname)],
+            ['/usr/bin/find -E {}/Contents/ -name "__pycache__" -print0 | /usr/bin/xargs -0 /bin/rm -rf'.format(appname)],
             shell=True)
     else:
         print('using system python...')
@@ -157,17 +157,17 @@ def compile_app(appname):
             shell=True)
         print("-- Remove all py/pyc/pyo")
         check_call(
-            ['find -E {} -regex "(.*)\.pyc" -print0 | xargs -0 rm'.format(appname)],
+            ['/usr/bin/find -E {} -regex "(.*)\.pyc" -print0 | /usr/bin/xargs -0 /bin/rm'.format(appname)],
             shell=True)
         check_call(
-            ['find -E {} -regex "(.*)\.pyo" -print0 | xargs -0 rm'.format(appname)],
+            ['/usr/bin/find -E {} -regex "(.*)\.pyo" -print0 | /usr/bin/xargs -0 /bin/rm'.format(appname)],
             shell=True)
         check_call(
-            ['find -E {} -regex "(.*)\.py" -print0 | grep -v __init__ | xargs -0 rm'.format(appname)],
+            ['/usr/bin/find -E {} -regex "(.*)\.py" -print0 | /usr/bin/grep -v __init__ | /usr/bin/xargs -0 /bin/rm'.format(appname)],
             shell=True)
         print("-- Remove all .c")
         check_call(
-            ['find -E {} -regex "(.*)\.c" -print0 | xargs -0 rm'.format(appname)],
+            ['/usr/bin/find -E {} -regex "(.*)\.c" -print0 | /usr/bin/xargs -0 /bin/rm'.format(appname)],
             shell=True)
     sh.command('mv', pypath + '/myapp', pypath + '/yourapp')
 

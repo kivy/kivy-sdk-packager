@@ -91,7 +91,7 @@ def upload_directory(folder_id, pat):
             raise Exception('{} is not a file'.format(name))
 
         fname = basename(name)
-        if fname in files and not fname.startswith('nightly-'):
+        if fname in files and '.dev0' not in fname:
             print('Skipping {}. Already exists on gdrive'.format(fname))
             continue
 

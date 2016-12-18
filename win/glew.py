@@ -6,7 +6,7 @@ from .common import *
 
 __version__ = '0.1.5'
 
-glew_ver = '1.13.0'
+glew_ver = '2.0.0'
 
 batch = '''
 "C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\Common7\\IDE\\devenv.exe" .\\build\\vc12\\glew.sln /upgrade
@@ -54,7 +54,7 @@ def get_glew(cache, build_path, arch, pyver, package, output, compiler='mingw'):
             join(z, 'lib', 'glew32.dll'), join('bin', 'glew32.dll'),
             join('share', package, 'bin'), False))
     else:
-        src = 'x86_amd64' if arch == '64' else 'x86'
+        src = 'amd64' if arch == '64' else 'amd64_x86'
         target = 'x64' if arch == '64' else 'Win32'
         with open(join(base_dir, 'compile.bat'), 'w') as fh:
             fh.write(batch.format(src, target))

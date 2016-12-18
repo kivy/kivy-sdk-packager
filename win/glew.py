@@ -4,7 +4,7 @@ from os.path import join, sep
 from os import walk
 from .common import *
 
-__version__ = '0.1.6'
+__version__ = '0.1.7'
 
 glew_ver = '2.0.0'
 
@@ -36,9 +36,10 @@ def get_glew(cache, build_path, arch, pyver, package, output, compiler='mingw'):
             'Compiling Glew',
             ['gcc', '-DGLEW_NO_GLU', '-O2', '-Wall', '-W', '-Iinclude', '-DGLEW_BUILD',
              '-o', 'src/glew.o', '-c', 'src/glew.c'], cwd=base_dir, shell=True)
+        # -nostdlib b/c https://stackoverflow.com/questions/38673228
         exec_binary(
             '',
-            ['gcc', '-shared', '-Wl,-soname,libglew32.dll',
+            ['gcc', '-nostdlib', '-shared', '-Wl,-soname,libglew32.dll',
              '-Wl,--out-implib,lib/libglew32.dll.a', '-o', 'lib/glew32.dll',
              'src/glew.o', '-lglu32', '-lopengl32', '-lgdi32',
              '-luser32', '-lkernel32'], cwd=base_dir, shell=True)

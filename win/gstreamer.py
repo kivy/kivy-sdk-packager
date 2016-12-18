@@ -7,7 +7,7 @@ from .common import *
 
 __version__ = '0.1.7'
 
-gst_ver = '1.8.2'
+gst_ver = '1.10.2'
 
 
 def get_gstreamer(cache, build_path, arch, pyver, package, output, compiler='mingw'):

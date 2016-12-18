@@ -6,23 +6,10 @@ from .common import *
 
 __version__ = '0.1.13'
 
-sdl2_ver = '2.0.4'
+sdl2_ver = '2.0.5'
 sdl2_mixer_ver = '2.0.1'
-sdl2_ttf_ver = '2.0.13'
+sdl2_ttf_ver = '2.0.14'
 sdl2_image_ver = '2.0.1'
-
-drive_map = {
-    'SDL2-devel-{}-mingw.tar.gz'.format(sdl2_ver): '0B1_HB9J8mZepNDMwVjJCRWVqT2M',
-    'SDL2_mixer-devel-{}-mingw.tar.gz'.format(sdl2_mixer_ver): '0B1_HB9J8mZepQ1l4WlUyT0t2ODQ',
-    'SDL2_ttf-devel-{}-mingw.tar.gz'.format(sdl2_ttf_ver): '0B1_HB9J8mZepenN2YmtHSUZmb0U',
-    'SDL2_image-devel-{}-mingw.tar.gz'.format(sdl2_image_ver): '0B1_HB9J8mZepOXNoSWJCYlI3QW8'
-}
-
-
-def get_gdrive_link(fname):
-    gid = drive_map[fname]
-    url = 'https://drive.google.com/uc?export=download&id={}'.format(gid)
-    return url
 
 
 def get_sdl2(cache, build_path, arch, pyver, package, output, compiler='mingw'):
@@ -43,8 +30,8 @@ def get_sdl2(cache, build_path, arch, pyver, package, output, compiler='mingw'):
         if 'ttf' in name and compiler == 'mingw':
             # see https://github.com/kivy/kivy/issues/3889 and
             # https://bugzilla.libsdl.org/show_bug.cgi?id=3241
-            url = get_gdrive_link(fname)
-            local_url = download_cache(r'C:\kivy_no_cache', url, build_path, fname)
+            url = 'https://drive.google.com/uc?export=download&id=0B1_HB9J8mZepenN2YmtHSUZmb0U'
+            local_url = download_cache(r'C:\kivy_no_cache', url, build_path, 'SDL2_ttf-devel-2.0.13-mingw.tar.gz')
         else:
             local_url = download_cache(cache, url, build_path, fname)
 
@@ -91,9 +78,13 @@ def get_sdl2(cache, build_path, arch, pyver, package, output, compiler='mingw'):
                     dirpath = dirpath[1:]
 
                 for filename in filenames:
+                    is_dev = d != 'bin'
+                    if compiler != 'mingw' and d == 'lib' and not filename.endswith('lib'):
+                        base = join('share', package, 'bin')
+                        is_dev = False
                     data.append((
                         join(root, filename), join(d, dirpath, filename),
-                        join(base, dirpath), d != 'bin'))
+                        join(base, dirpath), is_dev))
 
     make_package(join(build_path, 'project'), package, data, __version__, output, 'zlib')
 

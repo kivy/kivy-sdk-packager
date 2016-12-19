@@ -4,7 +4,7 @@ from os.path import join, sep
 from os import walk
 from .common import *
 
-__version__ = '0.1.14'
+__version__ = '0.1.15'
 
 sdl2_ver = '2.0.5'
 sdl2_mixer_ver = '2.0.1'
@@ -79,9 +79,12 @@ def get_sdl2(cache, build_path, arch, pyver, package, output, compiler='mingw'):
 
                 for filename in filenames:
                     is_dev = d != 'bin'
-                    if compiler != 'mingw' and d == 'lib' and not filename.endswith('lib'):
-                        base = join('share', package, 'bin')
-                        is_dev = False
+                    if compiler != 'mingw' and d == 'lib'
+                        if filename.endswith('lib'):
+                            base = 'libs'
+                        else:
+                            base = join('share', package, 'bin')
+                            is_dev = False
                     data.append((
                         join(root, filename), join(d, dirpath, filename),
                         join(base, dirpath), is_dev))

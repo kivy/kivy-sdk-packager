@@ -79,7 +79,7 @@ def get_sdl2(cache, build_path, arch, pyver, package, output, compiler='mingw'):
 
                 for filename in filenames:
                     is_dev = d != 'bin'
-                    if compiler != 'mingw' and d == 'lib'
+                    if compiler != 'mingw' and d == 'lib':
                         if filename.endswith('lib'):
                             base = 'libs'
                         else:

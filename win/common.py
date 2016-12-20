@@ -276,16 +276,19 @@ just install it with `pip install kivy.deps.{0}`.\n'''.format(mod_name)
         else:
             data_files = ''
 
+        setup_f = setup.format(data_files, package_name, version, license, package_name)
         with open(join(setup_path, 'setup.py'), 'wb') as fh:
             fh.write(setup_f.encode('ascii'))
 
-        setup_f = setup.format(data_files, package_name, version, license, package_name)
         exec_binary(
             'Making wheel',
             ['python', 'setup.py', 'bdist_wheel', '-d', output],
             cwd=setup_path, shell=True)
 
         setup_f = setup.format('', package_name, version, license, package_name)
+        with open(join(setup_path, 'setup.py'), 'wb') as fh:
+            fh.write(setup_f.encode('ascii'))
+
         exec_binary(
             'Making wheel',
             ['python', 'setup.py', 'sdist', '-d', output],

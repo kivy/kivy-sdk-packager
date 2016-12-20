@@ -4,7 +4,7 @@ from os.path import join, sep
 from os import walk
 from .common import *
 
-__version__ = '0.1.2'
+__version__ = '0.1.3'
 
 batch = '''
 call "C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat" {}

@@ -69,6 +69,22 @@ environment:
     BITTNESS: 86
     COMPILER: msvc
   - PACKAGE_TARGET: sdl2
+    PYVER: 36
+    BITTNESS: 86
+    COMPILER: msvc
+  - PACKAGE_TARGET: glew
+    PYVER: 36
+    BITTNESS: 86
+    COMPILER: msvc
+  - PACKAGE_TARGET: gstreamer
+    PYVER: 36
+    BITTNESS: 86
+    COMPILER: msvc
+  - PACKAGE_TARGET: angle
+    PYVER: 36
+    BITTNESS: 86
+    COMPILER: msvc
+  - PACKAGE_TARGET: sdl2
     PYVER: 27
     BITTNESS: 64
   - PACKAGE_TARGET: glew
@@ -109,6 +125,22 @@ environment:
     COMPILER: msvc
   - PACKAGE_TARGET: angle
     PYVER: 35
+    BITTNESS: 64
+    COMPILER: msvc
+  - PACKAGE_TARGET: sdl2
+    PYVER: 36
+    BITTNESS: 64
+    COMPILER: msvc
+  - PACKAGE_TARGET: glew
+    PYVER: 36
+    BITTNESS: 64
+    COMPILER: msvc
+  - PACKAGE_TARGET: gstreamer
+    PYVER: 36
+    BITTNESS: 64
+    COMPILER: msvc
+  - PACKAGE_TARGET: angle
+    PYVER: 36
     BITTNESS: 64
     COMPILER: msvc
 cache: C:\kivy_build_cache2

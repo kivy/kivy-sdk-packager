@@ -5,6 +5,7 @@ os: Visual Studio 2015
 branches:
   only:
   - master
+  - appveyor-test
 environment:
   WHEEL_DIR: C:\kivy_wheels
   COMPILER: mingw
@@ -25,6 +26,10 @@ environment:
   GDRIVE_angle_UPLOAD_ID: 0B1_HB9J8mZepRDltSDB6Z0FVT00
   GDRIVE_angle_dev_UPLOAD_ID: fake
   matrix:
+  - PACKAGE_TARGET: angle
+    PYVER: 36
+    BITTNESS: 64
+    COMPILER: msvc
   - PACKAGE_TARGET: sdl2
     PYVER: 27
     BITTNESS: 86
@@ -230,3 +235,6 @@ build_script:
       C:\Python27\python.exe win\gdrive.py upload "$GDRIVE_ID" "$env:WHEEL_DIR\kivy.deps.$env:PACKAGE_TARGET-*"
       Check-Error
     }
+on_finish:
+  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+

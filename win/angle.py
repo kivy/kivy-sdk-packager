@@ -14,8 +14,8 @@ msbuild .\\src\\angle.sln /property:Configuration=Release /property:Platform={}
 mingw_batch = '''
 set MSYSTEM=MINGW{}
 set CHERE_INVOKING=1
-C:\msys64\usr\bin\pacman --noconfirm --sync --refresh --refresh --sysupgrade --sysupgrade
-C:\msys64\usr\bin\bash --login -c "pacman -Su --noconfirm; \
+C:\\msys64\\usr\\bin\\pacman --noconfirm --sync --refresh --refresh --sysupgrade --sysupgrade
+C:\\msys64\\usr\\bin\\bash --login -c "pacman -Su --noconfirm; \
 makepkg --noconfirm --noprogressbar --skippgpcheck"
 '''
 

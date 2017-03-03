@@ -157,7 +157,7 @@ def exec_binary(status, cmd, env=None, cwd=None, shell=True, exclude=None):
 
     if stderr:
         if isinstance(stderr, bytes):
-            stderr = stderr.decode(sys.stdout.encoding)
+            stderr = stderr.decode()
         if exclude:
             stderr = u'\n'.join(
                 [l for l in stderr.splitlines() if not match(exclude, l)])

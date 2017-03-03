@@ -6,7 +6,7 @@ from .common import *
 
 __version__ = '0.1.5'
 
-batch = '''
+msvc_batch = '''
 call "C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat" {}
 msbuild .\\src\\angle.sln /property:Configuration=Release /property:Platform={}
 '''
@@ -37,7 +37,7 @@ def get_angle(cache, build_path, arch, pyver, package, output, compiler='mingw')
 
     if mingw:
         if arch == '64':
-            mingw_arch = 'x86_x64'
+            mingw_arch = 'x86_64'
             mingw_bit = 'mingw64'
             win_arch = 'x64'
             bits = '64'
@@ -59,7 +59,7 @@ def get_angle(cache, build_path, arch, pyver, package, output, compiler='mingw')
     else:
         src = 'x86_amd64' if arch == '64' else 'x86'
         target = 'x64' if arch == '64' else 'Win32'
-        batch = batch.format(src, target)
+        batch = msvc_batch.format(src, target)
         d3d_out = out_dir = join(base_dir, 'src', 'Release_{}'.format(target))
 
     with open(join(base_dir, 'compile.bat'), 'w') as fh:

@@ -311,7 +311,7 @@ def download_cache(cache, url, local_dir, fname=None, force=False):
     cache_path = join(cache, fname)
     local_path = join(local_dir, fname)
 
-    if not exists(cache_path):
+    if not exists(cache_path) or force:
         print("Getting {}\nProgress: 000.00%".format(url), end=' ')
         urlretrieve(url, cache_path, reporthook=report_hook)
         print(" [Done]")

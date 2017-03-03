@@ -16,6 +16,7 @@ set MSYSTEM=MINGW{}
 set CHERE_INVOKING=1
 C:\\msys64\\usr\\bin\\pacman --noconfirm --sync --refresh --refresh --sysupgrade --sysupgrade
 C:\\msys64\\usr\\bin\\bash --login -c "pacman -Su --noconfirm; \
+pacman -S --noconfirm gyp-git git python2; \
 makepkg --noconfirm --noprogressbar --skippgpcheck"
 '''
 

@@ -136,7 +136,7 @@ def exec_binary(status, cmd, env=None, cwd=None, shell=True, exclude=None):
     lines = iter(proc.stdout.readline, '')
     for line in lines:
         if isinstance(line, bytes):
-            line = line.decode(sys.stdout.encoding)
+            line = line.decode()
 
         if not exclude or not match(exclude, line):
             print(line, end=u'')
@@ -149,7 +149,7 @@ def exec_binary(status, cmd, env=None, cwd=None, shell=True, exclude=None):
 
     if stdout:
         if isinstance(stdout, bytes):
-            stdout = stdout.decode(sys.stdout.encoding)
+            stdout = stdout.decode()
         if exclude:
             stdout = u'\n'.join(
                 [l for l in stdout.splitlines() if not match(exclude, l)])

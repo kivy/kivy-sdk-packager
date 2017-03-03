@@ -141,11 +141,11 @@ def exec_binary(status, cmd, env=None, cwd=None, shell=True, exclude=None):
         if not exclude or not match(exclude, line):
             print(line, end=u'')
 
-        retval = process.poll()
+        retval = proc.poll()
         if retval is not None:
             break
 
-    stdout, stderr = process.communicate()
+    stdout, stderr = proc.communicate()
 
     if stdout:
         if isinstance(stdout, bytes):

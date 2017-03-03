@@ -132,20 +132,36 @@ def exec_binary(status, cmd, env=None, cwd=None, shell=True, exclude=None):
     print(status)
     print(' '.join(cmd))
     proc = Popen(cmd, stdout=PIPE, stderr=PIPE, env=env, cwd=cwd, shell=shell)
-    a, b = proc.communicate()
-    if a:
-        if exclude is not None:
-            a = b'\n'.join(
-                [l for l in a.splitlines() if match(exclude, l) is None])
-        print(a.decode(), end='')
-        print()
 
-    if b:
-        if exclude is not None:
-            b = b'\n'.join(
-                [l for l in b.splitlines() if match(exclude, l) is None])
-        print(b.decode(), end='')
-        print()
+    lines = iter(proc.stdout.readline, '')
+    for line in lines:
+        if isinstance(line, bytes):
+            line = line.decode()
+
+        if not exclude or not match(exclude, line):
+            print(line, end=u'')
+
+        retval = proc.poll()
+        if retval is not None:
+            break
+
+    stdout, stderr = proc.communicate()
+
+    if stdout:
+        if isinstance(stdout, bytes):
+            stdout = stdout.decode()
+        if exclude:
+            stdout = u'\n'.join(
+                [l for l in stdout.splitlines() if not match(exclude, l)])
+        print(stdout)
+
+    if stderr:
+        if isinstance(stderr, bytes):
+            stderr = stderr.decode()
+        if exclude:
+            stderr = u'\n'.join(
+                [l for l in stderr.splitlines() if not match(exclude, l)])
+        print(stderr)
 
 
 def copy_files(src, dst):
@@ -311,7 +327,7 @@ def download_cache(cache, url, local_dir, fname=None, force=False):
     cache_path = join(cache, fname)
     local_path = join(local_dir, fname)
 
-    if not exists(cache_path):
+    if not exists(cache_path) or force:
         print("Getting {}\nProgress: 000.00%".format(url), end=' ')
         urlretrieve(url, cache_path, reporthook=report_hook)
         print(" [Done]")

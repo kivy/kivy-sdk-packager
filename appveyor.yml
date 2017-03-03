@@ -5,6 +5,7 @@ os: Visual Studio 2015
 branches:
   only:
   - master
+  - appveyor_test
 environment:
   WHEEL_DIR: C:\kivy_wheels
   COMPILER: mingw
@@ -34,6 +35,9 @@ environment:
   - PACKAGE_TARGET: gstreamer
     PYVER: 27
     BITTNESS: 86
+  - PACKAGE_TARGET: angle
+    PYVER: 27
+    BITTNESS: 86
   - PACKAGE_TARGET: sdl2
     PYVER: 33
     BITTNESS: 86
@@ -43,6 +47,9 @@ environment:
   - PACKAGE_TARGET: gstreamer
     PYVER: 33
     BITTNESS: 86
+  - PACKAGE_TARGET: angle
+    PYVER: 33
+    BITTNESS: 86
   - PACKAGE_TARGET: sdl2
     PYVER: 34
     BITTNESS: 86
@@ -50,6 +57,9 @@ environment:
     PYVER: 34
     BITTNESS: 86
   - PACKAGE_TARGET: gstreamer
+    PYVER: 34
+    BITTNESS: 86
+  - PACKAGE_TARGET: angle
     PYVER: 34
     BITTNESS: 86
   - PACKAGE_TARGET: sdl2
@@ -93,6 +103,9 @@ environment:
   - PACKAGE_TARGET: gstreamer
     PYVER: 27
     BITTNESS: 64
+  - PACKAGE_TARGET: angle
+    PYVER: 27
+    BITTNESS: 64
   - PACKAGE_TARGET: sdl2
     PYVER: 33
     BITTNESS: 64
@@ -102,6 +115,9 @@ environment:
   - PACKAGE_TARGET: gstreamer
     PYVER: 33
     BITTNESS: 64
+  - PACKAGE_TARGET: angle
+    PYVER: 33
+    BITTNESS: 64
   - PACKAGE_TARGET: sdl2
     PYVER: 34
     BITTNESS: 64
@@ -109,6 +125,9 @@ environment:
     PYVER: 34
     BITTNESS: 64
   - PACKAGE_TARGET: gstreamer
+    PYVER: 34
+    BITTNESS: 64
+  - PACKAGE_TARGET: angle
     PYVER: 34
     BITTNESS: 64
   - PACKAGE_TARGET: sdl2

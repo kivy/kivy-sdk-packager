@@ -1,10 +1,11 @@
 from __future__ import absolute_import, print_function
 import sys
-from os.path import join, sep
+from os.path import join, sep, split
 from os import walk, environ
+from glob import glob
 from .common import *
 
-__version__ = '0.1.5'
+__version__ = '0.1.6'
 
 msvc_batch = '''
 call "C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat" {}
@@ -56,6 +57,15 @@ def get_angle(cache, build_path, arch, pyver, package, output, compiler='mingw')
         d3d_out = join(
             environ['ProgramFiles(x86)'], 'Windows Kits', '8.1', 'Redist',
             'D3D', win_arch)
+
+        for pat, b in (
+                ('libwinpthread-*.dll', bits), ('libstdc++-*.dll', bits),
+                ('libgcc_s_dw2-*.dll', '32')):
+            root = join('C:\\msys64', 'mingw{}'.format(b), 'bin', pat)
+            f = sorted(glob(root))[-1]
+            name = split(f)[-1]
+            data.append(
+                (f, join('bin', name), join('share', package, 'bin'), False))
     else:
         src = 'x86_amd64' if arch == '64' else 'x86'
         target = 'x64' if arch == '64' else 'Win32'

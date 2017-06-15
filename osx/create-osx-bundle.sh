@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION=stable
+VERSION=1.10.0
 if [ "x$2" != "x" ]; then
     VERSION=$2
 fi
@@ -34,7 +34,7 @@ $PLATYPUS -DBR -x -y \
 
 
 
-# --- Frameworks
+echo "--- Frameworks"
 
 echo "-- Create Frameworks directory"
 mkdir -p Kivy.app/Contents/Frameworks
@@ -59,6 +59,8 @@ cp -a /Library/Frameworks/SDL2.framework .
 cp -a /Library/Frameworks/SDL2_image.framework .
 cp -a /Library/Frameworks/SDL2_ttf.framework .
 cp -a /Library/Frameworks/SDL2_mixer.framework .
+mkdir ../lib/
+cp /usr/local/lib/libintl.8.dylib ../lib/
 
 echo "-- Reduce frameworks size"
 rm -rf {SDL2,SDL2_image,SDL2_ttf,SDL2_mixer,GStreamer}.framework/Headers
@@ -112,9 +114,8 @@ fi
 echo "-- Install dependencies"
 source venv/bin/activate
 pip install cython==0.23
-pip install pygments docutils
+$PYTHON -m pip install pygments docutils
 pip install git+http://github.com/tito/osxrelocator
-
 echo "-- Link python to the right location for relocation"
 ln -s ./venv/bin/python ./python
 
@@ -137,6 +138,8 @@ popd
 
 echo "-- Relocate frameworks"
 pushd Kivy.app
+osxrelocator -r . /usr/local/lib/ \
+    @executable_path/../lib/
 osxrelocator -r . /Library/Frameworks/GStreamer.framework/ \
     @executable_path/../Frameworks/GStreamer.framework/
 osxrelocator -r . /Library/Frameworks/SDL2/ \
@@ -153,6 +156,8 @@ osxrelocator -r . @rpath/SDL2_image.framework/Versions/A/SDL2_image \
     @executable_path/../Frameworks/SDL2_image.framework/Versions/A/SDL2_image
 osxrelocator -r . @rpath/SDL2_mixer.framework/Versions/A/SDL2_mixer \
     @executable_path/../Frameworks/SDL2_mixer.framework/Versions/A/SDL2_mixer
+install_name_tool -change  /usr/local/lib/libintl.8.dylib \
+    @executable_path/../lib/libintl.8.dylib Contents/Resources/python 
 popd
 
 # relocate the activate script

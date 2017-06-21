@@ -1,3 +1,9 @@
+kivy (10.1-dev) UNRELEASED; urgency=medium
+
+  * bump version to new dev
+
+ -- Gabriel Pettier <gabriel@kivy.org>  Mon, 08 May 2017 16:52:16 +0200
+
 kivy (1.9.2-0) stable; urgency=low
 
   * Auto build.

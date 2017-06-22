@@ -41,10 +41,10 @@ X-Python3-Version: >= 3.3
 Package: kivy
 Architecture: all
 Depends: kivy-doc      (>= ${binary:Version}),
-         kivy-examples (>= ${binary:Version}),
          kivy-tools    (>= ${binary:Version}),
          python-kivy   (>= ${binary:Version}),
          python3-kivy  (>= ${binary:Version})
+Suggests: kivy-examples (>= ${binary:Version}),
 Description: Kivy - Multimedia / Multitouch framework - metapackage
  Kivy is an open source library for developing multi-touch applications. It is
  completely cross platform (Linux/OSX/Win/Android) and released under the terms

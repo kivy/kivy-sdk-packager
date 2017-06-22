@@ -23,7 +23,7 @@ Build-Depends: debhelper (>= 7.0.50~), dh-python, pkg-config, git,
 # libav development files
  libswscale-dev, libavformat-dev, libavcodec-dev,
 # gstreamer1.0 dependencies
- libgstreamer1.0-dev
+ libgstreamer1.0-dev,
 # documentation generator
  python-sphinx,             python3-sphinx,
 # X Window Virtual Framebuffer

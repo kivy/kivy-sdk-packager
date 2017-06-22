@@ -22,8 +22,8 @@ Build-Depends: debhelper (>= 7.0.50~), dh-python, pkg-config, git,
  libsmpeg-dev,
 # libav development files
  libswscale-dev, libavformat-dev, libavcodec-dev,
-# gstreamer1.0 dependencies (gstreamer0.10 is just there to make builds work, when no gstreamer1.0 is available)
- libgstreamer1.0-dev | libgstreamer0.10-dev,
+# gstreamer1.0 dependencies
+ libgstreamer1.0-dev,
 # mtdev
  libmtdev-dev,
 # documentation generator

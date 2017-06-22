@@ -1,8 +1,8 @@
-kivy (10.0-0) stable; urgency=medium
+kivy (1.10.0-0) stable; urgency=medium
 
   * update to new release
 
- -- gabriel pettier <gabriel@alice>  Mon, 08 May 2017 16:53:04 +0200
+ -- gabriel pettier <gabriel@kivy.org>  Mon, 08 May 2017 16:53:04 +0200
 
 kivy (1.9.1-2) stable; urgency=low
 

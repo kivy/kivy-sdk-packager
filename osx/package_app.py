@@ -65,7 +65,7 @@ def error(message):
     exit(-1)
 
 
-def bootstrap(source_app, appname, confirm):
+def bootstrap(source_app, appname):
     # remove mypackage.app if it already exists
     print('Copy Kivy.app/source.app if it exists')
     if exists(appname):
@@ -200,7 +200,6 @@ def install_garden_deps(appname, deps):
 def main(arguments):
     path_to_app = arguments.get('<path_to_app>')
     source_app = arguments.get('--source-app')
-    confirm = arguments.get('-y')
     appname = arguments.get('--appname')
     if not appname:
         appname = path_to_app.split('/')[-1] + '.app'
@@ -214,7 +213,7 @@ def main(arguments):
     blacklist = arguments.get('--blacklist')
     whitelist = arguments.get('--whitelist')
 
-    bootstrap(source_app, appname, confirm)
+    bootstrap(source_app, appname)
     insert_app(path_to_app, appname, blacklist=blacklist, whitelist=whitelist)
     if deps:
         install_deps(appname, deps)

@@ -181,8 +181,6 @@ Architecture: any
 Depends: ${misc:Depends},
          libmtdev1,
          ${python3:Depends},
-         python3-kivy-common (= ${binary:Version}),
-         python3-kivy-bin (= ${binary:Version}),
          python3-docutils,
          python3-pygments,
          xclip,

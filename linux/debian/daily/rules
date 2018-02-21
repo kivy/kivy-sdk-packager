@@ -33,5 +33,4 @@ override_dh_auto_test:
 	echo "! TESTS ARE TEMPORARY DISABLED !"
 
 override_dh_install:
-	dh_missing --list-missing
-	dh_install --fail-missing -X shapecollisions.py --sourcedir debian/tmp
+	dh_missing --fail-missing --sourcedir debian/tmp

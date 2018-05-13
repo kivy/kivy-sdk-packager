@@ -24,6 +24,8 @@ Build-Depends: debhelper (>= 7.0.50~), dh-python, pkg-config, git,
  libswscale-dev, libavformat-dev, libavcodec-dev,
 # gstreamer1.0 dependencies
  libgstreamer1.0-dev,
+# x11 headers for optional x11 provider
+ libx11-dev,
 # mtdev
  libmtdev-dev,
 # documentation generator
@@ -144,12 +146,14 @@ Description: Kivy - Multimedia / Multitouch framework - examples
 Package: python-kivy
 Architecture: any
 Depends: ${misc:Depends},
-         libmtdev1,
          ${python:Depends},
          python-docutils,
          python-pygments,
-         xclip,
-         xsel,
+         xclip | xsel,
+         libsdl2-2.0 | python-pygame,
+         libsdl2-image-2.0-0 | python-pygame | python-gi | python-pil,
+         libsdl2-mixer-2.0-0 | python-pygame | libgstreamer-1.0-0,
+         libsdl2-ttf-2.0-0 | python-pygame | python-pil,
 Provides:
  ${python:Provides},
  python-kivy-common,
@@ -161,7 +165,8 @@ Conflicts:
  python-kivy-common,
  python-kivy-bin,
 Suggests:
- python-pygame,
+ ${python:Suggests},
+ libmtdev1,
 Description: Kivy - Multimedia / Multitouch framework - Python 2.7 modules
  Kivy is an open source library for developing multi-touch applications. It is
  completely cross platform (Linux/OSX/Win/Android) and released under the terms
@@ -179,12 +184,14 @@ Description: Kivy - Multimedia / Multitouch framework - Python 2.7 modules
 Package: python3-kivy
 Architecture: any
 Depends: ${misc:Depends},
-         libmtdev1,
-         ${python3:Depends},
-         python3-docutils,
-         python3-pygments,
-         xclip,
-         xsel,
+         ${python:Depends},
+         python-docutils,
+         python-pygments,
+         xclip | xsel,
+         libsdl2-2.0 | python-pygame,
+         libsdl2-image-2.0-0 | python-pygame | python-gi | python-pil,
+         libsdl2-mixer-2.0-0 | python-pygame | libgstreamer-1.0-0,
+         libsdl2-ttf-2.0-0 | python-pygame | python-pil,
 Provides:
  ${python3:Provides},
 Replaces:
@@ -195,7 +202,7 @@ Conflicts:
  python3-kivy-bin,
 Suggests:
  ${python3:Suggests},
- python3-pygame,
+ libmtdev1,
 Description: Kivy - Multimedia / Multitouch framework - Python 3.x modules
  Kivy is an open source library for developing multi-touch applications. It is
  completely cross platform (Linux/OSX/Win/Android) and released under the terms

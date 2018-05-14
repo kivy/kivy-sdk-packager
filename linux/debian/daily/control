@@ -185,13 +185,13 @@ Package: python3-kivy
 Architecture: any
 Depends: ${misc:Depends},
          ${python:Depends},
-         python-docutils,
-         python-pygments,
+         python3-docutils,
+         python3-pygments,
          xclip | xsel,
-         libsdl2-2.0 | python-pygame,
-         libsdl2-image-2.0-0 | python-pygame | python-gi | python-pil,
-         libsdl2-mixer-2.0-0 | python-pygame | libgstreamer-1.0-0,
-         libsdl2-ttf-2.0-0 | python-pygame | python-pil,
+         libsdl2-2.0,
+         libsdl2-image-2.0-0 | python-gi | python3-pil,
+         libsdl2-mixer-2.0-0 | libgstreamer-1.0-0,
+         libsdl2-ttf-2.0-0 | python3-pil,
 Provides:
  ${python3:Provides},
 Replaces:

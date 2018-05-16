@@ -167,6 +167,9 @@ Conflicts:
 Suggests:
  ${python:Suggests},
  libmtdev1,
+ libgstreamer-plugins-base1.0,
+ libgstreamer-plugins-good1.0,
+ libgstreamer-plugins-bad1.0,
 Description: Kivy - Multimedia / Multitouch framework - Python 2.7 modules
  Kivy is an open source library for developing multi-touch applications. It is
  completely cross platform (Linux/OSX/Win/Android) and released under the terms
@@ -203,6 +206,9 @@ Conflicts:
 Suggests:
  ${python3:Suggests},
  libmtdev1,
+ libgstreamer-plugins-base1.0,
+ libgstreamer-plugins-good1.0,
+ libgstreamer-plugins-bad1.0,
 Description: Kivy - Multimedia / Multitouch framework - Python 3.x modules
  Kivy is an open source library for developing multi-touch applications. It is
  completely cross platform (Linux/OSX/Win/Android) and released under the terms

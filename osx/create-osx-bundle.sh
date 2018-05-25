@@ -112,7 +112,7 @@ fi
 
 echo "-- Install dependencies"
 source venv/bin/activate
-pip install cython==0.25.2
+pip install cython --upgrade
 $PYTHON -m pip install pygments docutils
 pip install git+http://github.com/tito/osxrelocator
 echo "-- Link python to the right location for relocation"

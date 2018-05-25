@@ -60,7 +60,6 @@ cp -a /Library/Frameworks/SDL2_image.framework .
 cp -a /Library/Frameworks/SDL2_ttf.framework .
 cp -a /Library/Frameworks/SDL2_mixer.framework .
 mkdir ../lib/
-cp /usr/local/lib/libintl.8.dylib ../lib/
 
 echo "-- Reduce frameworks size"
 rm -rf {SDL2,SDL2_image,SDL2_ttf,SDL2_mixer,GStreamer}.framework/Headers
@@ -156,8 +155,6 @@ osxrelocator -r . @rpath/SDL2_image.framework/Versions/A/SDL2_image \
     @executable_path/../Frameworks/SDL2_image.framework/Versions/A/SDL2_image
 osxrelocator -r . @rpath/SDL2_mixer.framework/Versions/A/SDL2_mixer \
     @executable_path/../Frameworks/SDL2_mixer.framework/Versions/A/SDL2_mixer
-install_name_tool -change  /usr/local/lib/libintl.8.dylib \
-    @executable_path/../lib/libintl.8.dylib Contents/Resources/python 
 popd
 
 # relocate the activate script

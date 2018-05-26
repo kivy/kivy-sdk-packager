@@ -112,8 +112,8 @@ fi
 
 echo "-- Install dependencies"
 source venv/bin/activate
-#$PYTHON -m pip install cython==0.26
-$PYTHON -m pip install pygments docutils
+pip install https://github.com/cython/cython/archive/0.28.zip
+pip install https://github.com/sol/pygments/archive/2.2.0.zip https://github.com/docutils-mirror/docutils/archive/0.12.zip
 pip install git+http://github.com/tito/osxrelocator
 echo "-- Link python to the right location for relocation"
 ln -s ./venv/bin/python ./python

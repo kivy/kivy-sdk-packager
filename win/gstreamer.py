@@ -5,9 +5,9 @@ from shutil import rmtree
 from os import walk, listdir
 from .common import *
 
-__version__ = '0.1.12'
+__version__ = '0.1.13'
 
-gst_ver = '1.10.2'
+gst_ver = '1.14.1'
 
 
 def get_gstreamer(cache, build_path, arch, pyver, package, output, compiler='mingw'):

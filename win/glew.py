@@ -4,9 +4,9 @@ from os.path import join, sep
 from os import walk
 from .common import *
 
-__version__ = '0.1.9'
+__version__ = '0.1.10'
 
-glew_ver = '2.0.0'
+glew_ver = '2.1.0'
 
 batch = '''
 "C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\Common7\\IDE\\devenv.exe" .\\build\\vc12\\glew.sln /upgrade

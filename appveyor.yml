@@ -11,20 +11,12 @@ environment:
   COMPILER: mingw
   KIVY_BUILD_DIR: C:\kivy_build
   KIVY_BUILD_CACHE: C:\kivy_build_cache2
-  AIRPLANE_CHARGE:
-    secure: HgQr7XMKpB6lWn33SKv0GyYZbh1RfpgvaIKEE0B54R5XHJujQg5dhOEB3Vc2CfAqCprX+CGxXAjQwFnuv6pJeA3++9Z8/1SfFuEqCF59J7PqsDs2thA8lNHLRsThvRVJrBt2jcb1wrG3Nf3sz3vi7e+rBzYjprkcYiTP0XJ5FdQekyFTTjuXYaRBGWrwGX81dEVVUkGFuEZFYWJq2Yf/PkFGOX+IN0CjgpFB0pGfZSJcIG7mvscurfG/KvckLhNUINprUKt0pJ8iCN0iufsbmrOnuG+WC8AHktvlSxzHSfCm8zmhSZTkDNkJfpYHapFagQQThmiYq8PqsVIC0XOz+j4KLljc6bxyhE0oPtOPg4DohBdqLI28V1XB/Kqh7CCZR50wAw567voWVOtKsyets5oeywZH1q/gtK6stC5t7v+a2s0w1I2IEW6p2aPy7plreZj15QCgIR8h6JgIuMuwqiaVCUuhej/GauCZG/9jIBJpTf1NkBa9k4vIxHPq5R5/ltYX8za49vz5ImdLe1qlTFwy9fegMpb+D5m3y3ilm+t5xkDmqXQau1oVWIVd8jf0DawWqkNsKLp6hbYr51gclS+Gc7NVKwvFtcmoAfbvNCGBDH4vF6cR2wNhy6RDjjqDgIStnpUs3fKS9bKOyrv9+394esQqEuAXgLtC2vUMk+z3Hf8V18AFYKZfZmWxiGGrjI6YQCBOBOdh5VO5cASqtoTU22OvAPhXT7gX2JG96Rc9yf/K8DEvzuWo3lArDAclh2zLm++1SOh54dDiAiMZvLkNXu5tAsg60c+rJCx4FQ9ra0/GcFY1LKJntdKvpQyBkp4wKAvq3YyV7Rnx8u6PULXXG2rS6i7m+asLrY+FSCO5oRmLrMv5pEv0cF/BOAh0RGR6medX8ASmM40sHqz+WC9WJfaSUZplSzQwHxXCr/AzK40mOTtKgkg8e8tqwNzjI8mdjx0kwcu8zuOeUK6U6l83voGKbli1gzinkLvzhjvF1TXZwpT1y/HvAs5dGwXVfdigeOqcfmIOxXStPmaZ4CZRKVK3CgweYzpETyT6Pm5H3jANcAuyYuphJr7YrfHfWKAg6N3Q0r3AfzliOuIBm3DVfm2RuI8USGJxRsjaDX8LB8sdhrCPLUYBh1RNhYol5bVEM1IX+BcpXzIyqv00eSMTvN3G7KdsM+/8LGlnEM+apIgnBlVfcWOQI8rzBkXuJvExSwDhKzncGWbi12UapEVsE/QnVpDiwbiPdZtQQzQ=
-  GDRIVE_CLIENT_ID:
-    secure: iGAZpJPOTLhRmK7X60xzRZm1S0PbmoMwoVJdd8WiKBH34Tqsd6UEFhPjLLok7J0+xWStS8E3fwEQh4Wzn1BCXhry5Qv8FLD41oskVpiSwdc=
-  GDRIVE_CLIENT_SECRET:
-    secure: 7J8TZnhr3MsF5rveMVVkbrr9tzTwGG6rHWZMorW0WN4=
-  GDRIVE_sdl2_UPLOAD_ID: 0B1_HB9J8mZepTVJhenRET01VQTQ
-  GDRIVE_sdl2_dev_UPLOAD_ID: 0B1_HB9J8mZepWlZMNWVKVHE5R28
-  GDRIVE_glew_UPLOAD_ID: 0B1_HB9J8mZepUkJ3TTJhY0ZuWGs
-  GDRIVE_glew_dev_UPLOAD_ID: 0B1_HB9J8mZepak1KeGJ5MDdSQ0E
-  GDRIVE_gstreamer_UPLOAD_ID: 0B1_HB9J8mZepNzZ5aW91Q0tJU2s
-  GDRIVE_gstreamer_dev_UPLOAD_ID: 0B1_HB9J8mZepZzNSZVI2V19mQ00
-  GDRIVE_angle_UPLOAD_ID: 0B1_HB9J8mZepRDltSDB6Z0FVT00
-  GDRIVE_angle_dev_UPLOAD_ID: fake
+  KEY_WITH_NO_TEETH:
+    secure: 7cS7xjpCL/VH5jIIGSf13camkiu1enMh5hO0UsBgmRlBXyKk3t/7HB79ofyJKgDb
+  SERVER_IP: 159.203.106.198
+  MSYSTEM: MINGW64
+  CHERE_INVOKING: 1
+  UPLOAD_DEV: 1
   matrix:
   - PACKAGE_TARGET: sdl2
     PYVER: 27
@@ -38,30 +30,7 @@ environment:
   - PACKAGE_TARGET: angle
     PYVER: 27
     BITTNESS: 86
-  - PACKAGE_TARGET: sdl2
-    PYVER: 33
-    BITTNESS: 86
-  - PACKAGE_TARGET: glew
-    PYVER: 33
-    BITTNESS: 86
-  - PACKAGE_TARGET: gstreamer
-    PYVER: 33
-    BITTNESS: 86
-  - PACKAGE_TARGET: angle
-    PYVER: 33
-    BITTNESS: 86
-  - PACKAGE_TARGET: sdl2
-    PYVER: 34
-    BITTNESS: 86
-  - PACKAGE_TARGET: glew
-    PYVER: 34
-    BITTNESS: 86
-  - PACKAGE_TARGET: gstreamer
-    PYVER: 34
-    BITTNESS: 86
-  - PACKAGE_TARGET: angle
-    PYVER: 34
-    BITTNESS: 86
+    UPLOAD_DEV: 0
   - PACKAGE_TARGET: sdl2
     PYVER: 35
     BITTNESS: 86
@@ -78,6 +47,7 @@ environment:
     PYVER: 35
     BITTNESS: 86
     COMPILER: msvc
+    UPLOAD_DEV: 0
   - PACKAGE_TARGET: sdl2
     PYVER: 36
     BITTNESS: 86
@@ -94,6 +64,7 @@ environment:
     PYVER: 36
     BITTNESS: 86
     COMPILER: msvc
+    UPLOAD_DEV: 0
   - PACKAGE_TARGET: sdl2
     PYVER: 27
     BITTNESS: 64
@@ -106,30 +77,7 @@ environment:
   - PACKAGE_TARGET: angle
     PYVER: 27
     BITTNESS: 64
-  - PACKAGE_TARGET: sdl2
-    PYVER: 33
-    BITTNESS: 64
-  - PACKAGE_TARGET: glew
-    PYVER: 33
-    BITTNESS: 64
-  - PACKAGE_TARGET: gstreamer
-    PYVER: 33
-    BITTNESS: 64
-  - PACKAGE_TARGET: angle
-    PYVER: 33
-    BITTNESS: 64
-  - PACKAGE_TARGET: sdl2
-    PYVER: 34
-    BITTNESS: 64
-  - PACKAGE_TARGET: glew
-    PYVER: 34
-    BITTNESS: 64
-  - PACKAGE_TARGET: gstreamer
-    PYVER: 34
-    BITTNESS: 64
-  - PACKAGE_TARGET: angle
-    PYVER: 34
-    BITTNESS: 64
+    UPLOAD_DEV: 0
   - PACKAGE_TARGET: sdl2
     PYVER: 35
     BITTNESS: 64
@@ -146,6 +94,7 @@ environment:
     PYVER: 35
     BITTNESS: 64
     COMPILER: msvc
+    UPLOAD_DEV: 0
   - PACKAGE_TARGET: sdl2
     PYVER: 36
     BITTNESS: 64
@@ -162,8 +111,10 @@ environment:
     PYVER: 36
     BITTNESS: 64
     COMPILER: msvc
+    UPLOAD_DEV: 0
 cache: C:\kivy_build_cache2
 build_script:
+- nuget install secure-file -ExcludeVersion
 - ps: >-
     function Check-Error
     {
@@ -187,11 +138,6 @@ build_script:
       mkdir "$env:KIVY_BUILD_CACHE"
     }
 
-    $GDRIVE_ID = [Environment]::GetEnvironmentVariable("GDRIVE_$env:PACKAGE_TARGET`_UPLOAD_ID", "Process")
-
-    $DEV_GDRIVE_ID = [Environment]::GetEnvironmentVariable("GDRIVE_$env:PACKAGE_TARGET`_dev_UPLOAD_ID", "Process")
-
-
 
     if ($env:BITTNESS -eq "64") {
       $PYTHON_ROOT = "C:\Python$env:PYVER-x64"
@@ -214,23 +160,23 @@ build_script:
     $WHEEL_DEV = "kivy.deps.$env:PACKAGE_TARGET`_dev-$WHEEL_VERSION-cp$env:PYVER-cp$env:PYVER`m-$WHELL_BITNESS.whl"
 
 
-    C:\Python27\Scripts\pip.exe install pydrive
+    C:\Python35-x64\Scripts\pip.exe install requests
 
     Check-Error
 
-    $ALREADY_EXISTS = C:\Python27\python.exe win\gdrive.py exists "$GDRIVE_ID" "$WHEEL_BIN"
+    $ALREADY_EXISTS = C:\Python35-x64\python.exe -c "import requests; 1 if requests.head('https://kivy.org/downloads/appveyor/deps/$env:PACKAGE_TARGET/$WHEEL_BIN').status_code == 200 else ''"
 
     Check-Error
 
-    if ($ALREADY_EXISTS -eq "True" -and $DEV_GDRIVE_ID -ne "fake") {
-      $ALREADY_EXISTS = C:\Python27\python.exe win\gdrive.py exists "$DEV_GDRIVE_ID" "$WHEEL_DEV"
+    if ($ALREADY_EXISTS -eq "1") {
+      $ALREADY_EXISTS = C:\Python35-x64\python.exe -c "import requests; 1 if requests.head('https://kivy.org/downloads/appveyor/deps/$env:PACKAGE_TARGET`_dev/$WHEEL_DEV').status_code == 200 else ''"
       Check-Error
     }
 
-    echo "Already exists=$ALREADY_EXISTS $WHEEL_BIN $WHEEL_DEV"
+    echo "Already exists=$ALREADY_EXISTS : $WHEEL_BIN, $WHEEL_DEV"
 
 
-    if ($ALREADY_EXISTS -eq "False") {
+    if ($ALREADY_EXISTS -ne "1") {
       python -m pip install pip wheel setuptools --upgrade
       Check-Error
       if ($env:COMPILER -eq "mingw") {
@@ -242,10 +188,13 @@ build_script:
       python -m win.$env:PACKAGE_TARGET build_path "$env:KIVY_BUILD_DIR" arch $env:BITTNESS pyver $env:PYVER package $env:PACKAGE_TARGET output "$env:WHEEL_DIR" cache "$env:KIVY_BUILD_CACHE" compiler "$env:COMPILER"
       Check-Error
 
-      if ($DEV_GDRIVE_ID -ne "fake") {
-        C:\Python27\python.exe win\gdrive.py upload "$DEV_GDRIVE_ID" "$env:WHEEL_DIR\kivy.deps.$env:PACKAGE_TARGET`_dev*"
+      secure-file\tools\secure-file -decrypt C:\projects\kivy\kivy\tools\appveyor\id_rsa.enc -secret "$env:KEY_WITH_NO_TEETH"
+      Check-Error
+
+      if ($UPLOAD_DEV -eq "1") {
+        C:\msys64\usr\bin\bash --login -c "/c/projects/kivy-sdk-packager/ci/appveyor_server_upload.sh $env:SERVER_IP $env:WHEEL_DIR kivy.deps.$env:PACKAGE_TARGET`_dev* appveyor/deps/$env:PACKAGE_TARGET`_dev"
         Check-Error
       }
-      C:\Python27\python.exe win\gdrive.py upload "$GDRIVE_ID" "$env:WHEEL_DIR\kivy.deps.$env:PACKAGE_TARGET-*"
+      C:\msys64\usr\bin\bash --login -c "/c/projects/kivy-sdk-packager/ci/appveyor_server_upload.sh $env:SERVER_IP $env:WHEEL_DIR kivy.deps.$env:PACKAGE_TARGET* appveyor/deps/$env:PACKAGE_TARGET"
       Check-Error
     }

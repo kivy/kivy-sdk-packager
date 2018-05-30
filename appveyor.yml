@@ -156,12 +156,12 @@ build_script:
 
     Check-Error
 
-    $ALREADY_EXISTS = C:\Python35-x64\python.exe -c "import requests; 1 if requests.head('https://kivy.org/downloads/appveyor/deps/$env:PACKAGE_TARGET/$WHEEL_BIN').status_code == 200 else ''"
+    $ALREADY_EXISTS = C:\Python35-x64\python.exe -c "import requests; print(1 if requests.head('https://kivy.org/downloads/appveyor/deps/$env:PACKAGE_TARGET/$WHEEL_BIN').status_code == 200 else '')"
 
     Check-Error
 
-    if ($ALREADY_EXISTS -eq "1") {
-      $ALREADY_EXISTS = C:\Python35-x64\python.exe -c "import requests; 1 if requests.head('https://kivy.org/downloads/appveyor/deps/$env:PACKAGE_TARGET`_dev/$WHEEL_DEV').status_code == 200 else ''"
+    if ($ALREADY_EXISTS -eq "1" -and $env:UPLOAD_DEV -eq "1") {
+      $ALREADY_EXISTS = C:\Python35-x64\python.exe -c "import requests; print(1 if requests.head('https://kivy.org/downloads/appveyor/deps/$env:PACKAGE_TARGET`_dev/$WHEEL_DEV').status_code == 200 else '')"
       Check-Error
     }
 

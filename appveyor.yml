@@ -192,9 +192,9 @@ build_script:
       Check-Error
 
       if ($UPLOAD_DEV -eq "1") {
-        C:\msys64\usr\bin\bash --login -c "/c/projects/kivy-sdk-packager/ci/appveyor_server_upload.sh $env:SERVER_IP $env:WHEEL_DIR kivy.deps.$env:PACKAGE_TARGET`_dev* appveyor/deps/$env:PACKAGE_TARGET`_dev"
+        C:\msys64\usr\bin\bash --login -c "/c/projects/kivy-sdk-packager/ci/appveyor_server_upload.sh $env:SERVER_IP '$env:WHEEL_DIR' kivy.deps.$env:PACKAGE_TARGET`_dev* appveyor/deps/$env:PACKAGE_TARGET`_dev"
         Check-Error
       }
-      C:\msys64\usr\bin\bash --login -c "/c/projects/kivy-sdk-packager/ci/appveyor_server_upload.sh $env:SERVER_IP $env:WHEEL_DIR kivy.deps.$env:PACKAGE_TARGET* appveyor/deps/$env:PACKAGE_TARGET"
+      C:\msys64\usr\bin\bash --login -c "/c/projects/kivy-sdk-packager/ci/appveyor_server_upload.sh $env:SERVER_IP '$env:WHEEL_DIR' kivy.deps.$env:PACKAGE_TARGET* appveyor/deps/$env:PACKAGE_TARGET"
       Check-Error
     }

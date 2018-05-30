@@ -188,7 +188,7 @@ build_script:
       python -m win.$env:PACKAGE_TARGET build_path "$env:KIVY_BUILD_DIR" arch $env:BITTNESS pyver $env:PYVER package $env:PACKAGE_TARGET output "$env:WHEEL_DIR" cache "$env:KIVY_BUILD_CACHE" compiler "$env:COMPILER"
       Check-Error
 
-      secure-file\tools\secure-file -decrypt C:\projects\kivy\kivy\tools\appveyor\id_rsa.enc -secret "$env:KEY_WITH_NO_TEETH"
+      secure-file\tools\secure-file -decrypt C:\projects\kivy-sdk-packager\ci\id_rsa.enc -secret "$env:KEY_WITH_NO_TEETH"
       Check-Error
 
       if ($UPLOAD_DEV -eq "1") {

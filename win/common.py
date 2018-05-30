@@ -29,7 +29,7 @@ from functools import partial
 import inspect
 from time import sleep
 
-zip_q = re.compile(b'^Extracting .*')
+zip_q = re.compile('^Extracting .*')
 
 if 'context' in inspect.getargspec(pyurlretrieve)[0]:
     pyurlretrieve = partial(pyurlretrieve, context=ssl._create_unverified_context())

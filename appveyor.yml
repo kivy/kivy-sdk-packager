@@ -27,10 +27,6 @@ environment:
   - PACKAGE_TARGET: gstreamer
     PYVER: 27
     BITTNESS: 86
-  - PACKAGE_TARGET: angle
-    PYVER: 27
-    BITTNESS: 86
-    UPLOAD_DEV: 0
   - PACKAGE_TARGET: sdl2
     PYVER: 35
     BITTNESS: 86
@@ -74,10 +70,6 @@ environment:
   - PACKAGE_TARGET: gstreamer
     PYVER: 27
     BITTNESS: 64
-  - PACKAGE_TARGET: angle
-    PYVER: 27
-    BITTNESS: 64
-    UPLOAD_DEV: 0
   - PACKAGE_TARGET: sdl2
     PYVER: 35
     BITTNESS: 64

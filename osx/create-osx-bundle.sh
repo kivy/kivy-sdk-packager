@@ -102,6 +102,9 @@ popd
 
 pushd Kivy.app/Contents/Resources/
 
+curl -OL http://bootstrap.pypa.io/get-pip.py
+$PYTHON get-pip.py
+
 echo "-- Create a virtualenv"
 
 if [ "$1" == "python3" ]; then

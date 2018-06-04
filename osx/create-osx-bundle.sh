@@ -43,15 +43,15 @@ if [ "$1" == "python3" ]  ;then
       curl -L https://raw.githubusercontent.com/yyuu/pyenv-installer/master/bin/pyenv-installer | bash
       curl -O https://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-2.2.7.tar.gz
       tar xvf libressl-2.2.7.tar.gz
-      CFLAGS="-I./libressl-2.2.7/include" CPPFLAGS="-I./libressl-2.2.7/include" ~/.pyenv/bin/pyenv install 3.6.3
+      CFLAGS="-I./libressl-2.2.7/include" CPPFLAGS="-I./libressl-2.2.7/include" ~/.pyenv/bin/pyenv install 3.6.5
   fi
   PYPATH="$SCRIPT_PATH/Kivy.app/Contents/Frameworks/python"
   mkdir "$PYPATH"
-  cp -a ~/.pyenv/versions/3.6.3 "$PYPATH"
-  #find -E "$PYPATH/3.6.3" -regex '.*.pyc' | grep -v "opt-2.pyc" | xargs rm
-  PYTHON="$PYPATH/3.6.3/bin/python3"
-  rm -rf python/3.6.3/share
-  rm -rf python/3.6.3/lib/python3.6/{test,unittest/test,turtledemo,tkinter}
+  cp -a ~/.pyenv/versions/3.6.5 "$PYPATH"
+  #find -E "$PYPATH/3.6.5" -regex '.*.pyc' | grep -v "opt-2.pyc" | xargs rm
+  PYTHON="$PYPATH/3.6.5/bin/python3"
+  rm -rf python/3.6.5/share
+  rm -rf python/3.6.5/lib/python3.6/{test,unittest/test,turtledemo,tkinter}
 fi
 pushd Kivy.app/Contents/Frameworks
 
@@ -117,9 +117,9 @@ fi
 
 echo "-- Install dependencies"
 source venv/bin/activate
-curl -O -L https://github.com/cython/cython/archive/0.28.zip && pip install 0.28.zip
-curl -O -L https://github.com/sol/pygments/archive/2.2.0.zip && pip install 2.2.0.zip
-curl -O -L https://github.com/docutils-mirror/docutils/archive/0.12.zip && pip install 0.12.zip
+curl -O -L https://github.com/cython/cython/archive/0.28.zip && venv/bin/pip install 0.28.zip && rm 0.28.zip
+curl -O -L https://github.com/sol/pygments/archive/2.2.0.zip && venv/bin/pip install 2.2.0.zip && rm 2.2.0.zip
+curl -O -L https://github.com/docutils-mirror/docutils/archive/0.12.zip && venv/bin/pip install 0.12.zip && rm 0.12.zip
 pip install git+https://github.com/tito/osxrelocator
 echo "-- Link python to the right location for relocation"
 ln -s ./venv/bin/python ./python
@@ -175,6 +175,6 @@ popd
 if [ "$1" == "python3" ]; then
     pushd Kivy.app/Contents/Resources/venv/bin/
     rm ./python
-    ln -s ../../../Frameworks/python/3.6.3/bin/python .
+    ln -s ../../../Frameworks/python/3.6.5/bin/python .
 fi
 echo "-- Done !"

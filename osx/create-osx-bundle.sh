@@ -43,7 +43,7 @@ tar xvf libressl-2.2.7.tar.gz
 if [ "$1" == "python3" ]  ;then
   if [ ! -f ~/.pyenv/bin/pyenv ]; then
       curl -L https://raw.githubusercontent.com/yyuu/pyenv-installer/master/bin/pyenv-installer | bash
-      $CFLAGS+" -I./libressl-2.2.7/include" ~/.pyenv/bin/pyenv install 3.5.0
+      CFLAGS="-I./libressl-2.2.7/include" ~/.pyenv/bin/pyenv install 3.5.0
   fi
   PYPATH="$SCRIPT_PATH/Kivy.app/Contents/Frameworks/python"
   mkdir "$PYPATH"

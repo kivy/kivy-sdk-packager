@@ -44,7 +44,7 @@ if [ "$1" == "python3" ]  ;then
       #curl -O https://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-2.2.7.tar.gz
       #tar xvf libressl-2.2.7.tar.gz
       #LDFLAGS="/usr/lib" CFLAGS="-I./libressl-2.2.7/include" CPPFLAGS="-I./libressl-2.2.7/include" ~/.pyenv/bin/pyenv install 3.6.5
-      brew install pyenv
+      brew upgrade pyenv
       pyenv install 3.6.5
   fi
   PYPATH="$SCRIPT_PATH/Kivy.app/Contents/Frameworks/python"

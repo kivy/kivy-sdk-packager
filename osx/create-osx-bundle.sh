@@ -45,7 +45,7 @@ if [ "$1" == "python3" ]  ;then
       #tar xvf libressl-2.2.7.tar.gz
       #LDFLAGS="/usr/lib" CFLAGS="-I./libressl-2.2.7/include" CPPFLAGS="-I./libressl-2.2.7/include" ~/.pyenv/bin/pyenv install 3.6.5
       brew upgrade pyenv
-      pyenv install 3.6.5
+      CFLAGS="-I$(brew --prefix openssl)/include" LDFLAGS="-L$(brew --prefix openssl)/lib" pyenv install 3.6.5
   fi
   PYPATH="$SCRIPT_PATH/Kivy.app/Contents/Frameworks/python"
   mkdir "$PYPATH"

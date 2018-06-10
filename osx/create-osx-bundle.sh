@@ -43,10 +43,9 @@ if [ "$1" == "python3" ]  ;then
       curl -L https://raw.githubusercontent.com/yyuu/pyenv-installer/master/bin/pyenv-installer | bash
       #curl -O https://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-2.2.7.tar.gz
       #tar xvf libressl-2.2.7.tar.gz
-      xcode-select --install
-      brew install readline xz
-      #LDFLAGS="/usr/lib" CFLAGS="-I./libressl-2.2.7/include" CPPFLAGS="-I./libressl-2.2.7/include"
-      CFLAGS="-I$(xcrun --show-sdk-path)/usr/include" ~/.pyenv/bin/pyenv install 3.6.5
+      openssl version
+      which openssl
+      LDFLAGS="/usr/lib" CFLAGS="-I$(xcrun --show-sdk-path)/usr/include -I./libressl-2.2.7/include" CPPFLAGS="-I./libressl-2.2.7/include -I$(xcrun --show-sdk-path)/usr/include" ~/.pyenv/bin/pyenv install 3.6.5
       #brew install openssl
       #brew link --force openssl
       #brew upgrade pyenv

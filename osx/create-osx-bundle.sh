@@ -46,7 +46,7 @@ if [ "$1" == "python3" ]  ;then
       xcode-select --install
       brew install readline xz
       #LDFLAGS="/usr/lib" CFLAGS="-I./libressl-2.2.7/include" CPPFLAGS="-I./libressl-2.2.7/include"
-      ~/.pyenv/bin/pyenv install 3.6.5
+      CFLAGS="-I$(xcrun --show-sdk-path)/usr/include" ~/.pyenv/bin/pyenv install 3.6.5
       #brew install openssl
       #brew link --force openssl
       #brew upgrade pyenv

@@ -41,10 +41,8 @@ mkdir -p Kivy.app/Contents/Frameworks
 if [ "$1" == "python3" ]  ;then
   if [ ! -f ~/.pyenv/bin/pyenv ]; then
       curl -L https://raw.githubusercontent.com/yyuu/pyenv-installer/master/bin/pyenv-installer | bash
-      #curl -O https://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-2.2.7.tar.gz
-      #tar xvf libressl-2.2.7.tar.gz
-      openssl version
-      which openssl
+      curl -O https://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-2.2.7.tar.gz
+      tar xvf libressl-2.2.7.tar.gz
       LDFLAGS="/usr/lib" CFLAGS="-I$(xcrun --show-sdk-path)/usr/include -I./libressl-2.2.7/include" CPPFLAGS="-I./libressl-2.2.7/include -I$(xcrun --show-sdk-path)/usr/include" ~/.pyenv/bin/pyenv install 3.6.5
       #brew install openssl
       #brew link --force openssl

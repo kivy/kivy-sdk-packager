@@ -110,7 +110,7 @@ popd
 pushd Kivy.app/Contents/Resources/
 
 curl -OL http://bootstrap.pypa.io/get-pip.py
-$PYTHON get-pip.py
+$PYTHON get-pip.py --user
 
 echo "-- Create a virtualenv"
 

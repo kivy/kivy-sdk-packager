@@ -141,7 +141,7 @@ def compile_app(appname):
     if exists(py3):
         print('python3 detected...')
         check_call(
-            [pypath + '/script -OO -m compileall -b ' + pypath+'/yourapp'],
+            [pypath + '/script -OO -m compileall -b ' + pypath+'/myapp'],
             shell=True)
         print("Remove all __pycache__")
         check_call(
@@ -153,7 +153,7 @@ def compile_app(appname):
     else:
         print('using system python...')
         check_call(
-            [pypath + '/script -OO -m compileall ' + appname],
+            [pypath + '/script -OO -m compileall ' + pypath+'/myapp'],
             shell=True)
         print("-- Remove all py/pyc/pyo")
         check_call(

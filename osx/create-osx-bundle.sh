@@ -182,4 +182,4 @@ if [ "$1" == "python3" ]; then
     rm ./python
     ln -s ../../../Frameworks/python/3.6.5/bin/python .
 fi
-eicho "-- Done !"
+echo "-- Done !"

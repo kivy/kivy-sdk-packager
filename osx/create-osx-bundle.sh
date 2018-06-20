@@ -40,15 +40,11 @@ echo "-- Create Frameworks directory"
 mkdir -p Kivy.app/Contents/Frameworks
 if [ "$1" == "python3" ]  ;then
   if [ ! -f ~/.pyenv/bin/pyenv ]; then
-      curl -L https://raw.githubusercontent.com/yyuu/pyenv-installer/master/bin/pyenv-installer | bash
+      #curl -L https://raw.githubusercontent.com/yyuu/pyenv-installer/master/bin/pyenv-installer | bash
       ~/.pyenv/bin/pyenv install 3.6.5
       #curl -O https://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-2.2.7.tar.gz
       #tar xvf libressl-2.2.7.tar.gz
-      #CFLAGS="-I./libressl-2.2.7/include"  ~/.pyenv/bin/pyenv install 3.6.5
-      #brew install openssl
-      #brew link --force openssl
-      #brew upgrade pyenv      
-      #CFLAGS="-I$(brew --prefix openssl)/include -I$(xcrun --show-sdk-path)/usr/include" LDFLAGS="-L$(brew --prefix openssl)/lib" pyenv install 3.6.5
+      #CFLAGS="-I./libressl-2.2.7/include" install LDFLAGS="-Lopenssl/lib" ~/.pyenv/bin/pyenv install 3.6.5
   fi
   PYPATH="$SCRIPT_PATH/Kivy.app/Contents/Frameworks/python"
   mkdir "$PYPATH"
@@ -109,9 +105,6 @@ popd
 
 pushd Kivy.app/Contents/Resources/
 
-curl -OL http://bootstrap.pypa.io/get-pip.py
-$PYTHON get-pip.py --user
-
 echo "-- Create a virtualenv"
 
 if [ "$1" == "python3" ]; then
@@ -122,10 +115,15 @@ fi
 
 echo "-- Install dependencies"
 source venv/bin/activate
-curl -O -L https://github.com/cython/cython/archive/0.28.zip && venv/bin/pip install 0.28.zip && rm 0.28.zip
-curl -O -L https://github.com/sol/pygments/archive/2.2.0.zip && venv/bin/pip install 2.2.0.zip && rm 2.2.0.zip
-curl -O -L https://github.com/docutils-mirror/docutils/archive/0.12.zip && venv/bin/pip install 0.12.zip && rm 0.12.zip
-pip install git+https://github.com/tito/osxrelocator
+#curl -O -L https://github.com/cython/cython/archive/0.28.1.zip && venv/bin/pip install 0.28.1.zip && rm 0.28.1.zip
+#curl -O -L https://github.com/sol/pygments/archive/2.2.0.zip && venv/bin/pip install 2.2.0.zip && rm 2.2.0.zip
+#curl -O -L https://github.com/docutils-mirror/docutils/archive/0.12.zip && venv/bin/pip install 0.12.zip && rm 0.12.zip
+curl -OL http://bootstrap.pypa.io/get-pip.py
+./venv/bin/python get-pip.py
+./venv/bin/python -m pip install pygments
+./venv/bin/python -m pip install cython==0.28.2
+./venv/bin/python -m pip install docutils
+./venv/bin/python -m pip install git+https://github.com/tito/osxrelocator
 echo "-- Link python to the right location for relocation"
 ln -s ./venv/bin/python ./python
 
@@ -141,7 +139,7 @@ rm $VERSION.zip
 mv kivy-$VERSION kivy
 
 cd kivy
-USE_SDL2=1 make
+USE_SDL2=1 $PYTHON setup.py build_ext --inplace
 popd
 
 # --- Relocation
@@ -166,6 +164,8 @@ osxrelocator -r . @rpath/SDL2_image.framework/Versions/A/SDL2_image \
     @executable_path/../Frameworks/SDL2_image.framework/Versions/A/SDL2_image
 osxrelocator -r . @rpath/SDL2_mixer.framework/Versions/A/SDL2_mixer \
     @executable_path/../Frameworks/SDL2_mixer.framework/Versions/A/SDL2_mixer
+osxrelocator -r . ~/.pyenv/versions/3.6.5/openssl/lib/ \
+    @executable_path/../Frameworks/python/3.6.5/openssl/lib
 popd
 
 # relocate the activate script
@@ -182,4 +182,4 @@ if [ "$1" == "python3" ]; then
     rm ./python
     ln -s ../../../Frameworks/python/3.6.5/bin/python .
 fi
-echo "-- Done !"
+eicho "-- Done !"

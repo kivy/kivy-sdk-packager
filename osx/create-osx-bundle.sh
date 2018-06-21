@@ -139,7 +139,7 @@ rm $VERSION.zip
 mv kivy-$VERSION kivy
 
 cd kivy
-USE_SDL2=1 $PYTHON setup.py build_ext --inplace
+USE_SDL2=1 ./venv/bin/python setup.py build_ext --inplace
 popd
 
 # --- Relocation

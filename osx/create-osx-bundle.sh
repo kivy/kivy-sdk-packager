@@ -40,7 +40,7 @@ echo "-- Create Frameworks directory"
 mkdir -p Kivy.app/Contents/Frameworks
 if [ "$1" == "python3" ]  ;then
   if [ ! -f ~/.pyenv/bin/pyenv ]; then
-      #curl -L https://raw.githubusercontent.com/yyuu/pyenv-installer/master/bin/pyenv-installer | bash
+      curl -L https://raw.githubusercontent.com/yyuu/pyenv-installer/master/bin/pyenv-installer | bash
       ~/.pyenv/bin/pyenv install 3.6.5
       #curl -O https://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-2.2.7.tar.gz
       #tar xvf libressl-2.2.7.tar.gz

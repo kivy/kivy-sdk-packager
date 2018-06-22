@@ -1,12 +1,15 @@
-for f in Kivy*.app
+SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
+
+for f in $SCRIPTPATH/Kivy*.app
 do
-    if [ -d /Applications/"$f" ];
+    b=$(basename $f)
+    if [ -d /Applications/"$b" ];
     then
-        IFS='.' read -ra ADDR <<< "$f"
+        IFS='.' read -ra ADDR <<< "$b"
         lowercase=`echo $ADDR | tr '[A-Z]' '[a-z]'`
-        ln -s /Applications/"$f"/Contents/Resources/script /usr/local/bin/"$lowercase"
+        ln -s /Applications/"$b"/Contents/Resources/script /usr/local/bin/"$lowercase"
         osascript -e 'display notification "Symlink created" with title "Kivy: Make Symlinks"'
     else
-        osascript -e 'display notification " '$f' does not exist in /Applications." with title "Kivy: Make Symlinks"'
+        osascript -e 'display notification " '$b' does not exist in /Applications." with title "Kivy: Make Symlinks"'
     fi
 done

@@ -62,6 +62,23 @@ environment:
     COMPILER: msvc
     UPLOAD_DEV: 0
   - PACKAGE_TARGET: sdl2
+    PYVER: 37
+    BITTNESS: 86
+    COMPILER: msvc
+  - PACKAGE_TARGET: glew
+    PYVER: 37
+    BITTNESS: 86
+    COMPILER: msvc
+  - PACKAGE_TARGET: gstreamer
+    PYVER: 37
+    BITTNESS: 86
+    COMPILER: msvc
+  - PACKAGE_TARGET: angle
+    PYVER: 37
+    BITTNESS: 86
+    COMPILER: msvc
+    UPLOAD_DEV: 0
+  - PACKAGE_TARGET: sdl2
     PYVER: 27
     BITTNESS: 64
   - PACKAGE_TARGET: glew
@@ -101,6 +118,23 @@ environment:
     COMPILER: msvc
   - PACKAGE_TARGET: angle
     PYVER: 36
+    BITTNESS: 64
+    COMPILER: msvc
+    UPLOAD_DEV: 0
+  - PACKAGE_TARGET: sdl2
+    PYVER: 37
+    BITTNESS: 64
+    COMPILER: msvc
+  - PACKAGE_TARGET: glew
+    PYVER: 37
+    BITTNESS: 64
+    COMPILER: msvc
+  - PACKAGE_TARGET: gstreamer
+    PYVER: 37
+    BITTNESS: 64
+    COMPILER: msvc
+  - PACKAGE_TARGET: angle
+    PYVER: 37
     BITTNESS: 64
     COMPILER: msvc
     UPLOAD_DEV: 0

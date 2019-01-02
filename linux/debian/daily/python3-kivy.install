@@ -1,7 +1,6 @@
 usr/lib/python3/dist-packages/Kivy-*.egg-info
 usr/lib/python3/dist-packages/kivy/*.*
 usr/lib/python3/dist-packages/kivy/__pycache__
-usr/lib/python3/dist-packages/kivy/adapters
 usr/lib/python3/dist-packages/kivy/core
 usr/lib/python3/dist-packages/kivy/data
 usr/lib/python3/dist-packages/kivy/deps

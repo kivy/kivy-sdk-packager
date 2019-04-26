@@ -15,7 +15,7 @@ def get_gstreamer(cache, build_path, arch, pyver, package, output, compiler='min
     bitness = 'x86_64' if arch == '64' else 'x86'
     runtime_name = 'gstreamer-1.0-{}-{}-{}.msi'.format(
         compiler, bitness, gst_ver)
-    devel_name = 'gstreamer-1.0-{}-devel-{}-{}.msi'.format(
+    devel_name = 'gstreamer-1.0-devel-{}-{}-{}.msi'.format(
         compiler, bitness, gst_ver)
 
     gst = join(build_path, package)

@@ -5,16 +5,18 @@ from shutil import rmtree
 from os import walk, listdir
 from .common import *
 
-__version__ = '0.1.13'
+__version__ = '0.1.14'
 
-gst_ver = '1.14.1'
+gst_ver = '1.16.0'
 
 
 def get_gstreamer(cache, build_path, arch, pyver, package, output, compiler='mingw'):
     data = []
     bitness = 'x86_64' if arch == '64' else 'x86'
-    runtime_name = 'gstreamer-1.0-{}-{}.msi'.format(bitness, gst_ver)
-    devel_name = 'gstreamer-1.0-devel-{}-{}.msi'.format(bitness, gst_ver)
+    runtime_name = 'gstreamer-1.0-{}-{}-{}.msi'.format(
+        compiler, bitness, gst_ver)
+    devel_name = 'gstreamer-1.0-{}-devel-{}-{}.msi'.format(
+        compiler, bitness, gst_ver)
 
     gst = join(build_path, package)
     makedirs(gst)
@@ -31,18 +33,7 @@ def get_gstreamer(cache, build_path, arch, pyver, package, output, compiler='min
     gst = join(gst, 'gstreamer')
     gst = join(gst, list(listdir(gst))[0], bitness)
 
-    pkg_url = 'pkg-config_0.28-1_win{}.zip'.format('64' if arch == '64' else '32')
-    url = 'http://win32builder.gnome.org/packages/3.6/{}'.format(pkg_url)
-    local_url = download_cache(cache, url, build_path)
-
-    base_dir = join(build_path, splitext(pkg_url)[0])
-    makedirs(base_dir)
-    with open(local_url, 'rb') as fd:
-        ZipFile(fd).extractall(base_dir)
-
-    data.append((join(base_dir, 'bin', 'pkg-config.exe'), 'pkg-config.exe',
-                 'Scripts', True))
-
+    # remove from the includes directory anything that isn't needed to compile
     inc = join(gst, 'include')
     for f in listdir(inc):
         if f in ('glib-2.0', 'gstreamer-1.0'):
@@ -68,6 +59,7 @@ def get_gstreamer(cache, build_path, arch, pyver, package, output, compiler='min
         if isdir(f):
             rmtree(f)
 
+    # remove from lib everything but these files
     lib_files = [
         ['gio'],
         ['glib-2.0'],

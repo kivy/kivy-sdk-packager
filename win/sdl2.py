@@ -4,12 +4,12 @@ from os.path import join, sep
 from os import walk
 from .common import *
 
-__version__ = '0.1.18'
+__version__ = '0.1.19'
 
-sdl2_ver = '2.0.8'
-sdl2_mixer_ver = '2.0.2'
-sdl2_ttf_ver = '2.0.14'
-sdl2_image_ver = '2.0.3'
+sdl2_ver = '2.0.9'
+sdl2_mixer_ver = '2.0.4'
+sdl2_ttf_ver = '2.0.15'
+sdl2_image_ver = '2.0.4'
 
 
 def get_sdl2(cache, build_path, arch, pyver, package, output, compiler='mingw'):

@@ -175,6 +175,7 @@ def copy_files(src, dst):
         else:
             copy2(s, d)
 
+
 setup = '''
 import os
 from setuptools import setup
@@ -209,11 +210,14 @@ dep_init = '''
 kivy when it imports this package.
 """
 
-__all__ = ('dep_bins', )
-
 import sys
 import os
 from os.path import join, isdir, dirname
+
+__all__ = ('dep_bins', )
+
+__version__ = '{}'
+
 {}
 
 dep_bins = []
@@ -230,6 +234,7 @@ else:
 
 {}
 '''
+
 
 def make_package(build_path, name, files, version, output, license,
                  loader=('', '')):
@@ -281,7 +286,7 @@ just install it with `pip install kivy.deps.{0}`.\n'''.format(mod_name)
 
         deps_text = ''
         if not dev:
-            deps_text = dep_init.format(loader[0], mod_name, loader[1])
+            deps_text = dep_init.format(version, loader[0], mod_name, loader[1])
         with open(join(setup_path, 'kivy', 'deps', mod_name, '__init__.py'), 'wb') as fh:
             fh.write(deps_text.encode('ascii'))
 

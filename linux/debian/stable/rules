@@ -19,13 +19,13 @@ override_dh_installdocs:
 	$(MAKE) build
 	cd doc && PYTHONPATH=.. make html
 	dh_installdocs
-	$(MAKE) distclean
+	$(MAKE) clean
 
 override_dh_auto_install:
 	for PYX in $(shell pyversions -r) $(shell py3versions -r) ; do \
 	    $(MAKE) install PYTHON=$$PYX INSTALL_ROOT=$(CURDIR)/debian/tmp INSTALL_PREFIX=/usr INSTALL_LAYOUT=deb; \
 	    $(MAKE) install PYTHON=$$PYX-dbg INSTALL_ROOT=$(CURDIR)/debian/tmp-dbg INSTALL_PREFIX=/usr INSTALL_LAYOUT=deb; \
-	    $(MAKE) distclean; \
+	    $(MAKE) clean; \
 	done
 
 override_dh_auto_test:

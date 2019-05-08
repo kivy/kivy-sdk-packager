@@ -15,11 +15,11 @@ export DH_VERBOSE=1
 override_dh_auto_build:
 	echo "Skipping any builds - doing them on install..."
 
-override_dh_installdocs:
-	$(MAKE) build
-	cd doc && PYTHONPATH=.. make html
-	dh_installdocs
-	$(MAKE) clean
+# override_dh_installdocs:
+# 	$(MAKE) build
+# 	cd doc && PYTHONPATH=.. make html
+# 	dh_installdocs
+# 	$(MAKE) clean
 
 override_dh_auto_install:
 	for PYX in $(shell pyversions -r) $(shell py3versions -r) ; do \

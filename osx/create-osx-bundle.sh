@@ -20,14 +20,6 @@ fi
 SCRIPT_PATH=$(python -c "import os; print(os.path.realpath(os.path.dirname('${SCRIPT_PATH}')))")
 OSXRELOCATOR="osxrelocator"
 
-if [ "$1" == "python3" ]; then
-    PY_VENV="$PYTHON"
-else
-    PY_VENV="/System/Library/Frameworks/Python.framework/Versions/2.7/Resources/Python.app/Contents/MacOS/Python"
-fi
-echo "Installing virtualenv with $PY_VENV"
-$PY_VENV -m pip install virtualenv
-
 echo "-- Create initial Kivy.app package"
 $PLATYPUS -DBR -x -y \
     -i "$SCRIPT_PATH/data/icon.icns" \
@@ -118,7 +110,8 @@ echo "-- Create a virtualenv"
 if [ "$1" == "python3" ]; then
     $PYTHON -m venv venv
 else
-    $PY_VENV -m virtualenv -p /System/Library/Frameworks/Python.framework/Versions/2.7/Resources/Python.app/Contents/MacOS/Python venv
+    python -m pip install virtualenv
+    python -m virtualenv -p /System/Library/Frameworks/Python.framework/Versions/2.7/Resources/Python.app/Contents/MacOS/Python venv
 fi
 
 echo "-- Install dependencies"
@@ -128,6 +121,7 @@ source venv/bin/activate
 #curl -O -L https://github.com/docutils-mirror/docutils/archive/0.12.zip && venv/bin/pip install 0.12.zip && rm 0.12.zip
 curl -OL http://bootstrap.pypa.io/get-pip.py
 ./venv/bin/python get-pip.py
+./venv/bin/python -m pip install virtualenv
 ./venv/bin/python -m pip install pygments
 ./venv/bin/python -m pip install cython==0.28.2
 ./venv/bin/python -m pip install docutils
@@ -179,7 +173,7 @@ popd
 # relocate the activate script
 echo "-- Relocate virtualenv"
 pushd Kivy.app/Contents/Resources/venv
-$PY_VENV -m virtualenv --relocatable .
+virtualenv --relocatable .
 sed -i -r 's#^VIRTUAL_ENV=.*#VIRTUAL_ENV=$(cd $(dirname "$BASH_SOURCE"); dirname `pwd`)#' bin/activate
 rm bin/activate.csh
 rm bin/activate.fish

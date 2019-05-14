@@ -72,6 +72,7 @@ echo '
 ' | osascript
  
 sync
+sleep 10
 
 # unmount it
 hdiutil detach "${DEVICE}"

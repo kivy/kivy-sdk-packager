@@ -4,7 +4,7 @@ from os.path import join, sep
 from os import walk
 from .common import *
 
-__version__ = '0.1.19'
+__version__ = '0.1.20'
 
 sdl2_ver = '2.0.9'
 sdl2_mixer_ver = '2.0.4'
@@ -30,7 +30,7 @@ def get_sdl2(cache, build_path, arch, pyver, package, output, compiler='mingw'):
         if 'ttf' in name and compiler == 'mingw':
             # see https://github.com/kivy/kivy/issues/3889 and
             # https://bugzilla.libsdl.org/show_bug.cgi?id=3241
-            url = 'https://drive.google.com/uc?export=download&id=0B1_HB9J8mZepenN2YmtHSUZmb0U'
+            url = 'https://kivy.org/downloads/appveyor/SDL2_ttf_deps/SDL2_ttf-devel-2.0.13-mingw.tar.gz'
             local_url = download_cache(r'C:\kivy_no_cache', url, build_path, 'SDL2_ttf-devel-2.0.13-mingw.tar.gz')
         else:
             local_url = download_cache(cache, url, build_path, fname)

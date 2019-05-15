@@ -35,7 +35,7 @@ Build-Depends: debhelper (>= 7.0.50~), dh-python, pkg-config, git,
 # mtdev
  libmtdev-dev,
 # documentation generator
- python-sphinx,             python3-sphinx,
+ python3-sphinx,
 # X Window Virtual Framebuffer
  xvfb,
 # LaTex

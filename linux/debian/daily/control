@@ -14,6 +14,8 @@ Build-Depends: debhelper (>= 7.0.50~), dh-python, pkg-config, git,
  python-nose,               python3-nose,
 # pip for cython
  python-pip,               python3-pip,
+# wheel for cython
+ python3-wheel,
 # setuptools
  python-setuptools,        python3-setuptools,
 # measuring code coverage during during test execution

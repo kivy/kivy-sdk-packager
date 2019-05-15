@@ -17,7 +17,15 @@ override_dh_auto_build:
 	echo "Skipping any builds - doing them on install..."
 
 override_dh_installdocs:
+	rm -rf pypackages setuptools/setuptools.egg-info || true
 	$(MAKE) clean
+	mkdir pypackages && cd setuptools
+	python3 bootstrap.py && cd ..
+	python3 -m pip install $(CURDIR)/setuptools -t $(CURDIR)/pypackages --no-deps --upgrade
+	python3 -m pip install $(CURDIR)/pip -t $(CURDIR)/pypackages --no-deps --upgrade
+	python3 -m pip install $(CURDIR)/wheel -t $(CURDIR)/pypackages --no-deps --upgrade
+	python3 -m pip install $(CURDIR)/cython -t $(CURDIR)/pypackages --no-deps --upgrade
+	python3 -m pip list
 	$(MAKE) PYTHON=python3 force
 	cd doc && PYTHONPATH=..:$PYTHONPATH make html
 	dh_installdocs

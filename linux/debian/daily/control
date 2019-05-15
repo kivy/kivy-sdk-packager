@@ -8,8 +8,14 @@ Build-Depends: debhelper (>= 7.0.50~), dh-python, pkg-config, git,
  python-all-dev (>= 2.7),   python3-deadsnakes-all-dev | python3-all-dev (>= 3.3),
 # Cython2/3
  cython,                    cython3,
+# wget to download pip
+ wget, curl,
 # code unittest
  python-nose,               python3-nose,
+# pip for cython
+ python-pip,               python3-pip,
+# setuptools
+ python-setuptools,        python3-setuptools,
 # measuring code coverage during during test execution
  python-coverage,
 # Mesa OpenGL / -ES development files
@@ -150,10 +156,10 @@ Depends: ${misc:Depends},
          python-docutils,
          python-pygments,
          xclip | xsel,
-         libsdl2-2.0-0 | python-pygame,
-         libsdl2-image-2.0-0 | python-pygame | python-gi | python-pil,
-         libsdl2-mixer-2.0-0 | python-pygame | libgstreamer1.0-0,
-         libsdl2-ttf-2.0-0 | python-pygame | python-pil,
+         libsdl2-2.0-0,
+         libsdl2-image-2.0-0 | python-pil,
+         libsdl2-mixer-2.0-0 | libgstreamer1.0-0,
+         libsdl2-ttf-2.0-0 | python-pil,
 Provides:
  ${python:Provides},
  python-kivy-common,
@@ -194,7 +200,7 @@ Depends: ${misc:Depends},
          python3-pygments,
          xclip | xsel,
          libsdl2-2.0-0,
-         libsdl2-image-2.0-0 | python3-gi | python3-pil,
+         libsdl2-image-2.0-0 | python3-pil,
          libsdl2-mixer-2.0-0 | libgstreamer1.0-0,
          libsdl2-ttf-2.0-0 | python3-pil,
 Provides:

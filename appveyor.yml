@@ -5,6 +5,7 @@ os: Visual Studio 2015
 branches:
   only:
   - master
+  - kivy_deps
   - appveyor_test
 environment:
   WHEEL_DIR: C:\kivy_wheels
@@ -169,9 +170,9 @@ build_script:
 
     Check-Error
 
-    $WHEEL_BIN = "kivy.deps.$env:PACKAGE_TARGET-$WHEEL_VERSION-cp$env:PYVER-cp$env:PYVER`m-$WHELL_BITNESS.whl"
+    $WHEEL_BIN = "kivy_deps.$env:PACKAGE_TARGET-$WHEEL_VERSION-cp$env:PYVER-cp$env:PYVER`m-$WHELL_BITNESS.whl"
 
-    $WHEEL_DEV = "kivy.deps.$env:PACKAGE_TARGET`_dev-$WHEEL_VERSION-cp$env:PYVER-cp$env:PYVER`m-$WHELL_BITNESS.whl"
+    $WHEEL_DEV = "kivy_deps.$env:PACKAGE_TARGET`_dev-$WHEEL_VERSION-cp$env:PYVER-cp$env:PYVER`m-$WHELL_BITNESS.whl"
 
 
     C:\Python35-x64\Scripts\pip.exe install requests
@@ -206,9 +207,9 @@ build_script:
       Check-Error
 
       if ($env:UPLOAD_DEV -eq "1") {
-        C:\msys64\usr\bin\bash --login -c "/c/projects/kivy-sdk-packager/ci/appveyor_server_upload.sh $env:SERVER_IP '$env:WHEEL_DIR' kivy.deps.$env:PACKAGE_TARGET`_dev-* ci/win/deps/$env:PACKAGE_TARGET`_dev/"
+        C:\msys64\usr\bin\bash --login -c "/c/projects/kivy-sdk-packager/ci/appveyor_server_upload.sh $env:SERVER_IP '$env:WHEEL_DIR' kivy_deps.$env:PACKAGE_TARGET`_dev-* ci/win/deps/$env:PACKAGE_TARGET`_dev/"
         Check-Error
       }
-      C:\msys64\usr\bin\bash --login -c "/c/projects/kivy-sdk-packager/ci/appveyor_server_upload.sh $env:SERVER_IP '$env:WHEEL_DIR' kivy.deps.$env:PACKAGE_TARGET-* ci/win/deps/$env:PACKAGE_TARGET/"
+      C:\msys64\usr\bin\bash --login -c "/c/projects/kivy-sdk-packager/ci/appveyor_server_upload.sh $env:SERVER_IP '$env:WHEEL_DIR' kivy_deps.$env:PACKAGE_TARGET-* ci/win/deps/$env:PACKAGE_TARGET/"
       Check-Error
     }

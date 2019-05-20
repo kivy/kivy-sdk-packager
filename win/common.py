@@ -262,7 +262,7 @@ def make_package(build_path, name, files, version, output, license,
     for dev, package_data in ((True, data_dev), (False, data)):
         package_name = '{}_dev' if dev else '{}'
         mod_name = package_name = package_name.format(name)
-        package_name = 'kivy.deps.{}'.format(mod_name)
+        package_name = 'kivy_deps.{}'.format(mod_name)
 
         # remove any additional files from before
         for fname in list(listdir(setup_path)):
@@ -275,11 +275,11 @@ def make_package(build_path, name, files, version, output, license,
             else:
                 rmtree(full_fname, ignore_errors=True)
 
-        makedirs(join(setup_path, 'kivy', 'deps', mod_name))
+        makedirs(join(setup_path, 'kivy_deps', mod_name))
         readme = '''Binary dependency distribution of Kivy on Windows.
 
 This package is a distribution of the kivy binary dependency {0}. To use,
-just install it with `pip install kivy.deps.{0}`.\n'''.format(mod_name)
+just install it with `pip install kivy_deps.{0}`.\n'''.format(mod_name)
 
         with open(join(setup_path, 'README'), 'wb') as fh:
             fh.write(readme.encode('ascii'))
@@ -287,7 +287,7 @@ just install it with `pip install kivy.deps.{0}`.\n'''.format(mod_name)
         deps_text = ''
         if not dev:
             deps_text = dep_init.format(version, loader[0], mod_name, loader[1])
-        with open(join(setup_path, 'kivy', 'deps', mod_name, '__init__.py'), 'wb') as fh:
+        with open(join(setup_path, 'kivy_deps', mod_name, '__init__.py'), 'wb') as fh:
             fh.write(deps_text.encode('ascii'))
 
         if package_data:

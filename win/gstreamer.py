@@ -2,10 +2,11 @@ from __future__ import absolute_import, print_function
 import sys
 from os.path import join, sep
 from shutil import rmtree
-from os import walk, listdir
+from os import walk, listdir, remove
+import glob
 from .common import *
 
-__version__ = '0.1.14'
+__version__ = '0.1.15'
 
 gst_ver = '1.16.0'
 
@@ -92,6 +93,19 @@ def get_gstreamer(cache, build_path, arch, pyver, package, output, compiler='min
     rmtree(join(gst, 'lib', 'gio'))
     rmtree(join(gst, 'lib', 'glib-2.0'))
     rmtree(join(gst, 'lib', 'gstreamer-1.0'))
+
+    blacklist = [
+        'gstassrender*',
+        'gstclosedcaption*',
+        'gstpango*',
+        'libass*',
+        'libharfbuzz*',
+        'pangocairo*',
+        'pangoft2*',
+    ]
+    for pat in blacklist:
+        for name in glob.glob(join(glob.escape(gst), 'bin', pat)):
+            remove(name)
 
     items = list(listdir(gst))
     items.remove('include')

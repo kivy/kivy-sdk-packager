@@ -10,6 +10,11 @@ __version__ = '0.1.15'
 
 gst_ver = '1.16.0'
 
+try:
+    glob_escape = glob.escape
+except AttributeError:  # python 2
+    glob_escape = lambda x: x
+
 
 def get_gstreamer(cache, build_path, arch, pyver, package, output, compiler='mingw'):
     data = []
@@ -104,7 +109,7 @@ def get_gstreamer(cache, build_path, arch, pyver, package, output, compiler='min
         'pangoft2*',
     ]
     for pat in blacklist:
-        for name in glob.glob(join(glob.escape(gst), 'bin', pat)):
+        for name in glob.glob(join(glob_escape(gst), 'bin', pat)):
             remove(name)
 
     items = list(listdir(gst))

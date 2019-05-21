@@ -107,6 +107,8 @@ def get_gstreamer(cache, build_path, arch, pyver, package, output, compiler='min
         'libharfbuzz*',
         'pangocairo*',
         'pangoft2*',
+        'gstopus*',
+        'libssl*',
     ]
     for pat in blacklist:
         for name in glob.glob(join(glob_escape(gst), 'bin', pat)):

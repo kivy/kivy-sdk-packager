@@ -3,8 +3,8 @@ import sys
 from os.path import join, sep
 from shutil import rmtree
 from os import walk, listdir, remove
-import glob
 from .common import *
+import glob  # also imported in common so it must be after
 
 __version__ = '0.1.15'
 

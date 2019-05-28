@@ -235,6 +235,14 @@ else:
 {}
 '''
 
+dep_init_dev = '''
+"""The following code is required to make the dependency binaries available to
+kivy when it imports this package.
+"""
+__version__ = '{}'
+
+'''
+
 
 def make_package(build_path, name, files, version, output, license,
                  loader=('', '')):
@@ -284,9 +292,10 @@ just install it with `pip install kivy.deps.{0}`.\n'''.format(mod_name)
         with open(join(setup_path, 'README'), 'wb') as fh:
             fh.write(readme.encode('ascii'))
 
-        deps_text = ''
         if not dev:
             deps_text = dep_init.format(version, loader[0], mod_name, loader[1])
+        else:
+            deps_text = dep_init_dev.format(version)
         with open(join(setup_path, 'kivy', 'deps', mod_name, '__init__.py'), 'wb') as fh:
             fh.write(deps_text.encode('ascii'))
 

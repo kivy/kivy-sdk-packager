@@ -36,6 +36,9 @@ environment:
     PYVER: 35
     BITTNESS: 86
     COMPILER: msvc
+  - PACKAGE_TARGET: gstreamer
+    PYVER: 35
+    BITTNESS: 86
   - PACKAGE_TARGET: angle
     PYVER: 35
     BITTNESS: 86
@@ -49,6 +52,9 @@ environment:
     PYVER: 36
     BITTNESS: 86
     COMPILER: msvc
+  - PACKAGE_TARGET: gstreamer
+    PYVER: 36
+    BITTNESS: 86
   - PACKAGE_TARGET: angle
     PYVER: 36
     BITTNESS: 86
@@ -62,6 +68,9 @@ environment:
     PYVER: 37
     BITTNESS: 86
     COMPILER: msvc
+  - PACKAGE_TARGET: gstreamer
+    PYVER: 37
+    BITTNESS: 86
   - PACKAGE_TARGET: angle
     PYVER: 37
     BITTNESS: 86

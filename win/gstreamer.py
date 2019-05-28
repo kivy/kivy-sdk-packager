@@ -100,15 +100,17 @@ def get_gstreamer(cache, build_path, arch, pyver, package, output, compiler='min
     rmtree(join(gst, 'lib', 'gstreamer-1.0'))
 
     blacklist = [
-        'gstassrender*',
-        'gstclosedcaption*',
-        'gstpango*',
+        '*gstassrender*',
+        '*gstclosedcaption*',
+        '*gstpango*',
         'libass*',
         'libharfbuzz*',
-        'pangocairo*',
-        'pangoft2*',
-        'gstopus*',
+        '*pangocairo*',
+        '*pangoft2*',
+        '*gstopus*',
         'libssl*',
+        '*gstdtls*',
+        '*rsvg*'
     ]
     for pat in blacklist:
         for name in glob.glob(join(glob_escape(gst), 'bin', pat)):

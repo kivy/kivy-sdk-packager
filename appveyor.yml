@@ -203,10 +203,6 @@ build_script:
     if ($ALREADY_EXISTS -ne "1") {
       python -m pip install pip wheel setuptools --upgrade
       Check-Error
-      if ($env:COMPILER -eq "mingw") {
-        pip install -i https://pypi.anaconda.org/carlkl/simple mingwpy
-        Check-Error
-      }
 
       echo "Executing win.$env:PACKAGE_TARGET build_path $env:KIVY_BUILD_DIR arch $env:BITTNESS pyver $env:PYVER package $env:PACKAGE_TARGET output $env:WHEEL_DIR cache $env:KIVY_BUILD_CACHE compiler $env:COMPILER"
       python -m win.$env:PACKAGE_TARGET build_path "$env:KIVY_BUILD_DIR" arch $env:BITTNESS pyver $env:PYVER package $env:PACKAGE_TARGET output "$env:WHEEL_DIR" cache "$env:KIVY_BUILD_CACHE" compiler "$env:COMPILER"

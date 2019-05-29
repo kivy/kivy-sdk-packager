@@ -201,7 +201,7 @@ setup(
     url='http://kivy.org/',
     license='{}',
     distclass=BinaryDistribution,
-    packages=['{}'],
+    packages=['kivy_deps', '{}'],
     data_files=data)
 '''
 
@@ -291,6 +291,9 @@ just install it with `pip install kivy_deps.{0}`.\n'''.format(mod_name)
 
         with open(join(setup_path, 'README'), 'wb') as fh:
             fh.write(readme.encode('ascii'))
+
+        with open(join(setup_path, 'kivy_deps', '__init__.py'), 'w') as fh:
+            fh.write("__path__ = __import__('pkgutil').extend_path(__path__, __name__)")
 
         if not dev:
             deps_text = dep_init.format(version, loader[0], mod_name, loader[1])

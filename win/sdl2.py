@@ -4,7 +4,7 @@ from os.path import join, sep
 from os import walk
 from .common import *
 
-__version__ = '0.1.21'
+__version__ = '0.1.22'
 
 sdl2_ver = '2.0.9'
 sdl2_mixer_ver = '2.0.4'

@@ -5,7 +5,7 @@ from os import walk, environ
 from glob import glob
 from .common import *
 
-__version__ = '0.1.8'
+__version__ = '0.1.9'
 
 msvc_batch = '''
 call "C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat" {}

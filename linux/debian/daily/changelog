@@ -1,3 +1,9 @@
+kivy (1.11.0-dev) UNRELEASED; urgency=medium
+
+  * update to new dev
+
+ -- Matthew Einhorn <moiein2000@gmail.com>  Sat, 01 June 2019 14:44:00 -0500
+
 kivy (1.10.1-dev) UNRELEASED; urgency=medium
 
   * bump version to new dev

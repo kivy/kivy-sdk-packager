@@ -1,6 +1,4 @@
 from __future__ import absolute_import, print_function
-import sys
-from os.path import join, sep
 from os import walk
 from .common import *
 
@@ -12,50 +10,32 @@ sdl2_ttf_ver = '2.0.15'
 sdl2_image_ver = '2.0.4'
 
 
-def get_sdl2(cache, build_path, arch, pyver, package, output, compiler='mingw'):
+def get_sdl2(cache, build_path, arch, pyver, package, output):
     data = []
-    suffix = 'VC.zip' if compiler == 'msvc' else 'mingw.tar.gz'
 
     for name, ver in (
-        ('https://www.libsdl.org/release/SDL2-devel-{}-{}',
+        ('https://www.libsdl.org/release/SDL2-devel-{}-VC.zip',
          sdl2_ver),
-        ('https://www.libsdl.org/projects/SDL_mixer/release/SDL2_mixer-devel-{}-{}',
+        ('https://www.libsdl.org/projects/SDL_mixer/release/SDL2_mixer-devel-{}-VC.zip',
          sdl2_mixer_ver),
-        ('http://www.libsdl.org/projects/SDL_ttf/release/SDL2_ttf-devel-{}-{}',
+        ('http://www.libsdl.org/projects/SDL_ttf/release/SDL2_ttf-devel-{}-VC.zip',
          sdl2_ttf_ver),
-        ('http://www.libsdl.org/projects/SDL_image/release/SDL2_image-devel-{}-{}',
+        ('http://www.libsdl.org/projects/SDL_image/release/SDL2_image-devel-{}-VC.zip',
          sdl2_image_ver)):
-        url = name.format(ver, suffix)
+        url = name.format(ver)
         fname = url.split('/')[-1]
-        if 'ttf' in name and compiler == 'mingw':
-            # see https://github.com/kivy/kivy/issues/3889 and
-            # https://bugzilla.libsdl.org/show_bug.cgi?id=3241
-            url = 'https://kivy.org/downloads/appveyor/SDL2_ttf_deps/SDL2_ttf-devel-2.0.13-mingw.tar.gz'
-            local_url = download_cache(r'C:\kivy_no_cache', url, build_path, 'SDL2_ttf-devel-2.0.13-mingw.tar.gz')
-        else:
-            local_url = download_cache(cache, url, build_path, fname)
+        local_url = download_cache(cache, url, build_path, fname)
 
         exec_binary(
             'Extracting {}'.format(local_url),
             [zip7, 'x', '-y', local_url], cwd=build_path, shell=True, exclude=zip_q)
-        if compiler == 'mingw':
-            exec_binary(
-                'Extracting {}'.format(local_url[:-3]),
-                [zip7, 'x', '-y', local_url[:-3]], cwd=build_path, shell=True, exclude=zip_q)
 
-        base_dir = local_url.replace('-{}'.format(suffix), '').replace('-devel', '')
+        base_dir = local_url.replace('-VC.zip', '').replace('-devel', '')
 
-        if compiler == 'mingw':
-            if arch == '64':
-                base_dir = join(base_dir, 'x86_64-w64-mingw32')
-            else:
-                base_dir = join(base_dir, 'i686-w64-mingw32')
-            sources = {p: join(base_dir, p) for p in ('lib', 'include', 'bin')}
-        else:
-            sources = {
-                'lib': join(base_dir, 'lib', 'x64' if arch == '64' else 'x86'),
-                'include': join(base_dir, 'include')
-                }
+        sources = {
+            'lib': join(base_dir, 'lib', 'x64' if arch == '64' else 'x86'),
+            'include': join(base_dir, 'include')
+            }
 
         for d in sources.keys():
             # bin goes to python/share/kivy_package
@@ -68,10 +48,9 @@ def get_sdl2(cache, build_path, arch, pyver, package, output, compiler='mingw'):
                 elif d == 'lib':
                     base = 'libs'
                 elif d == 'include':
-                    if compiler == 'mingw':
-                        base = d
-                    else:
-                        base = join(d, 'SDL2')
+                    base = join(d, 'SDL2')
+                else:
+                    assert False
 
                 dirpath = dirpath.replace(src, '')
                 if dirpath and dirpath[0] == sep:
@@ -79,7 +58,7 @@ def get_sdl2(cache, build_path, arch, pyver, package, output, compiler='mingw'):
 
                 for filename in filenames:
                     is_dev = d != 'bin'
-                    if compiler != 'mingw' and d == 'lib':
+                    if d == 'lib':
                         if filename.endswith('lib'):
                             base = 'libs'
                         else:

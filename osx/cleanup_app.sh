@@ -13,8 +13,6 @@ PYPATH="$APPPATH/Contents/Frameworks/python"
 rm -rf "$APPPATH/"Contents/Resources/kivy/{doc,build,examples}
 rm -rf "$APPPATH/"Contents/Resources/kivy/kivy/{tools,tests}
 rm -rf "$APPPATH/"Contents/Resources/venv/bin/{cython*,cygdb,osxrelocator,pip*,pygmentize,easy_install*,rst*}
-rm -rf "$APPPATH/"Contents/Resources/venv/lib/python2.7/site-packages/{pip*,Cython*,setuptools*,osxrelocator*,cython*}
-rm -rf "$APPPATH/"Contents/Resources/venv/lib/python2.7/site-packages/wheel/test
 rm -rf "$APPPATH/"Contents/Resources/venv/lib/python3.5/site-packages/{pip*,Cython*,setuptools*,osxrelocator*,cython*,wheel/test*}
 rm -rf "$APPPATH/"Contents/Resources/venv/lib/python3.5/site-packages/wheel/test
 rm -rf "$PYPATH/"3.5.0/lib/python3.5/{turtledemo,test,curses,unittest,ensurepip,idlelib,pydoc_data,setuptools*}

@@ -9,7 +9,6 @@ branches:
   - appveyor_test
 environment:
   WHEEL_DIR: C:\kivy_wheels
-  COMPILER: mingw
   KIVY_BUILD_DIR: C:\kivy_build
   KIVY_BUILD_CACHE: C:\kivy_build_cache2
   KEY_WITH_NO_TEETH:
@@ -18,126 +17,84 @@ environment:
   MSYSTEM: MINGW64
   CHERE_INVOKING: 1
   UPLOAD_DEV: 1
-  USE_MINGWPY: 0
   matrix:
   - PACKAGE_TARGET: sdl2
-    PYVER: 27
-    BITTNESS: 86
-  - PACKAGE_TARGET: glew
-    PYVER: 27
-    BITTNESS: 86
-    USE_MINGWPY: 1
-  - PACKAGE_TARGET: gstreamer
-    PYVER: 27
-    BITTNESS: 86
-  - PACKAGE_TARGET: sdl2
     PYVER: 35
     BITTNESS: 86
-    COMPILER: msvc
   - PACKAGE_TARGET: glew
     PYVER: 35
     BITTNESS: 86
-    COMPILER: msvc
   - PACKAGE_TARGET: gstreamer
     PYVER: 35
     BITTNESS: 86
   - PACKAGE_TARGET: angle
     PYVER: 35
     BITTNESS: 86
-    COMPILER: msvc
     UPLOAD_DEV: 0
   - PACKAGE_TARGET: sdl2
     PYVER: 36
     BITTNESS: 86
-    COMPILER: msvc
   - PACKAGE_TARGET: glew
     PYVER: 36
     BITTNESS: 86
-    COMPILER: msvc
   - PACKAGE_TARGET: gstreamer
     PYVER: 36
     BITTNESS: 86
   - PACKAGE_TARGET: angle
     PYVER: 36
     BITTNESS: 86
-    COMPILER: msvc
     UPLOAD_DEV: 0
   - PACKAGE_TARGET: sdl2
     PYVER: 37
     BITTNESS: 86
-    COMPILER: msvc
   - PACKAGE_TARGET: glew
     PYVER: 37
     BITTNESS: 86
-    COMPILER: msvc
   - PACKAGE_TARGET: gstreamer
     PYVER: 37
     BITTNESS: 86
   - PACKAGE_TARGET: angle
     PYVER: 37
     BITTNESS: 86
-    COMPILER: msvc
     UPLOAD_DEV: 0
   - PACKAGE_TARGET: sdl2
-    PYVER: 27
-    BITTNESS: 64
-  - PACKAGE_TARGET: glew
-    PYVER: 27
-    BITTNESS: 64
-    USE_MINGWPY: 1
-  - PACKAGE_TARGET: gstreamer
-    PYVER: 27
-    BITTNESS: 64
-  - PACKAGE_TARGET: sdl2
     PYVER: 35
     BITTNESS: 64
-    COMPILER: msvc
   - PACKAGE_TARGET: glew
     PYVER: 35
     BITTNESS: 64
-    COMPILER: msvc
   - PACKAGE_TARGET: gstreamer
     PYVER: 35
     BITTNESS: 64
-    COMPILER: msvc
   - PACKAGE_TARGET: angle
     PYVER: 35
     BITTNESS: 64
-    COMPILER: msvc
     UPLOAD_DEV: 0
   - PACKAGE_TARGET: sdl2
     PYVER: 36
     BITTNESS: 64
-    COMPILER: msvc
   - PACKAGE_TARGET: glew
     PYVER: 36
     BITTNESS: 64
-    COMPILER: msvc
   - PACKAGE_TARGET: gstreamer
     PYVER: 36
     BITTNESS: 64
-    COMPILER: msvc
   - PACKAGE_TARGET: angle
     PYVER: 36
     BITTNESS: 64
-    COMPILER: msvc
     UPLOAD_DEV: 0
   - PACKAGE_TARGET: sdl2
     PYVER: 37
     BITTNESS: 64
-    COMPILER: msvc
   - PACKAGE_TARGET: glew
     PYVER: 37
     BITTNESS: 64
-    COMPILER: msvc
   - PACKAGE_TARGET: gstreamer
     PYVER: 37
     BITTNESS: 64
-    COMPILER: msvc
   - PACKAGE_TARGET: angle
     PYVER: 37
     BITTNESS: 64
-    COMPILER: msvc
     UPLOAD_DEV: 0
 cache: C:\kivy_build_cache2
 build_script:
@@ -187,16 +144,16 @@ build_script:
     $WHEEL_DEV = "kivy_deps.$env:PACKAGE_TARGET`_dev-$WHEEL_VERSION-cp$env:PYVER-cp$env:PYVER`m-$WHELL_BITNESS.whl"
 
 
-    C:\Python35-x64\Scripts\pip.exe install requests
+    C:\Python37-x64\Scripts\pip.exe install requests
 
     Check-Error
 
-    $ALREADY_EXISTS = C:\Python35-x64\python.exe -c "import requests; print(1 if requests.head('https://kivy.org/downloads/appveyor/deps/$env:PACKAGE_TARGET/$WHEEL_BIN').status_code == 200 else '')"
+    $ALREADY_EXISTS = C:\Python37-x64\python.exe -c "import requests; print(1 if requests.head('https://kivy.org/downloads/appveyor/deps/$env:PACKAGE_TARGET/$WHEEL_BIN').status_code == 200 else '')"
 
     Check-Error
 
     if ($ALREADY_EXISTS -eq "1" -and $env:UPLOAD_DEV -eq "1") {
-      $ALREADY_EXISTS = C:\Python35-x64\python.exe -c "import requests; print(1 if requests.head('https://kivy.org/downloads/appveyor/deps/$env:PACKAGE_TARGET`_dev/$WHEEL_DEV').status_code == 200 else '')"
+      $ALREADY_EXISTS = C:\Python37-x64\python.exe -c "import requests; print(1 if requests.head('https://kivy.org/downloads/appveyor/deps/$env:PACKAGE_TARGET`_dev/$WHEEL_DEV').status_code == 200 else '')"
       Check-Error
     }
 
@@ -206,14 +163,9 @@ build_script:
     if ($ALREADY_EXISTS -ne "1") {
       python -m pip install pip wheel setuptools --upgrade
       Check-Error
-      
-      if ($env:USE_MINGWPY -eq "1") {
-        pip install -i https://pypi.anaconda.org/carlkl/simple mingwpy
-        Check-Error
-      }
 
-      echo "Executing win.$env:PACKAGE_TARGET build_path $env:KIVY_BUILD_DIR arch $env:BITTNESS pyver $env:PYVER package $env:PACKAGE_TARGET output $env:WHEEL_DIR cache $env:KIVY_BUILD_CACHE compiler $env:COMPILER"
-      python -m win.$env:PACKAGE_TARGET build_path "$env:KIVY_BUILD_DIR" arch $env:BITTNESS pyver $env:PYVER package $env:PACKAGE_TARGET output "$env:WHEEL_DIR" cache "$env:KIVY_BUILD_CACHE" compiler "$env:COMPILER"
+      echo "Executing win.$env:PACKAGE_TARGET build_path $env:KIVY_BUILD_DIR arch $env:BITTNESS pyver $env:PYVER package $env:PACKAGE_TARGET output $env:WHEEL_DIR cache $env:KIVY_BUILD_CACHE
+      python -m win.$env:PACKAGE_TARGET build_path "$env:KIVY_BUILD_DIR" arch $env:BITTNESS pyver $env:PYVER package $env:PACKAGE_TARGET output "$env:WHEEL_DIR" cache "$env:KIVY_BUILD_CACHE"
       Check-Error
 
       secure-file\tools\secure-file -decrypt C:\projects\kivy-sdk-packager\ci\id_rsa.enc -secret "$env:KEY_WITH_NO_TEETH"

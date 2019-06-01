@@ -1,11 +1,9 @@
 from __future__ import print_function
-import subprocess
 import sys
 import os
 from os import makedirs, listdir, remove, rename, environ
 from os.path import exists, join, abspath, isdir, isfile, splitext, dirname
 from os.path import basename, split as path_split, sep
-import argparse
 from subprocess import Popen, PIPE
 from shutil import rmtree, copytree, copy2
 from glob import glob
@@ -13,26 +11,10 @@ from collections import defaultdict
 import hashlib
 import re
 from re import match
-import csv
-import platform
-from zipfile import ZipFile
-try:
-    from ConfigParser import ConfigParser
-    import urlparse
-    from urllib import urlretrieve as pyurlretrieve
-except ImportError:
-    from configparser import ConfigParser
-    from urllib import parse as urlparse
-    from urllib.request import urlretrieve as pyurlretrieve
-import ssl
-from functools import partial
-import inspect
+from urllib.request import urlretrieve as pyurlretrieve
 from time import sleep
 
 zip_q = re.compile('^Extracting .*')
-
-if 'context' in inspect.getargspec(pyurlretrieve)[0]:
-    pyurlretrieve = partial(pyurlretrieve, context=ssl._create_unverified_context())
 
 zip7 = r'C:\Program Files\7-Zip\7z.exe'
 

@@ -8,6 +8,7 @@
 
 # Uncomment this to turn on verbose mode.
 export DH_VERBOSE=1
+export PYTHONPATH=$(CURDIR)/pypackages:$PYTHONPATH
 
 %:
 	dh $@ --with python2,python3
@@ -16,21 +17,40 @@ override_dh_auto_build:
 	echo "Skipping any builds - doing them on install..."
 
 override_dh_installdocs:
-	$(MAKE) build
-	cd doc && PYTHONPATH=.. make html
+	rm -rf pypackages setuptools/setuptools.egg-info || true;
+	$(MAKE) clean;
+	mkdir pypackages;
+	ls && cd setuptools && ls && python3 bootstrap.py && cd ..;
+	python3 -m pip list;
+	python3 -m pip install $(CURDIR)/setuptools -t $(CURDIR)/pypackages --no-deps --upgrade || true;
+	python3 -m pip install $(CURDIR)/pip -t $(CURDIR)/pypackages --no-deps --upgrade || true;
+	python3 -m pip install $(CURDIR)/wheel -t $(CURDIR)/pypackages --no-deps --upgrade || true;
+	python3 -m pip install $(CURDIR)/cython -t $(CURDIR)/pypackages --no-deps --upgrade || true;
+	python3 -m pip list;
+	$(MAKE) PYTHON=python3 force;
+	cd doc && PYTHONPATH=..:$PYTHONPATH make html;
 	dh_installdocs
-	$(MAKE) clean
 
 override_dh_auto_install:
-	for PYX in $(shell pyversions -r) $(shell py3versions -r) ; do \
-	    $(MAKE) install PYTHON=$$PYX INSTALL_ROOT=$(CURDIR)/debian/tmp INSTALL_PREFIX=/usr INSTALL_LAYOUT=deb; \
-	    $(MAKE) install PYTHON=$$PYX-dbg INSTALL_ROOT=$(CURDIR)/debian/tmp-dbg INSTALL_PREFIX=/usr INSTALL_LAYOUT=deb; \
+	echo "PYTHONPATH is $$PYTHONPATH"
+	for PYX in $(shell py3versions -r) $(shell pyversions -r); do \
+	    rm -rf pypackages setuptools/setuptools.egg-info || true; \
 	    $(MAKE) clean; \
+	    mkdir pypackages && cd setuptools; \
+	    $$PYX bootstrap.py && cd ..; \
+	    $$PYX -m pip list; \
+	    $$PYX -m pip install $(CURDIR)/setuptools -t $(CURDIR)/pypackages --no-deps --upgrade; \
+	    $$PYX -m pip install $(CURDIR)/pip -t $(CURDIR)/pypackages --no-deps --upgrade; \
+	    $$PYX -m pip install $(CURDIR)/wheel -t $(CURDIR)/pypackages --no-deps --upgrade; \
+	    $$PYX -m pip install $(CURDIR)/cython -t $(CURDIR)/pypackages --no-deps --upgrade; \
+	    $$PYX -m pip list; \
+	    $(MAKE) install PYTHON=$$PYX INSTALL_ROOT=$(CURDIR)/debian/tmp INSTALL_PREFIX=/usr INSTALL_LAYOUT=deb; \
+	    $(MAKE) install PYTHON=$$PYX-dbg INSTALL_ROOT=$(CURDIR)/debian/tmp-dbg INSTALL_PREFIX=/usr INSTALL_LAYOUT=deb || true; \
 	done
 
 override_dh_auto_test:
 	#xvfb-run -s "+extension GLX" dh_auto_test
 	echo "! TESTS ARE TEMPORARY DISABLED !"
 
-override_dh_install:
-	dh_install --fail-missing --sourcedir debian/tmp
+override_dh_missing:
+	dh_missing --fail-missing --sourcedir debian/tmp

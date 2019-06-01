@@ -1,7 +1,7 @@
 Windows
 =======
 
-Process to make a ne release
+Process to make a new release
 -----------------------------
 
 * For each dependency, 

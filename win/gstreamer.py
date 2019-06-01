@@ -16,13 +16,11 @@ except AttributeError:  # python 2
     glob_escape = lambda x: x
 
 
-def get_gstreamer(cache, build_path, arch, pyver, package, output, compiler='mingw'):
+def get_gstreamer(cache, build_path, arch, pyver, package, output):
     data = []
     bitness = 'x86_64' if arch == '64' else 'x86'
-    runtime_name = 'gstreamer-1.0-{}-{}-{}.msi'.format(
-        compiler, bitness, gst_ver)
-    devel_name = 'gstreamer-1.0-devel-{}-{}-{}.msi'.format(
-        compiler, bitness, gst_ver)
+    runtime_name = 'gstreamer-1.0-msvc-{}-{}.msi'.format(bitness, gst_ver)
+    devel_name = 'gstreamer-1.0-devel-msvc-{}-{}.msi'.format(bitness, gst_ver)
 
     gst = join(build_path, package)
     makedirs(gst)

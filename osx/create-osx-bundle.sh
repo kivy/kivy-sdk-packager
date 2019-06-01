@@ -38,22 +38,20 @@ echo "--- Frameworks"
 
 echo "-- Create Frameworks directory"
 mkdir -p Kivy.app/Contents/Frameworks
-if [ "$1" == "python3" ]  ;then
-  if [ ! -f ~/.pyenv/bin/pyenv ]; then
-      curl -L https://raw.githubusercontent.com/yyuu/pyenv-installer/master/bin/pyenv-installer | bash
-      ~/.pyenv/bin/pyenv install 3.6.5
-      #curl -O https://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-2.2.7.tar.gz
-      #tar xvf libressl-2.2.7.tar.gz
-      #CFLAGS="-I./libressl-2.2.7/include" install LDFLAGS="-Lopenssl/lib" ~/.pyenv/bin/pyenv install 3.6.5
-  fi
-  PYPATH="$SCRIPT_PATH/Kivy.app/Contents/Frameworks/python"
-  mkdir "$PYPATH"
-  cp -a ~/.pyenv/versions/3.6.5 "$PYPATH"
-  #find -E "$PYPATH/3.6.5" -regex '.*.pyc' | grep -v "opt-2.pyc" | xargs rm
-  PYTHON="$PYPATH/3.6.5/bin/python3"
-  rm -rf python/3.6.5/share
-  rm -rf python/3.6.5/lib/python3.6/{test,unittest/test,turtledemo,tkinter}
+if [ ! -f ~/.pyenv/bin/pyenv ]; then
+  curl -L https://raw.githubusercontent.com/yyuu/pyenv-installer/master/bin/pyenv-installer | bash
+  ~/.pyenv/bin/pyenv install 3.6.5
+  #curl -O https://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-2.2.7.tar.gz
+  #tar xvf libressl-2.2.7.tar.gz
+  #CFLAGS="-I./libressl-2.2.7/include" install LDFLAGS="-Lopenssl/lib" ~/.pyenv/bin/pyenv install 3.6.5
 fi
+PYPATH="$SCRIPT_PATH/Kivy.app/Contents/Frameworks/python"
+mkdir "$PYPATH"
+cp -a ~/.pyenv/versions/3.6.5 "$PYPATH"
+#find -E "$PYPATH/3.6.5" -regex '.*.pyc' | grep -v "opt-2.pyc" | xargs rm
+PYTHON="$PYPATH/3.6.5/bin/python3"
+rm -rf python/3.6.5/share
+rm -rf python/3.6.5/lib/python3.6/{test,unittest/test,turtledemo,tkinter}
 pushd Kivy.app/Contents/Frameworks
 
 echo "-- Copy frameworks"
@@ -107,12 +105,7 @@ pushd Kivy.app/Contents/Resources/
 
 echo "-- Create a virtualenv"
 
-if [ "$1" == "python3" ]; then
-    $PYTHON -m venv venv
-else
-    python -m pip install virtualenv
-    python -m virtualenv -p /System/Library/Frameworks/Python.framework/Versions/2.7/Resources/Python.app/Contents/MacOS/Python venv
-fi
+$PYTHON -m venv venv
 
 echo "-- Install dependencies"
 source venv/bin/activate
@@ -179,9 +172,7 @@ rm bin/activate.csh
 rm bin/activate.fish
 popd
 
-if [ "$1" == "python3" ]; then
-    pushd Kivy.app/Contents/Resources/venv/bin/
-    rm ./python
-    ln -s ../../../Frameworks/python/3.6.5/bin/python .
-fi
+pushd Kivy.app/Contents/Resources/venv/bin/
+rm ./python
+ln -s ../../../Frameworks/python/3.6.5/bin/python .
 echo "-- Done !"

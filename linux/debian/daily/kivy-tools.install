@@ -1,13 +1,6 @@
 # moved to kivy-garden/garden
 # usr/bin/garden
 
-## Python2
-# Tools
-usr/lib/python2.7/dist-packages/kivy/tools
-# Tests
-usr/lib/python2.7/dist-packages/kivy/tests/
-
-## Python3
 # Tools
 usr/lib/python3/dist-packages/kivy/tools
 # Tests

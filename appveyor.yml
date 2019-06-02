@@ -164,7 +164,7 @@ build_script:
       python -m pip install pip wheel setuptools --upgrade
       Check-Error
 
-      echo "Executing win.$env:PACKAGE_TARGET build_path $env:KIVY_BUILD_DIR arch $env:BITTNESS pyver $env:PYVER package $env:PACKAGE_TARGET output $env:WHEEL_DIR cache $env:KIVY_BUILD_CACHE
+      echo "Executing win.$env:PACKAGE_TARGET build_path $env:KIVY_BUILD_DIR arch $env:BITTNESS pyver $env:PYVER package $env:PACKAGE_TARGET output $env:WHEEL_DIR cache $env:KIVY_BUILD_CACHE"
       python -m win.$env:PACKAGE_TARGET build_path "$env:KIVY_BUILD_DIR" arch $env:BITTNESS pyver $env:PYVER package $env:PACKAGE_TARGET output "$env:WHEEL_DIR" cache "$env:KIVY_BUILD_CACHE"
       Check-Error
 

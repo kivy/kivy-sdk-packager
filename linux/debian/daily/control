@@ -157,7 +157,7 @@ Depends: ${misc:Depends},
          python3-pygments,
          xclip | xsel,
          libsdl2-2.0-0,
-         libsdl2-image-2.0-0 | python3-pil,
+         libsdl2-image-2.0-0,
          libsdl2-mixer-2.0-0 | libgstreamer1.0-0,
          libsdl2-ttf-2.0-0 | python3-pil,
 Provides:
@@ -176,6 +176,7 @@ Suggests:
  gstreamer1.0-plugins-bad,
  gstreamer1.0-plugins-ugly,
  python3-enchant,
+ python3-pil,
 Description: Kivy - Multimedia / Multitouch framework - Python 3.x modules
  Kivy is an open source library for developing multi-touch applications. It is
  completely cross platform (Linux/OSX/Win/Android) and released under the terms

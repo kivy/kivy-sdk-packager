@@ -1,9 +1,34 @@
 #!/bin/bash
 
-VERSION=1.10.0
-if [ "x$2" != "x" ]; then
-    VERSION=$2
+USAGE="Usage::
+
+    create-osx-bundle.sh <Kivy version> <Python version>
+
+For Example::
+
+    sh ./create-osx-bundle.sh 1.11.1 3.7.4
+"
+
+# -- VERSION=1.11.1
+if [ "x$1" != "x" ]; then
+    VERSION=$1
+else
+    echo "$USAGE"
+    exit 1
 fi
+
+echo "Using kivy version $VERSION"
+
+# -- PYVER=3.7.4
+
+if [ "x$2" != "x" ]; then
+    PYVER=$2
+else
+    echo "$USAGE"
+    exit 1
+fi
+
+echo "Using Python version $PYVER"
 
 set -x  # verbose
 set -e  # exit on error
@@ -19,7 +44,6 @@ fi
 
 SCRIPT_PATH=$(python -c "import os; print(os.path.realpath(os.path.dirname('${SCRIPT_PATH}')))")
 OSXRELOCATOR="osxrelocator"
-
 echo "-- Create initial Kivy.app package"
 $PLATYPUS -DBR -x -y \
     -i "$SCRIPT_PATH/data/icon.icns" \
@@ -40,18 +64,18 @@ echo "-- Create Frameworks directory"
 mkdir -p Kivy.app/Contents/Frameworks
 if [ ! -f ~/.pyenv/bin/pyenv ]; then
   curl -L https://raw.githubusercontent.com/yyuu/pyenv-installer/master/bin/pyenv-installer | bash
-  ~/.pyenv/bin/pyenv install 3.6.5
+  ~/.pyenv/bin/pyenv install $PYVER
   #curl -O https://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-2.2.7.tar.gz
   #tar xvf libressl-2.2.7.tar.gz
   #CFLAGS="-I./libressl-2.2.7/include" install LDFLAGS="-Lopenssl/lib" ~/.pyenv/bin/pyenv install 3.6.5
 fi
 PYPATH="$SCRIPT_PATH/Kivy.app/Contents/Frameworks/python"
 mkdir "$PYPATH"
-cp -a ~/.pyenv/versions/3.6.5 "$PYPATH"
-#find -E "$PYPATH/3.6.5" -regex '.*.pyc' | grep -v "opt-2.pyc" | xargs rm
-PYTHON="$PYPATH/3.6.5/bin/python3"
-rm -rf python/3.6.5/share
-rm -rf python/3.6.5/lib/python3.6/{test,unittest/test,turtledemo,tkinter}
+cp -a ~/.pyenv/versions/$PYVER "$PYPATH"
+find -E "$PYPATH/$PYVER" -regex '.*.pyc' | grep -v "opt-2.pyc" | xargs rm
+PYTHON="$PYPATH/$PYVER/bin/python3"
+rm -rf python/$PYVER/share
+rm -rf python/$PYVER/lib/python${PYVER[@]:0:3}/{test,unittest/test,turtledemo,tkinter}
 pushd Kivy.app/Contents/Frameworks
 
 echo "-- Copy frameworks"
@@ -174,5 +198,5 @@ popd
 
 pushd Kivy.app/Contents/Resources/venv/bin/
 rm ./python
-ln -s ../../../Frameworks/python/3.6.5/bin/python .
+ln -s ../../../Frameworks/python/$PYVER/bin/python .
 echo "-- Done !"

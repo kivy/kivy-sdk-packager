@@ -1,11 +1,34 @@
 #!/bin/bash
 
-VERSION=1.11.1
-if [ "x$2" != "x" ]; then
-    VERSION=$2
+USAGE="Usage::
+
+    create-osx-bundle.sh <Kivy version> <Python version>
+
+For Example::
+
+    sh ./create-osx-bundle.sh 1.11.1 3.7.4
+"
+
+# -- VERSION=1.11.1
+if [ "x$1" != "x" ]; then
+    VERSION=$1
+else
+    echo "$USAGE"
+    exit 1
 fi
 
-PYVER=3.7.4
+echo "Using kivy version $VERSION"
+
+# -- PYVER=3.7.4
+
+if [ "x$2" != "x" ]; then
+    PYVER=$2
+else
+    echo "$USAGE"
+    exit 1
+fi
+
+echo "Using Python version $PYVER"
 
 set -x  # verbose
 set -e  # exit on error
@@ -21,7 +44,6 @@ fi
 
 SCRIPT_PATH=$(python -c "import os; print(os.path.realpath(os.path.dirname('${SCRIPT_PATH}')))")
 OSXRELOCATOR="osxrelocator"
-
 echo "-- Create initial Kivy.app package"
 $PLATYPUS -DBR -x -y \
     -i "$SCRIPT_PATH/data/icon.icns" \

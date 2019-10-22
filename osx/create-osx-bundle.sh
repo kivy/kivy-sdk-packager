@@ -65,15 +65,12 @@ mkdir -p Kivy.app/Contents/Frameworks
 if [ ! -f ~/.pyenv/bin/pyenv ]; then
   curl -L https://raw.githubusercontent.com/yyuu/pyenv-installer/master/bin/pyenv-installer | bash
   ~/.pyenv/bin/pyenv install $PYVER
-  #curl -O https://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-2.2.7.tar.gz
-  #tar xvf libressl-2.2.7.tar.gz
-  #CFLAGS="-I./libressl-2.2.7/include" install LDFLAGS="-Lopenssl/lib" ~/.pyenv/bin/pyenv install 3.6.5
 fi
 PYPATH="$SCRIPT_PATH/Kivy.app/Contents/Frameworks/python"
 mkdir "$PYPATH"
 cp -a ~/.pyenv/versions/$PYVER "$PYPATH"
 find -E "$PYPATH/$PYVER" -regex '.*.pyc' | grep -v "opt-2.pyc" | xargs rm
-PYTHON="$PYPATH/$PYVER/bin/python3"
+PYTHON="$PYPATH/$PYVER/bin/python"
 rm -rf python/$PYVER/share
 rm -rf python/$PYVER/lib/python${PYVER[@]:0:3}/{test,unittest/test,turtledemo,tkinter}
 pushd Kivy.app/Contents/Frameworks
@@ -128,8 +125,12 @@ popd
 pushd Kivy.app/Contents/Resources/
 
 echo "-- Create a virtualenv"
-
-$PYTHON -m venv venv
+if [ ${PYVER[@]:0:1} = 3 ]; then
+    $PYTHON -m venv venv
+else
+    $PYTHON -m pip install virtualenv
+    $PYTHON -m virtualenv venv
+fi
 
 echo "-- Install dependencies"
 source venv/bin/activate

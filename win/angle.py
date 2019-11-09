@@ -11,7 +11,8 @@ msbuild .\\src\\angle.sln /property:Configuration=Release /property:Platform={}
 
 
 def get_angle(cache, build_path, arch, pyver, package, output):
-    url = 'https://github.com/Microsoft/angle/archive/ms-master.zip'
+    url = 'https://github.com/microsoft/angle/archive/' \
+          'c61d0488abd9663e0d4d2450db7345baa2c0dfb6.zip'
     local_url = download_cache(cache, url, build_path, force=True)
 
     print('Extracting {}'.format(local_url))

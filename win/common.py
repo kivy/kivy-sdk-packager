@@ -210,7 +210,10 @@ Can be used e.g. with pyinstaller to ensure it copies all the binaries.
 _root = sys.prefix
 dep_bins = [join(_root, 'share', '{}', 'bin')]
 if isdir(dep_bins[0]):
-    os.environ["PATH"] = dep_bins[0] + os.pathsep + os.environ["PATH"]
+    if hasattr(os, 'add_dll_directory'):
+        os.add_dll_directory(dep_bins[0])
+    else:
+        os.environ["PATH"] = dep_bins[0] + os.pathsep + os.environ["PATH"]
 else:
     dep_bins = []
 

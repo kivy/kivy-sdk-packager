@@ -58,6 +58,19 @@ environment:
     BITTNESS: 86
     UPLOAD_DEV: 0
   - PACKAGE_TARGET: sdl2
+    PYVER: 38
+    BITTNESS: 86
+  - PACKAGE_TARGET: glew
+    PYVER: 38
+    BITTNESS: 86
+  - PACKAGE_TARGET: gstreamer
+    PYVER: 38
+    BITTNESS: 86
+  - PACKAGE_TARGET: angle
+    PYVER: 38
+    BITTNESS: 86
+    UPLOAD_DEV: 0
+  - PACKAGE_TARGET: sdl2
     PYVER: 35
     BITTNESS: 64
   - PACKAGE_TARGET: glew
@@ -94,6 +107,19 @@ environment:
     BITTNESS: 64
   - PACKAGE_TARGET: angle
     PYVER: 37
+    BITTNESS: 64
+    UPLOAD_DEV: 0
+  - PACKAGE_TARGET: sdl2
+    PYVER: 38
+    BITTNESS: 64
+  - PACKAGE_TARGET: glew
+    PYVER: 38
+    BITTNESS: 64
+  - PACKAGE_TARGET: gstreamer
+    PYVER: 38
+    BITTNESS: 64
+  - PACKAGE_TARGET: angle
+    PYVER: 38
     BITTNESS: 64
     UPLOAD_DEV: 0
 cache: C:\kivy_build_cache2

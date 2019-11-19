@@ -63,6 +63,9 @@ environment:
   - PACKAGE_TARGET: glew
     PYVER: 38
     BITTNESS: 86
+  - PACKAGE_TARGET: gstreamer
+    PYVER: 38
+    BITTNESS: 86
   - PACKAGE_TARGET: angle
     PYVER: 38
     BITTNESS: 86

@@ -2,7 +2,7 @@ from __future__ import absolute_import, print_function
 from .common import *
 from zipfile import ZipFile
 
-__version__ = '0.1.9'
+__version__ = '0.1.10'
 
 msvc_batch = '''
 call "C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat" {}

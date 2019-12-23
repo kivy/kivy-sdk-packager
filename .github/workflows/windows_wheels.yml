@@ -18,7 +18,6 @@ jobs:
       matrix:
         arch: ['x64', 'x86']
         package: ['sdl2', 'angle', 'glew', 'gstreamer']
-    if: contains(github.event.head_commit.message, join(join('[build ', matrix.package), ' win]')) || contains(github.event.head_commit.message, join(join('[publish ', matrix.package), ' win]'))
     env:
       PACKAGE_TARGET: ${{ matrix.package }}
       PACKAGE_ARCH: ${{ matrix.arch }}
@@ -29,15 +28,18 @@ jobs:
         with:
           python-version: 3.x
       - name: Cache deps
+        if: contains(github.event.head_commit.message, join(join('[build ', matrix.package), ' win]')) || contains(github.event.head_commit.message, join(join('[publish ', matrix.package), ' win]'))
         uses: actions/cache@v1
         with:
           path: kivy_build_cache
           key: cache-packages-${{ matrix.package }}-${{ matrix.arch }}-${{ hashFiles(join(join('win/', matrix.package), '.py')) }}
       - name: Prepare Environment
+        if: contains(github.event.head_commit.message, join(join('[build ', matrix.package), ' win]')) || contains(github.event.head_commit.message, join(join('[publish ', matrix.package), ' win]'))
         run: |
           . .\.ci\windows_ci.ps1
           Prepre-env
       - name: Download Dependencies
+        if: contains(github.event.head_commit.message, join(join('[build ', matrix.package), ' win]')) || contains(github.event.head_commit.message, join(join('[publish ', matrix.package), ' win]'))
         run: |
           . .\.ci\windows_ci.ps1
           Download-Packages
@@ -50,7 +52,6 @@ jobs:
         python: [ '3.5', '3.6', '3.7', '3.8' ]
         arch: ['x64', 'x86']
         package: ['sdl2', 'angle', 'glew', 'gstreamer']
-    if: contains(github.event.head_commit.message, join(join('[build ', matrix.package), ' win]')) || contains(github.event.head_commit.message, join(join('[publish ', matrix.package), ' win]'))
     env:
       PACKAGE_TARGET: ${{ matrix.package }}
       PACKAGE_ARCH: ${{ matrix.arch }}
@@ -63,18 +64,22 @@ jobs:
         architecture: ${{ matrix.arch }}
     - name: Cache deps
       uses: actions/cache@v1
+      if: contains(github.event.head_commit.message, join(join('[build ', matrix.package), ' win]')) || contains(github.event.head_commit.message, join(join('[publish ', matrix.package), ' win]'))
       with:
         path: kivy_build_cache
         key: cache-packages-${{ matrix.package }}-${{ matrix.arch }}-${{ hashFiles(join(join('win/', matrix.package), '.py')) }}
     - name: Prepare Environment
+      if: contains(github.event.head_commit.message, join(join('[build ', matrix.package), ' win]')) || contains(github.event.head_commit.message, join(join('[publish ', matrix.package), ' win]'))
       run: |
         . .\.ci\windows_ci.ps1
         Prepre-env
     - name: Build package
+      if: contains(github.event.head_commit.message, join(join('[build ', matrix.package), ' win]')) || contains(github.event.head_commit.message, join(join('[publish ', matrix.package), ' win]'))
       run: |
         . .\.ci\windows_ci.ps1
         Create-Packages
     - name: Install MSYS2
+      if: contains(github.event.head_commit.message, join(join('[build ', matrix.package), ' win]')) || contains(github.event.head_commit.message, join(join('[publish ', matrix.package), ' win]'))
       run: choco install msys2
     - name: Upload wheels to server
       if: contains(github.event.head_commit.message, join(join('[publish ', matrix.package), ' win]'))
@@ -86,6 +91,7 @@ jobs:
         . .\.ci\windows_ci.ps1
         Upload-windows-wheels-to-server -ip "$env:SERVER_IP"
     - name: Upload wheels as artifact
+      if: contains(github.event.head_commit.message, join(join('[build ', matrix.package), ' win]')) || contains(github.event.head_commit.message, join(join('[publish ', matrix.package), ' win]'))
       uses: actions/upload-artifact@master
       with:
         name: wheels
@@ -96,12 +102,3 @@ jobs:
       with:
         user: __token__
         password: ${{ secrets.pypi_password }}
-
-  always_job:
-    name: Always run job
-    runs-on: windows-latest
-    steps:
-      - name: Always run
-        run: |
-          echo "This is run to prevent the workflow from showing an error if the wheels job is not run and no jobs run is an error."
-          echo "See https://github.community/t5/GitHub-Actions/Workflow-is-failing-if-no-job-can-be-ran-due-to-condition/m-p/38085"

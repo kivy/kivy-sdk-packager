@@ -10,6 +10,7 @@ env:
   SERVER_IP: '159.203.106.198'
   KIVY_BUILD_DIR: kivy_build
   KIVY_BUILD_CACHE: kivy_build_cache
+  PYTHONPATH: .
 
 jobs:
   prepare_cache:

@@ -7,7 +7,7 @@ __version__ = '0.2.0'
 glew_ver = '2.1.0'
 
 batch = '''
-call "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Enterprise\\Common7\\Tools\\VsDevCmd.bat"
+call "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Enterprise\\Common7\\Tools\\VsDevCmd.bat"
 devenv /upgrade .\\build\\vc12\\glew.sln
 msbuild .\\build\\vc12\\glew.sln /property:Configuration=Release /property:Platform={}
 '''
@@ -16,6 +16,7 @@ msbuild .\\build\\vc12\\glew.sln /property:Configuration=Release /property:Platf
 def get_glew(cache, build_path, arch, package, output, download_only=False):
     url = ('http://jaist.dl.sourceforge.net/project/glew/glew/{}/glew-{}.zip'.
            format(glew_ver, glew_ver))
+    url = 'http://jaist.dl.sourceforge.net/project/glew/glew/snapshots/glew-20190928.tgz'
     local_url = download_cache(cache, url, build_path)
     if download_only:
         return

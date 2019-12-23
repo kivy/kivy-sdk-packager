@@ -6,9 +6,9 @@ from os import walk, listdir, remove
 from .common import *
 import glob  # also imported in common so it must be after
 
-__version__ = '0.1.18'
+__version__ = '0.2.0'
 
-gst_ver = '1.16.0'
+gst_ver = '1.16.2'
 
 try:
     glob_escape = glob.escape
@@ -16,10 +16,10 @@ except AttributeError:  # python 2
     glob_escape = lambda x: x
 
 
-def get_gstreamer(cache, build_path, arch, pyver, package, output):
+def get_gstreamer(cache, build_path, arch, package, output, download_only=False):
     data = []
-    bitness = 'x86_64' if arch == '64' else 'x86'
-    compiler = 'msvc' if arch == '64' else 'mingw'
+    bitness = 'x86_64' if arch == 'x64' else 'x86'
+    compiler = 'msvc' if arch == 'x64' else 'mingw'
     runtime_name = 'gstreamer-1.0-{}-{}-{}.msi'.format(
         compiler, bitness, gst_ver)
     devel_name = 'gstreamer-1.0-devel-{}-{}-{}.msi'.format(
@@ -33,10 +33,15 @@ def get_gstreamer(cache, build_path, arch, pyver, package, output):
             'https://gstreamer.freedesktop.org/data/pkg/windows/{}/{}'.format(gst_ver, name))
         local_url = download_cache(cache, url, build_path)
 
-        exec_binary(
-            "Extracting {} to {}".format(local_url, gst),
-            ['msiexec', '/a', local_url, '/qb', 'TARGETDIR={}'.format(gst)],
-            cwd=gst, shell=False)
+        if not download_only:
+            exec_binary(
+                "Extracting {} to {}".format(local_url, gst),
+                ['msiexec', '/a', local_url, '/qb',
+                 'TARGETDIR={}'.format(gst)],
+                cwd=gst, shell=False)
+    if download_only:
+        return
+
     gst = join(gst, 'gstreamer')
     gst = join(gst, list(listdir(gst))[0], bitness)
 

@@ -2,7 +2,7 @@ from __future__ import absolute_import, print_function
 from .common import *
 from zipfile import ZipFile
 
-__version__ = '0.1.9'
+__version__ = '0.2.0'
 
 msvc_batch = '''
 call "C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat" {}
@@ -10,10 +10,12 @@ msbuild .\\src\\angle.sln /property:Configuration=Release /property:Platform={}
 '''
 
 
-def get_angle(cache, build_path, arch, pyver, package, output):
+def get_angle(cache, build_path, arch, package, output, download_only=False):
     url = 'https://github.com/microsoft/angle/archive/' \
           'c61d0488abd9663e0d4d2450db7345baa2c0dfb6.zip'
-    local_url = download_cache(cache, url, build_path, force=True)
+    local_url = download_cache(cache, url, build_path)
+    if download_only:
+        return
 
     print('Extracting {}'.format(local_url))
     with open(local_url, 'rb') as fd:
@@ -22,8 +24,8 @@ def get_angle(cache, build_path, arch, pyver, package, output):
     base_dir = join(build_path, package, list(listdir(join(build_path, package)))[0])
     data = []
 
-    src = 'x86_amd64' if arch == '64' else 'x86'
-    target = 'x64' if arch == '64' else 'Win32'
+    src = 'x86_amd64' if arch == 'x64' else 'x86'
+    target = 'x64' if arch == 'x64' else 'Win32'
     batch = msvc_batch.format(src, target)
     d3d_out = out_dir = join(base_dir, 'src', 'Release_{}'.format(target))
 

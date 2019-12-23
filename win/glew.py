@@ -2,7 +2,7 @@ from __future__ import absolute_import, print_function
 from .common import *
 from zipfile import ZipFile
 
-__version__ = '0.1.12'
+__version__ = '0.2.0'
 
 glew_ver = '2.1.0'
 
@@ -13,10 +13,12 @@ msbuild .\\build\\vc12\\glew.sln /property:Configuration=Release /property:Platf
 '''
 
 
-def get_glew(cache, build_path, arch, pyver, package, output):
+def get_glew(cache, build_path, arch, package, output, download_only=False):
     url = ('http://jaist.dl.sourceforge.net/project/glew/glew/{}/glew-{}.zip'.
            format(glew_ver, glew_ver))
     local_url = download_cache(cache, url, build_path)
+    if download_only:
+        return
 
     print('Extracting glew {}'.format(local_url))
     with open(local_url, 'rb') as fd:
@@ -29,8 +31,8 @@ def get_glew(cache, build_path, arch, pyver, package, output):
         data.append((
             fname, fname.replace(z, '').strip(sep), join('include', 'GL'), True))
 
-    src = 'amd64' if arch == '64' else 'amd64_x86'
-    target = 'x64' if arch == '64' else 'Win32'
+    src = 'amd64' if arch == 'x64' else 'amd64_x86'
+    target = 'x64' if arch == 'x64' else 'Win32'
     with open(join(base_dir, 'compile.bat'), 'w') as fh:
         fh.write(batch.format(src, target))
     exec_binary(

@@ -2,17 +2,18 @@ from __future__ import absolute_import, print_function
 from os import walk
 from .common import *
 
-__version__ = '0.1.23'
+__version__ = '0.2.0'
 
-sdl2_ver = '2.0.9'
+sdl2_ver = '2.0.10'
 sdl2_mixer_ver = '2.0.4'
 sdl2_ttf_ver = '2.0.15'
-sdl2_image_ver = '2.0.4'
+sdl2_image_ver = '2.0.5'
 
 
-def get_sdl2(cache, build_path, arch, pyver, package, output):
+def get_sdl2(cache, build_path, arch, package, output, download_only=False):
     data = []
 
+    paths = []
     for name, ver in (
         ('https://www.libsdl.org/release/SDL2-devel-{}-VC.zip',
          sdl2_ver),
@@ -24,8 +25,12 @@ def get_sdl2(cache, build_path, arch, pyver, package, output):
          sdl2_image_ver)):
         url = name.format(ver)
         fname = url.split('/')[-1]
-        local_url = download_cache(cache, url, build_path, fname)
+        paths.append(download_cache(cache, url, build_path, fname))
 
+    if download_only:
+        return
+
+    for local_url in paths:
         exec_binary(
             'Extracting {}'.format(local_url),
             [zip7, 'x', '-y', local_url], cwd=build_path, shell=True, exclude=zip_q)
@@ -33,7 +38,7 @@ def get_sdl2(cache, build_path, arch, pyver, package, output):
         base_dir = local_url.replace('-VC.zip', '').replace('-devel', '')
 
         sources = {
-            'lib': join(base_dir, 'lib', 'x64' if arch == '64' else 'x86'),
+            'lib': join(base_dir, 'lib', arch),
             'include': join(base_dir, 'include')
             }
 

@@ -18,12 +18,12 @@ function Download-Packages() {
 function Create-Packages() {
     python -m pip install pip wheel setuptools --upgrade
     python -m "win.$env:PACKAGE_TARGET" build_path "$(pwd)\$env:KIVY_BUILD_DIR" arch $env:PACKAGE_ARCH package $env:PACKAGE_TARGET output "$(pwd)\dist" cache "$(pwd)\$env:KIVY_BUILD_CACHE"
+    dir "$(pwd)\dist"
 }
 
 
 function Upload-windows-wheels-to-server($ip) {
     echo "Uploading wheels*:"
-    dir "$(pwd)\dist"
-    C:\tools\msys64\usr\bin\bash --login -c ".ci/windows-server-upload.sh $ip '$(pwd)\dist' 'kivy_deps.$env:PACKAGE_TARGET`_dev-*' ci/win/deps/$env:PACKAGE_TARGET`_dev/"
-    C:\tools\msys64\usr\bin\bash --login -c ".ci/windows-server-upload.sh $ip '$(pwd)\dist' 'kivy_deps.$env:PACKAGE_TARGET-*' ci/win/deps/$env:PACKAGE_TARGET/"
+    C:\tools\msys64\usr\bin\bash --login -c ".ci/windows-server-upload.sh $ip '$(pwd)\dist' 'kivy_deps.$env:PACKAGE_TARGET`_dev-*.whl' ci/win/deps/$env:PACKAGE_TARGET`_dev/"
+    C:\tools\msys64\usr\bin\bash --login -c ".ci/windows-server-upload.sh $ip '$(pwd)\dist' 'kivy_deps.$env:PACKAGE_TARGET-*.whl' ci/win/deps/$env:PACKAGE_TARGET/"
 }

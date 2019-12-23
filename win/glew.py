@@ -7,7 +7,7 @@ __version__ = '0.2.0'
 glew_ver = '2.1.0'
 
 batch = '''
-call "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Enterprise\\Common7\\Tools\\VsDevCmd.bat"
+call "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Enterprise\\Common7\\Tools\\VsDevCmd.bat"
 devenv /upgrade .\\build\\vc12\\glew.sln
 msbuild .\\build\\vc12\\glew.sln /property:Configuration=Release /property:Platform={}
 '''

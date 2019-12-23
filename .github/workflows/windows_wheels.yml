@@ -28,18 +28,15 @@ jobs:
         with:
           python-version: 3.x
       - name: Cache deps
-        if: contains(github.event.head_commit.message, join(join('[build ', matrix.package), ' win]')) || contains(github.event.head_commit.message, join(join('[publish ', matrix.package), ' win]'))
         uses: actions/cache@v1
         with:
           path: kivy_build_cache
-          key: cache-packages-${{ matrix.package }}-${{ matrix.arch }}-${{ hashFiles(join(join('win/', matrix.package), '.py')) }}
+            key: cache-packages-${{ matrix.package }}-${{ matrix.arch }}-${{ hashFiles(format('win/{0}.py', matrix.package)) }}
       - name: Prepare Environment
-        if: contains(github.event.head_commit.message, join(join('[build ', matrix.package), ' win]')) || contains(github.event.head_commit.message, join(join('[publish ', matrix.package), ' win]'))
         run: |
           . .\.ci\windows_ci.ps1
           Prepre-env
       - name: Download Dependencies
-        if: contains(github.event.head_commit.message, join(join('[build ', matrix.package), ' win]')) || contains(github.event.head_commit.message, join(join('[publish ', matrix.package), ' win]'))
         run: |
           . .\.ci\windows_ci.ps1
           Download-Packages
@@ -64,22 +61,18 @@ jobs:
         architecture: ${{ matrix.arch }}
     - name: Cache deps
       uses: actions/cache@v1
-      if: contains(github.event.head_commit.message, join(join('[build ', matrix.package), ' win]')) || contains(github.event.head_commit.message, join(join('[publish ', matrix.package), ' win]'))
       with:
         path: kivy_build_cache
-        key: cache-packages-${{ matrix.package }}-${{ matrix.arch }}-${{ hashFiles(join(join('win/', matrix.package), '.py')) }}
+        key: cache-packages-${{ matrix.package }}-${{ matrix.arch }}-${{ hashFiles(format('win/{0}.py', matrix.package)) }}
     - name: Prepare Environment
-      if: contains(github.event.head_commit.message, join(join('[build ', matrix.package), ' win]')) || contains(github.event.head_commit.message, join(join('[publish ', matrix.package), ' win]'))
       run: |
         . .\.ci\windows_ci.ps1
         Prepre-env
     - name: Build package
-      if: contains(github.event.head_commit.message, join(join('[build ', matrix.package), ' win]')) || contains(github.event.head_commit.message, join(join('[publish ', matrix.package), ' win]'))
       run: |
         . .\.ci\windows_ci.ps1
         Create-Packages
     - name: Install MSYS2
-      if: contains(github.event.head_commit.message, join(join('[build ', matrix.package), ' win]')) || contains(github.event.head_commit.message, join(join('[publish ', matrix.package), ' win]'))
       run: choco install msys2
     - name: Upload wheels to server
       if: contains(github.event.head_commit.message, join(join('[publish ', matrix.package), ' win]'))
@@ -91,7 +84,6 @@ jobs:
         . .\.ci\windows_ci.ps1
         Upload-windows-wheels-to-server -ip "$env:SERVER_IP"
     - name: Upload wheels as artifact
-      if: contains(github.event.head_commit.message, join(join('[build ', matrix.package), ' win]')) || contains(github.event.head_commit.message, join(join('[publish ', matrix.package), ' win]'))
       uses: actions/upload-artifact@master
       with:
         name: wheels

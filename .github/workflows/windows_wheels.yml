@@ -32,7 +32,7 @@ jobs:
         uses: actions/cache@v1
         with:
           path: kivy_build_cache
-          key: cache-packages-${{ matrix.package }}-${{ matrix.arch }}-${{ hashFiles(join('win/', matrix.package, '.py')) }}
+          key: cache-packages-${{ matrix.package }}-${{ matrix.arch }}-${{ hashFiles(join(['win/', matrix.package, '.py'])) }}
       - name: Prepare Environment
         run: |
           . .\.ci\windows_ci.ps1
@@ -65,7 +65,7 @@ jobs:
       uses: actions/cache@v1
       with:
         path: kivy_build_cache
-        key: cache-packages-${{ matrix.package }}-${{ matrix.arch }}-${{ hashFiles(join('win/', matrix.package, '.py')) }}
+        key: cache-packages-${{ matrix.package }}-${{ matrix.arch }}-${{ hashFiles(join(['win/', matrix.package, '.py'])) }}
     - name: Prepare Environment
       run: |
         . .\.ci\windows_ci.ps1

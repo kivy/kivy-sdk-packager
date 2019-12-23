@@ -1,15 +1,16 @@
-name: Windows wheels
+name: Gstreamer wheels
 
 on:
   push:
     paths:
-      - 'win/**'
-      - '.github/workflows/windows_wheels.yml'
+      - 'win/gstreamer.py'
+      - '.github/workflows/windows_gstreamer_wheels.yml'
 
 env:
   SERVER_IP: '159.203.106.198'
   KIVY_BUILD_DIR: kivy_build
   KIVY_BUILD_CACHE: kivy_build_cache
+  PACKAGE_TARGET: gstreamer
   PYTHONPATH: .
 
 jobs:
@@ -18,9 +19,7 @@ jobs:
     strategy:
       matrix:
         arch: ['x64', 'x86']
-        package: ['sdl2', 'angle', 'glew', 'gstreamer']
     env:
-      PACKAGE_TARGET: ${{ matrix.package }}
       PACKAGE_ARCH: ${{ matrix.arch }}
     steps:
       - uses: actions/checkout@v1
@@ -32,7 +31,7 @@ jobs:
         uses: actions/cache@v1
         with:
           path: kivy_build_cache
-          key: cache-packages-${{ matrix.package }}-${{ matrix.arch }}-${{ hashFiles(format('win/{0}.py', matrix.package)) }}
+          key: cache-packages-gstreamer-${{ matrix.arch }}-${{ hashFiles('win/gstreamer.py') }}
       - name: Prepare Environment
         run: |
           . .\ci\windows_ci.ps1
@@ -49,9 +48,7 @@ jobs:
       matrix:
         python: [ '3.5', '3.6', '3.7', '3.8' ]
         arch: ['x64', 'x86']
-        package: ['sdl2', 'angle', 'glew', 'gstreamer']
     env:
-      PACKAGE_TARGET: ${{ matrix.package }}
       PACKAGE_ARCH: ${{ matrix.arch }}
     steps:
     - uses: actions/checkout@v1
@@ -64,7 +61,7 @@ jobs:
       uses: actions/cache@v1
       with:
         path: kivy_build_cache
-        key: cache-packages-${{ matrix.package }}-${{ matrix.arch }}-${{ hashFiles(format('win/{0}.py', matrix.package)) }}
+        key: cache-packages-gstreamer-${{ matrix.arch }}-${{ hashFiles('win/gstreamer.py') }}
     - name: Prepare Environment
       run: |
         . .\ci\windows_ci.ps1
@@ -76,7 +73,7 @@ jobs:
     - name: Install MSYS2
       run: choco install msys2
     - name: Upload wheels to server
-      if: contains(github.event.head_commit.message, join(join('[publish ', matrix.package), ' win]'))
+      if: contains(github.event.head_commit.message, '[publish gstreamer win]')
       env:
         UBUNTU_UPLOAD_KEY: ${{ secrets.UBUNTU_UPLOAD_KEY }}
         MSYSTEM: MINGW64
@@ -87,10 +84,10 @@ jobs:
     - name: Upload wheels as artifact
       uses: actions/upload-artifact@master
       with:
-        name: wheels
+        name: gstreamer_wheels
         path: dist
     - name: Publish to PyPI
-      if: contains(github.event.head_commit.message, join(join('[publish ', matrix.package), ' win]'))
+      if: contains(github.event.head_commit.message, '[publish gstreamer win]')
       uses: pypa/gh-action-pypi-publish@master
       with:
         user: __token__

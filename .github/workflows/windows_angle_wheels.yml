@@ -1,0 +1,94 @@
+name: Angle wheels
+
+on:
+  push:
+    paths:
+      - 'win/angle.py'
+      - '.github/workflows/windows_angle_wheels.yml'
+
+env:
+  SERVER_IP: '159.203.106.198'
+  KIVY_BUILD_DIR: kivy_build
+  KIVY_BUILD_CACHE: kivy_build_cache
+  PACKAGE_TARGET: angle
+  PYTHONPATH: .
+
+jobs:
+  prepare_cache:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        arch: ['x64', 'x86']
+    env:
+      PACKAGE_ARCH: ${{ matrix.arch }}
+    steps:
+      - uses: actions/checkout@v1
+      - name: Set up Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.x
+      - name: Cache deps
+        uses: actions/cache@v1
+        with:
+          path: kivy_build_cache
+          key: cache-packages-angle-${{ matrix.arch }}-${{ hashFiles('win/angle.py') }}
+      - name: Prepare Environment
+        run: |
+          . .\ci\windows_ci.ps1
+          Prepre-env
+      - name: Download Dependencies
+        run: |
+          . .\ci\windows_ci.ps1
+          Download-Packages
+
+  windows_wheels:
+    runs-on: windows-latest
+    needs: prepare_cache
+    strategy:
+      matrix:
+        python: [ '3.5', '3.6', '3.7', '3.8' ]
+        arch: ['x64', 'x86']
+    env:
+      PACKAGE_ARCH: ${{ matrix.arch }}
+    steps:
+    - uses: actions/checkout@v1
+    - name: Set up Python
+      uses: actions/setup-python@v1
+      with:
+        python-version: ${{ matrix.python }}
+        architecture: ${{ matrix.arch }}
+    - name: Cache deps
+      uses: actions/cache@v1
+      with:
+        path: kivy_build_cache
+        key: cache-packages-angle-${{ matrix.arch }}-${{ hashFiles('win/angle.py') }}
+    - name: Prepare Environment
+      run: |
+        . .\ci\windows_ci.ps1
+        Prepre-env
+    - name: Build package
+      run: |
+        . .\ci\windows_ci.ps1
+        Create-Packages
+    - name: Install MSYS2
+      run: choco install msys2
+    - name: Upload wheels to server
+      if: contains(github.event.head_commit.message, '[publish angle win]')
+      env:
+        UBUNTU_UPLOAD_KEY: ${{ secrets.UBUNTU_UPLOAD_KEY }}
+        MSYSTEM: MINGW64
+        CHERE_INVOKING: 1
+      run: |
+        . .\ci\windows_ci.ps1
+        Upload-windows-wheels-to-server -ip "$env:SERVER_IP"
+    - name: Upload wheels as artifact
+      uses: actions/upload-artifact@master
+      with:
+        name: angle_wheels
+        path: dist
+    - name: Publish to PyPI
+      if: contains(github.event.head_commit.message, '[publish angle win]')
+      uses: pypa/gh-action-pypi-publish@master
+      with:
+        user: __token__
+        password: ${{ secrets.pypi_password }}

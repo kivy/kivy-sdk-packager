@@ -5,7 +5,8 @@ from zipfile import ZipFile
 __version__ = '0.2.0'
 
 msvc_batch = '''
-call "C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat" {}
+call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\Common7\Tools\VsDevCmd.bat"
+devenv /upgrade .\\src\\angle.sln
 msbuild .\\src\\angle.sln /property:Configuration=Release /property:Platform={}
 '''
 
@@ -24,9 +25,8 @@ def get_angle(cache, build_path, arch, package, output, download_only=False):
     base_dir = join(build_path, package, list(listdir(join(build_path, package)))[0])
     data = []
 
-    src = 'x86_amd64' if arch == 'x64' else 'x86'
     target = 'x64' if arch == 'x64' else 'Win32'
-    batch = msvc_batch.format(src, target)
+    batch = msvc_batch.format(target)
     d3d_out = out_dir = join(base_dir, 'src', 'Release_{}'.format(target))
 
     with open(join(base_dir, 'compile.bat'), 'w') as fh:

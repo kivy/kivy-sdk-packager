@@ -1,5 +1,4 @@
 function Prepre-env {
-    choco install microsoft-visual-cpp-build-tools
     pip install requests
 
     mkdir "$(pwd)\dist"

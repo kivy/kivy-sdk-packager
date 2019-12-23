@@ -6,7 +6,6 @@ __version__ = '0.2.0'
 
 msvc_batch = '''
 call "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Enterprise\\Common7\\Tools\\VsDevCmd.bat"
-devenv /upgrade .\\src\\angle.sln
 msbuild .\\src\\angle.sln /property:Configuration=Release /property:Platform={} /p:PlatformToolset=v140
 '''
 

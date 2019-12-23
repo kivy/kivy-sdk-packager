@@ -1,6 +1,7 @@
 from __future__ import absolute_import, print_function
 from .common import *
 from zipfile import ZipFile
+import tarfile
 
 __version__ = '0.2.0'
 
@@ -9,7 +10,7 @@ glew_ver = '2.1.0'
 batch = '''
 call "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Enterprise\\Common7\\Tools\\VsDevCmd.bat"
 devenv /upgrade .\\build\\vc12\\glew.sln
-msbuild .\\build\\vc12\\glew.sln /property:Configuration=Release /property:Platform={}
+msbuild .\\build\\vc12\\glew.sln /property:Configuration=Release /property:Platform={} /p:PlatformToolset=v140
 '''
 
 
@@ -22,8 +23,11 @@ def get_glew(cache, build_path, arch, package, output, download_only=False):
         return
 
     print('Extracting glew {}'.format(local_url))
-    with open(local_url, 'rb') as fd:
-        ZipFile(fd).extractall(join(build_path, package))
+    tar = tarfile.open(local_url, "r:gz")
+    tar.extractall()
+    tar.close()
+    # with open(local_url, 'rb') as fd:
+    #     ZipFile(fd).extractall(join(build_path, package))
 
     z = base_dir = join(build_path, package, list(listdir(join(build_path, package)))[0])
 

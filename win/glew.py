@@ -31,10 +31,9 @@ def get_glew(cache, build_path, arch, package, output, download_only=False):
         data.append((
             fname, fname.replace(z, '').strip(sep), join('include', 'GL'), True))
 
-    src = 'amd64' if arch == 'x64' else 'amd64_x86'
     target = 'x64' if arch == 'x64' else 'Win32'
     with open(join(base_dir, 'compile.bat'), 'w') as fh:
-        fh.write(batch.format(src, target))
+        fh.write(batch.format(target))
     exec_binary(
         '', [join(base_dir, 'compile.bat')], cwd=base_dir, shell=True)
 

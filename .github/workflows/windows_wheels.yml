@@ -34,11 +34,11 @@ jobs:
           key: cache-packages-${{ matrix.package }}-${{ matrix.arch }}-${{ hashFiles(format('win/{0}.py', matrix.package)) }}
       - name: Prepare Environment
         run: |
-          . .\.ci\windows_ci.ps1
+          . .\ci\windows_ci.ps1
           Prepre-env
       - name: Download Dependencies
         run: |
-          . .\.ci\windows_ci.ps1
+          . .\ci\windows_ci.ps1
           Download-Packages
 
   windows_wheels:
@@ -66,11 +66,11 @@ jobs:
         key: cache-packages-${{ matrix.package }}-${{ matrix.arch }}-${{ hashFiles(format('win/{0}.py', matrix.package)) }}
     - name: Prepare Environment
       run: |
-        . .\.ci\windows_ci.ps1
+        . .\ci\windows_ci.ps1
         Prepre-env
     - name: Build package
       run: |
-        . .\.ci\windows_ci.ps1
+        . .\ci\windows_ci.ps1
         Create-Packages
     - name: Install MSYS2
       run: choco install msys2
@@ -81,7 +81,7 @@ jobs:
         MSYSTEM: MINGW64
         CHERE_INVOKING: 1
       run: |
-        . .\.ci\windows_ci.ps1
+        . .\ci\windows_ci.ps1
         Upload-windows-wheels-to-server -ip "$env:SERVER_IP"
     - name: Upload wheels as artifact
       uses: actions/upload-artifact@master

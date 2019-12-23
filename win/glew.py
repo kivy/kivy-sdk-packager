@@ -17,17 +17,13 @@ msbuild .\\build\\vc12\\glew.sln /property:Configuration=Release /property:Platf
 def get_glew(cache, build_path, arch, package, output, download_only=False):
     url = ('http://jaist.dl.sourceforge.net/project/glew/glew/{}/glew-{}.zip'.
            format(glew_ver, glew_ver))
-    url = 'http://jaist.dl.sourceforge.net/project/glew/glew/snapshots/glew-20190928.tgz'
     local_url = download_cache(cache, url, build_path)
     if download_only:
         return
 
     print('Extracting glew {}'.format(local_url))
-    tar = tarfile.open(local_url, "r:gz")
-    tar.extractall()
-    tar.close()
-    # with open(local_url, 'rb') as fd:
-    #     ZipFile(fd).extractall(join(build_path, package))
+    with open(local_url, 'rb') as fd:
+        ZipFile(fd).extractall(join(build_path, package))
 
     z = base_dir = join(build_path, package, list(listdir(join(build_path, package)))[0])
 

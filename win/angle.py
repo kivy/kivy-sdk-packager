@@ -8,12 +8,12 @@ msvc_batch = '''
 set PATH={};%PATH%
 set DEPOT_TOOLS_WIN_TOOLCHAIN=0
 
-call run_gclient.bat
+call cmd.exe /c "gclient & exit /b 0"
 
-git clone https://chromium.googlesource.com/angle/angle
+call cmd.exe /c "git clone https://chromium.googlesource.com/angle/angle & exit /b 0"
 cd angle
 python scripts/bootstrap.py
-gclient sync
+call cmd.exe /c "gclient sync & exit /b 0"
 git checkout master
 
 call "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Enterprise\\Common7\\Tools\\VsDevCmd.bat"
@@ -38,9 +38,6 @@ def get_angle(cache, build_path, arch, package, output, download_only=False):
     base_dir = join(build_path, package)
     batch = msvc_batch.format(
         join(base_dir, 'depot_tools'), arch)
-
-    with open(join(base_dir, 'run_gclient.bat'), 'w') as fh:
-        fh.write('gclient\nexit /b 0')
 
     with open(join(base_dir, 'compile.bat'), 'w') as fh:
         fh.write(batch)

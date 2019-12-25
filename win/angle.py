@@ -14,7 +14,11 @@ call angle_cmd.bat
 echo git clone https://chromium.googlesource.com/angle/angle ^& ver ^> nul > angle_cmd.bat
 call angle_cmd.bat
 cd angle
-python scripts/bootstrap.py
+
+where python
+echo %PATH%
+
+python.bat scripts/bootstrap.py
 echo gclient sync ^& ver ^> nul > angle_cmd.bat
 call angle_cmd.bat
 git checkout master

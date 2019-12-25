@@ -8,7 +8,7 @@ msvc_batch = '''
 set PATH={};%PATH%
 set DEPOT_TOOLS_WIN_TOOLCHAIN=0
 
-gclient & echo "Ignore error"
+call run_gclient.bat
 
 git clone https://chromium.googlesource.com/angle/angle
 cd angle
@@ -38,6 +38,9 @@ def get_angle(cache, build_path, arch, package, output, download_only=False):
     base_dir = join(build_path, package)
     batch = msvc_batch.format(
         join(base_dir, 'depot_tools'), arch)
+
+    with open(join(base_dir, 'run_gclient.bat'), 'w') as fh:
+        fh.write('gclient & exit 0')
 
     with open(join(base_dir, 'compile.bat'), 'w') as fh:
         fh.write(batch)

@@ -5,7 +5,7 @@ from zipfile import ZipFile
 __version__ = '0.2.0'
 
 msvc_batch = '''
-set PATH={};
+set PATH={};%PATH%
 set DEPOT_TOOLS_WIN_TOOLCHAIN=0
 
 echo gclient ^& ver ^> nul > angle_cmd.bat
@@ -15,12 +15,9 @@ echo git clone https://chromium.googlesource.com/angle/angle ^& ver ^> nul > ang
 call angle_cmd.bat
 cd angle
 
-where python
-echo %PATH%
-
-python.bat scripts/bootstrap.py
-echo gclient sync ^& ver ^> nul > angle_cmd.bat
+echo python scripts/bootstrap.py ^& ver ^> nul > angle_cmd.bat
 call angle_cmd.bat
+gclient sync
 git checkout master
 
 call "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Enterprise\\Common7\\Tools\\VsDevCmd.bat"

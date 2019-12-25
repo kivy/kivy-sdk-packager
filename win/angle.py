@@ -5,7 +5,7 @@ from zipfile import ZipFile
 __version__ = '0.2.0'
 
 msvc_batch = '''
-set PATH={};%PATH%
+set PATH={};
 set DEPOT_TOOLS_WIN_TOOLCHAIN=0
 
 echo gclient ^& ver ^> nul > angle_cmd.bat

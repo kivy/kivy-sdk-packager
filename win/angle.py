@@ -40,7 +40,7 @@ def get_angle(cache, build_path, arch, package, output, download_only=False):
         join(base_dir, 'depot_tools'), arch)
 
     with open(join(base_dir, 'run_gclient.bat'), 'w') as fh:
-        fh.write('gclient & exit 0')
+        fh.write('gclient\nexit /b 0')
 
     with open(join(base_dir, 'compile.bat'), 'w') as fh:
         fh.write(batch)

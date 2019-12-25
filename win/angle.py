@@ -8,7 +8,7 @@ msvc_batch = '''
 set PATH={};%PATH%
 set DEPOT_TOOLS_WIN_TOOLCHAIN=0
 
-gclient
+gclient & echo "Ignore error"
 
 git clone https://chromium.googlesource.com/angle/angle
 cd angle

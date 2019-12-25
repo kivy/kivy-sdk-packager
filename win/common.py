@@ -145,6 +145,10 @@ def exec_binary(status, cmd, env=None, cwd=None, shell=True, exclude=None):
                 [l for l in stderr.splitlines() if not match(exclude, l)])
         print(stderr)
 
+    ret_code = proc.returncode
+    if ret_code:
+        raise Exception(str(ret_code))
+
 
 def copy_files(src, dst):
     if not exists(dst):

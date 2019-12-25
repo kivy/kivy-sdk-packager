@@ -8,12 +8,12 @@ msvc_batch = '''
 set PATH={};%PATH%
 set DEPOT_TOOLS_WIN_TOOLCHAIN=0
 
-call cmd.exe /c "gclient & exit /b 0"
+gclient & ver > nul
 
-call cmd.exe /c "git clone https://chromium.googlesource.com/angle/angle & exit /b 0"
+git clone https://chromium.googlesource.com/angle/angle & ver > nul
 cd angle
 python scripts/bootstrap.py
-call cmd.exe /c "gclient sync & exit /b 0"
+gclient sync & ver > nul
 git checkout master
 
 call "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Enterprise\\Common7\\Tools\\VsDevCmd.bat"

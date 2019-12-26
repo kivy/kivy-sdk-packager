@@ -25,12 +25,8 @@ jobs:
           Invoke-WebRequest -Uri "https://storage.googleapis.com/chrome-infra/depot_tools.zip" -OutFile depot_tools.zip
           7z x depot_tools.zip -odepot_tools
       - name: Build Angle
-        shell: cmd
         run: |
-          set PATH="%cd%\depot_tools;%PATH%"
-          echo %PATH%
-          dir
-          dir depot_tools
+          $env:PATH="$(pwd)\depot_tools;$env:PATH"
           gclient
           git clone https://chromium.googlesource.com/angle/angle angle_src
           cd angle_src

@@ -5,7 +5,7 @@ from zipfile import ZipFile
 __version__ = '0.2.0'
 
 msvc_batch = '''
-set PATH={};%PATH%
+set PATH={0};%PATH%
 set DEPOT_TOOLS_WIN_TOOLCHAIN=0
 
 echo gclient ^& ver ^> nul > angle_cmd.bat
@@ -15,14 +15,16 @@ echo git clone https://chromium.googlesource.com/angle/angle ^& ver ^> nul > ang
 call angle_cmd.bat
 cd angle
 
-echo python scripts/bootstrap.py ^& ver ^> nul > angle_cmd.bat
+echo set PATH^={0}^;^%PATH^% > angle_cmd.bat
+echo set DEPOT_TOOLS_WIN_TOOLCHAIN^=0 >> angle_cmd.bat
+echo python scripts/bootstrap.py ^& ver ^> nul >> angle_cmd.bat
 call angle_cmd.bat
 gclient sync
 git checkout master
 
 call "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Enterprise\\Common7\\Tools\\VsDevCmd.bat"
 
-gn gen out/Release --args='is_debug=false target_cpu="{}"'
+gn gen out/Release --args='is_debug=false target_cpu="{1}"'
 
 autoninja -C out\\Release libEGL
 autoninja -C out\\Release libGLESv2
@@ -40,8 +42,7 @@ def get_angle(cache, build_path, arch, package, output, download_only=False):
         ZipFile(fd).extractall(join(build_path, package, 'depot_tools'))
 
     base_dir = join(build_path, package)
-    batch = msvc_batch.format(
-        join(base_dir, 'depot_tools'), arch)
+    batch = msvc_batch.format(join(base_dir, 'depot_tools'), arch)
 
     with open(join(base_dir, 'compile.bat'), 'w') as fh:
         fh.write(batch)

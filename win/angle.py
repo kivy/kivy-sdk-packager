@@ -15,10 +15,7 @@ echo git clone https://chromium.googlesource.com/angle/angle ^& ver ^> nul > ang
 call angle_cmd.bat
 cd angle
 
-echo set PATH^={0}^;^%PATH^% > angle_cmd.bat
-echo set DEPOT_TOOLS_WIN_TOOLCHAIN^=0 >> angle_cmd.bat
-echo python scripts/bootstrap.py ^& ver ^> nul >> angle_cmd.bat
-call angle_cmd.bat
+{0}\\python.bat scripts/bootstrap.py
 gclient sync
 git checkout master
 

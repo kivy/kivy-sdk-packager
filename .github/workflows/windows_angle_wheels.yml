@@ -9,7 +9,7 @@ on:
 
 env:
   SERVER_IP: '159.203.106.198'
-  KIVY_BUILD_DIR: kivy_build
+  KIVY_BUILD_DIR: angle_src
   KIVY_BUILD_CACHE: kivy_build_cache
   PACKAGE_TARGET: angle
   PYTHONPATH: .
@@ -21,12 +21,11 @@ jobs:
       DEPOT_TOOLS_WIN_TOOLCHAIN: 0
     steps:
       - uses: actions/checkout@v1
-      - name: Download depot_tools
+      - name: Build Angle
         run: |
           Invoke-WebRequest -Uri "https://storage.googleapis.com/chrome-infra/depot_tools.zip" -OutFile depot_tools.zip
           7z x depot_tools.zip -odepot_tools
-      - name: Build Angle
-        run: |
+
           $env:PATH="$(pwd)\depot_tools;$env:PATH"
           $env:PYTHON_HOME=""
           gclient
@@ -69,15 +68,13 @@ jobs:
       with:
         python-version: ${{ matrix.python }}
         architecture: ${{ matrix.arch }}
-    - name: Cache deps
-      uses: actions/cache@v1
-      with:
-        path: kivy_build_cache
-        key: cache-packages-angle-${{ matrix.arch }}-${{ hashFiles('win/angle.py') }}
     - name: Prepare Environment
       run: |
         . .\ci\windows_ci.ps1
         Prepre-env
+    - uses: actions/download-artifact@v1
+      with:
+        name: angle_dlls
     - name: Build package
       run: |
         . .\ci\windows_ci.ps1

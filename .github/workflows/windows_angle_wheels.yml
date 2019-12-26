@@ -28,6 +28,9 @@ jobs:
         shell: cmd
         run: |
           set PATH="%cd%\depot_tools;%PATH%"
+          echo %PATH%
+          dir
+          dir depot_tools
           gclient
           git clone https://chromium.googlesource.com/angle/angle angle_src
           cd angle_src

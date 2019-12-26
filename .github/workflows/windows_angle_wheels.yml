@@ -15,36 +15,42 @@ env:
   PYTHONPATH: .
 
 jobs:
-  prepare_cache:
+  prepare_angle:
     runs-on: windows-latest
-    strategy:
-      matrix:
-        arch: ['x64', 'x86']
     env:
-      PACKAGE_ARCH: ${{ matrix.arch }}
+      DEPOT_TOOLS_WIN_TOOLCHAIN: 0
     steps:
-      - uses: actions/checkout@v1
-      - name: Set up Python
-        uses: actions/setup-python@v1
-        with:
-          python-version: 3.x
-      - name: Cache deps
-        uses: actions/cache@v1
-        with:
-          path: kivy_build_cache
-          key: cache-packages-angle-${{ matrix.arch }}-${{ hashFiles('win/angle.py') }}
-      - name: Prepare Environment
+      - name: Download depot_tools
         run: |
-          . .\ci\windows_ci.ps1
-          Prepre-env
-      - name: Download Dependencies
+          Invoke-WebRequest -Uri "https://storage.googleapis.com/chrome-infra/depot_tools.zip" -OutFile depot_tools.zip
+          7z x depot_tools.zip -odepot_tools
+      - name: Build Angle
+        shell: cmd
         run: |
-          . .\ci\windows_ci.ps1
-          Download-Packages
+          set PATH="%cd%\depot_tools;%PATH%"
+          gclient
+          git clone https://chromium.googlesource.com/angle/angle angle_src
+          cd angle_src
+          python scripts/bootstrap.py
+          gclient sync
+          git checkout master
+
+          call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\Common7\Tools\VsDevCmd.bat"
+          gn gen out/Release_x86 --args='is_debug=false target_cpu="x86"'
+          autoninja -C out\Release_x86 libEGL
+          autoninja -C out\Release_x86 libGLESv2
+
+          gn gen out/Release_x64 --args='is_debug=false target_cpu="x64"'
+          autoninja -C out\Release_x64 libEGL
+          autoninja -C out\Release_x64 libGLESv2
+
+          dir out\Release_x64
+          dir out\Release_x86
+
 
   windows_wheels:
     runs-on: windows-latest
-    needs: prepare_cache
+    needs: prepare_angle
     strategy:
       matrix:
         python: [ '3.5', '3.6', '3.7', '3.8' ]

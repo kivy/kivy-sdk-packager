@@ -20,6 +20,7 @@ jobs:
     env:
       DEPOT_TOOLS_WIN_TOOLCHAIN: 0
     steps:
+      - uses: actions/checkout@v1
       - name: Download depot_tools
         run: |
           Invoke-WebRequest -Uri "https://storage.googleapis.com/chrome-infra/depot_tools.zip" -OutFile depot_tools.zip
@@ -30,8 +31,8 @@ jobs:
           $env:PATH="$(pwd)\depot_tools;$env:PATH"
           $env:PYTHON_HOME=""
           gclient
-          git clone https://chromium.googlesource.com/angle/angle
-          cd angle
+          git clone https://github.com/google/angle.git angle_src
+          cd angle_src
           python scripts/bootstrap.py
           gclient sync
           git checkout master
@@ -47,6 +48,10 @@ jobs:
 
           dir out\Release_x64
           dir out\Release_x86
+      - uses: actions/upload-artifact@v1
+        with:
+          name: angle_dlls
+          path: angle_src/out
 
 
   windows_wheels:

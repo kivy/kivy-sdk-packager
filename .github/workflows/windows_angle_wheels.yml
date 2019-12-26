@@ -28,9 +28,11 @@ jobs:
         run: |
           $env:PATH="$(pwd)\depot_tools;$env:PATH"
           gclient
+          env
           git clone https://chromium.googlesource.com/angle/angle angle_src
           cd angle_src
           python scripts/bootstrap.py
+          env
           gclient sync
           git checkout master
 

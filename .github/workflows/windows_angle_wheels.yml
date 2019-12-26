@@ -27,9 +27,9 @@ jobs:
           7z x depot_tools.zip -odepot_tools
       - name: Build Angle
         run: |
-          $env:PATH="$(python -c "import os; print(';'.join([p for p in os.environ['PATH'].split(';') if 'Python' not in p and 'python' not in p]))")"
+#          $env:PATH="$(python -c "import os; print(';'.join([p for p in os.environ['PATH'].split(';') if 'Python' not in p and 'python' not in p]))")"
           $env:PATH="$(pwd)\depot_tools;$env:PATH"
-          $env:PYTHON_HOME=""
+#          $env:PYTHON_HOME=""
           gclient
           git clone https://github.com/google/angle.git angle_src
           cd angle_src

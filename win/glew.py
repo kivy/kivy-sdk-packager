@@ -1,6 +1,7 @@
 from __future__ import absolute_import, print_function
 from .common import *
 from zipfile import ZipFile
+import tarfile
 
 __version__ = '0.1.13'
 
@@ -16,14 +17,17 @@ msbuild .\\build\\vc15\\glew.sln /property:Configuration=Release /property:Platf
 def get_glew(cache, build_path, arch, package, output, download_only=False):
     url = ('http://jaist.dl.sourceforge.net/project/glew/glew/{}/glew-{}.zip'.
            format(glew_ver, glew_ver))
-    url = 'https://github.com/Perlmint/glew-cmake/archive/master.zip'
+    url = 'http://jaist.dl.sourceforge.net/project/glew/glew/snapshots/glew-20190928.tgz'
     local_url = download_cache(cache, url, build_path)
     if download_only:
         return
 
     print('Extracting glew {}'.format(local_url))
-    with open(local_url, 'rb') as fd:
-        ZipFile(fd).extractall(join(build_path, package))
+    # with open(local_url, 'rb') as fd:
+    #     ZipFile(fd).extractall(join(build_path, package))
+    tar = tarfile.open(local_url)
+    tar.extractall(join(build_path, package))
+    tar.close()
 
     z = base_dir = join(build_path, package, list(listdir(join(build_path, package)))[0])
 

@@ -27,7 +27,7 @@ jobs:
           7z x depot_tools.zip -odepot_tools
           git clone https://github.com/google/angle.git angle_src
       - name: Build angle
-          run: |
+        run: |
           $env:PATH="$(pwd)\depot_tools;$env:PATH"
           Get-Item -Path Env:*
           $env:PATH="$(python -c "import os; print(';'.join([p for p in os.environ['PATH'].split(';') if 'Python' not in p and 'python' not in p]))")"

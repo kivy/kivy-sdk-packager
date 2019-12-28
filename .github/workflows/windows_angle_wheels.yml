@@ -38,7 +38,6 @@ jobs:
           gclient
           python scripts/bootstrap.py
           gclient sync
-          git checkout master
 
           call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\Common7\Tools\VsDevCmd.bat"
           gn gen out/Release_x86 --args='is_debug=false target_cpu="x86"'

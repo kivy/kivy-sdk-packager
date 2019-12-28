@@ -30,7 +30,7 @@ jobs:
         run: |
           $env:PATH="$(pwd)\depot_tools;$env:PATH"
           Get-Item -Path Env:*
-          $env:PATH="$(python -c "import os; print(';'.join([p for p in os.environ['PATH'].split(';') if 'Python' not in p and 'python' not in p]))")"
+          $env:PATH="$(python -c "import os; print(';'.join([p for p in os.environ['PATH'].split(';') if 'Python' not in p and 'python' not in p and 'Chocolatey' not in p]))")"
           $env:PYTHONHOME=""
           Get-Item -Path Env:*
           echo "Done with env"

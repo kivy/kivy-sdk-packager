@@ -28,3 +28,15 @@ function Upload-windows-wheels-to-server($ip) {
     C:\tools\msys64\usr\bin\bash --login -c ".ci/windows-server-upload.sh $ip '$(pwd)\dist' 'kivy_deps.$env:PACKAGE_TARGET`_dev-*.whl' ci/win/deps/$env:PACKAGE_TARGET`_dev/"
     C:\tools\msys64\usr\bin\bash --login -c ".ci/windows-server-upload.sh $ip '$(pwd)\dist' 'kivy_deps.$env:PACKAGE_TARGET-*.whl' ci/win/deps/$env:PACKAGE_TARGET/"
 }
+
+function Test-kivy() {
+    python -m pip config set install.find-links "$(pwd)\dist"
+    python -m pip install "https://github.com/kivy/kivy/archive/master.zip[full,dev]"
+
+    python -c 'import kivy'
+    $test_path=python -c 'import kivy.tests as tests; print(tests.__path__[0])'  --config "kivy:log_level:error"
+    cd "$test_path"
+
+    echo "[run]`nplugins = kivy.tools.coverage`n" > .coveragerc
+    python -m pytest .
+}

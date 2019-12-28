@@ -102,3 +102,7 @@ jobs:
       with:
         user: __token__
         password: ${{ secrets.pypi_password }}
+    - name: Test package
+      run: |
+        . .\ci\windows_ci.ps1
+        Test-kivy

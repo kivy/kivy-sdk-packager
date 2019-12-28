@@ -36,16 +36,15 @@ jobs:
           python scripts/bootstrap.py
           gclient sync
 
-          gn help target_cpu
           gn gen out/Release_x86 --args="is_debug=false"
-          ls gen out/Release_x86
+          ls out/Release_x86
           type out/Release_x86/args.gn
 
-          gn gen out/Release_x86 --args="is_debug=false target_cpu=`"x86`""
+          gn gen out/Release_x86 --args="target_cpu=`"x86`" is_debug=false"
           autoninja -C out\Release_x86 libEGL
           autoninja -C out\Release_x86 libGLESv2
 
-          gn gen out/Release_x64 --args="is_debug=false target_cpu=`"x64`""
+          gn gen out/Release_x64 --args="target_cpu=`"x64`" is_debug=false"
           autoninja -C out\Release_x64 libEGL
           autoninja -C out\Release_x64 libGLESv2
 

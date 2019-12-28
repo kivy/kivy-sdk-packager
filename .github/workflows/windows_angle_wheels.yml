@@ -35,10 +35,11 @@ jobs:
           gclient
           python scripts/bootstrap.py
           gclient sync
-          gn args out/Release_x86 --list
-          echo "done all"
-          gn args out/Release_x86 --list=target_cpu
-          echo "done cpu"
+
+          gn help target_cpu
+          gn gen out/Release_x86 --args="is_debug=false"
+          ls gen out/Release_x86
+          type out/Release_x86/args.gn
 
           gn gen out/Release_x86 --args="is_debug=false target_cpu=`"x86`""
           autoninja -C out\Release_x86 libEGL

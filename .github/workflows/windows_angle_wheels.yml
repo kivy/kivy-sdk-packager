@@ -21,16 +21,21 @@ jobs:
       DEPOT_TOOLS_WIN_TOOLCHAIN: 0
     steps:
       - uses: actions/checkout@v1
-      - name: Build Angle
+      - name: Get angle deps
         run: |
           Invoke-WebRequest -Uri "https://storage.googleapis.com/chrome-infra/depot_tools.zip" -OutFile depot_tools.zip
           7z x depot_tools.zip -odepot_tools
-
-          $env:PATH="$(pwd)\depot_tools;$env:PATH"
-          $env:PYTHON_HOME=""
-          gclient
           git clone https://github.com/google/angle.git angle_src
+      - name: Build angle
+          run: |
+          $env:PATH="$(pwd)\depot_tools;$env:PATH"
+          Get-Item -Path Env:*
+          $env:PATH="$(python -c "import os; print(';'.join([p for p in os.environ['PATH'].split(';') if 'Python' not in p and 'python' not in p]))")"
+          $env:PYTHONHOME=""
+          Get-Item -Path Env:*
+          echo "Done with env"
           cd angle_src
+          gclient
           python scripts/bootstrap.py
           gclient sync
           git checkout master
@@ -77,6 +82,7 @@ jobs:
         name: angle_dlls
     - name: Build package
       run: |
+        dir angle_dlls
         . .\ci\windows_ci.ps1
         Create-Packages
     - name: Install MSYS2

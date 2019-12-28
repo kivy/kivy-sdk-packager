@@ -1,7 +1,6 @@
 from __future__ import absolute_import, print_function
 from .common import *
 from zipfile import ZipFile
-import tarfile
 
 __version__ = '0.1.13'
 
@@ -9,25 +8,21 @@ glew_ver = '2.1.0'
 
 batch = '''
 call "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Enterprise\\Common7\\Tools\\VsDevCmd.bat"
-devenv /upgrade .\\build\\vc12\\glew.sln
-msbuild .\\build\\vc12\\glew.sln /property:Configuration=Release /property:Platform={}
+msbuild .\\build\\vc15\\glew.sln /property:Configuration=Release /property:Platform={}
 '''
 
 
 def get_glew(cache, build_path, arch, package, output, download_only=False):
     url = ('http://jaist.dl.sourceforge.net/project/glew/glew/{}/glew-{}.zip'.
            format(glew_ver, glew_ver))
-    url = 'http://jaist.dl.sourceforge.net/project/glew/glew/snapshots/glew-20190928.tgz'
+    url = 'https://github.com/Perlmint/glew-cmake/archive/master.zip'
     local_url = download_cache(cache, url, build_path)
     if download_only:
         return
 
     print('Extracting glew {}'.format(local_url))
-    # with open(local_url, 'rb') as fd:
-    #     ZipFile(fd).extractall(join(build_path, package))
-    tar = tarfile.open(local_url)
-    tar.extractall(join(build_path, package))
-    tar.close()
+    with open(local_url, 'rb') as fd:
+        ZipFile(fd).extractall(join(build_path, package))
 
     z = base_dir = join(build_path, package, list(listdir(join(build_path, package)))[0])
 

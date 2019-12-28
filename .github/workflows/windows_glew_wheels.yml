@@ -5,7 +5,6 @@ on:
     paths:
       - 'win/glew.py'
       - '.github/workflows/windows_glew_wheels.yml'
-      - 'ci/windows_ci.ps1'
 
 env:
   SERVER_IP: '159.203.106.198'

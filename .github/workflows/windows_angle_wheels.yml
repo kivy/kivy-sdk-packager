@@ -5,11 +5,10 @@ on:
     paths:
       - 'win/angle.py'
       - '.github/workflows/windows_angle_wheels.yml'
-      - 'ci/windows_ci.ps1'
 
 env:
   SERVER_IP: '159.203.106.198'
-  KIVY_BUILD_DIR: angle_src
+  KIVY_BUILD_DIR: angle_dlls
   KIVY_BUILD_CACHE: kivy_build_cache
   PACKAGE_TARGET: angle
   PYTHONPATH: .
@@ -23,35 +22,16 @@ jobs:
       - uses: actions/checkout@v1
       - name: Get dependecies
         run: |
-          Invoke-WebRequest -Uri "https://storage.googleapis.com/chrome-infra/depot_tools.zip" -OutFile depot_tools.zip
-          7z x depot_tools.zip -odepot_tools
-          git clone https://github.com/google/angle.git angle_src
+          . .\ci\windows_ci.ps1
+          Get-angle-deps
       - name: Build dependecies
         run: |
-          $env:PATH="$(pwd)\depot_tools;$env:PATH"
-          $env:PATH="$(python -c "import os; print(';'.join([p for p in os.environ['PATH'].split(';') if 'Python' not in p and 'python' not in p and 'Chocolatey' not in p]))")"
-          cd angle_src
-
-          gclient
-          python scripts/bootstrap.py
-          gclient sync
-
-          gn gen out/Release_x86 --args="is_debug=false"
-          echo target_cpu=`"x86`" >> out/Release_x86/args.gn
-          autoninja -C out\Release_x86 libEGL
-          autoninja -C out\Release_x86 libGLESv2
-
-          gn gen out/Release_x64 --args="is_debug=false"
-          echo target_cpu=`"x64`" >> out/Release_x64/args.gn
-          autoninja -C out\Release_x64 libEGL
-          autoninja -C out\Release_x64 libGLESv2
-
-          dir out\Release_x64
-          dir out\Release_x86
+          . .\ci\windows_ci.ps1
+          Build-angle
       - uses: actions/upload-artifact@v1
         with:
           name: angle_dlls
-          path: angle_src/out
+          path: angle_dlls
 
 
   windows_wheels:
@@ -79,7 +59,6 @@ jobs:
         name: angle_dlls
     - name: Build package
       run: |
-        dir angle_dlls
         . .\ci\windows_ci.ps1
         Create-Packages
     - name: Install MSYS2

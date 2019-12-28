@@ -7,7 +7,7 @@ __version__ = '0.1.11'
 
 def get_angle(cache, build_path, arch, package, output, download_only=False):
     data = []
-    base_dir = join(build_path, 'out', 'Release_{}'.format(arch))
+    base_dir = join(build_path, 'Release_{}'.format(arch))
     for dll in ('libEGL.dll', 'libGLESv2.dll', 'd3dcompiler_47.dll'):
         data.append((join(base_dir, dll), join('bin', dll),
                      join('share', package, 'bin'), False))

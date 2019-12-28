@@ -57,3 +57,38 @@ function Test-kivy() {
     echo "[run]`nplugins = kivy.tools.coverage`n" > .coveragerc
     raise-only-error -Func {python -m pytest .}
 }
+
+function Get-angle-deps() {
+    Invoke-WebRequest -Uri "https://storage.googleapis.com/chrome-infra/depot_tools.zip" -OutFile depot_tools.zip
+    7z x depot_tools.zip -odepot_tools
+    git clone https://github.com/google/angle.git angle_src
+}
+
+function Build-angle() {
+    $env:PATH="$(pwd)\depot_tools;$env:PATH"
+    $env:PATH="$(python -c "import os; print(';'.join([p for p in os.environ['PATH'].split(';') if 'Python' not in p and 'python' not in p and 'Chocolatey' not in p]))")"
+    cd angle_src
+
+    gclient
+    python scripts/bootstrap.py
+    gclient sync
+
+    gn gen out/Release_x86 --args="is_debug=false target_cpu=`"x86`""
+    type out/Release_x86/args.gn
+    autoninja -C out\Release_x86 libEGL
+    autoninja -C out\Release_x86 libGLESv2
+
+    gn gen out/Release_x64 --args="is_debug=false target_cpu=`"x64`""
+    type out/Release_x64/args.gn
+    autoninja -C out\Release_x64 libEGL
+    autoninja -C out\Release_x64 libGLESv2
+
+    dir out\Release_x64
+    dir out\Release_x86
+
+    cd ..
+    mkdir angle_dlls\Release_x64
+    mkdir angle_dlls\Release_x86
+    cp out\Release_x64\*.dll angle_dlls\Release_x64
+    cp out\Release_x86\*.dll angle_dlls\Release_x86
+}

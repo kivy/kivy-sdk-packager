@@ -1,3 +1,17 @@
+function raise-only-error{
+    Param([scriptblock]$Func)
+    # powershell interprets writing to stderr as an error, so only raise error if the return code is none-zero
+    try {
+      $Func.Invoke()
+    } catch {
+      if ($LastExitCode -ne 0) {
+        throw $_
+      } else {
+        echo $_
+      }
+    }
+}
+
 function Prepre-env {
     pip install requests
 
@@ -36,18 +50,10 @@ function Test-kivy() {
     Invoke-WebRequest -Uri "https://github.com/kivy/kivy/archive/master.zip" -OutFile master.zip
     python -m pip install "master.zip[full,dev]"
 
-    python -c 'import kivy'
+    raise-only-error -Func {python -c 'import kivy'}
     $test_path=python -c 'import kivy.tests as tests; print(tests.__path__[0])'  --config "kivy:log_level:error"
     cd "$test_path"
 
     echo "[run]`nplugins = kivy.tools.coverage`n" > .coveragerc
-    try {
-      python -m pytest .
-    } catch {
-      if ($LastExitCode -ne 0) {
-        throw $_
-      } else {
-        echo $_
-      }
-    }
+    raise-only-error -Func {python -m pytest .}
 }

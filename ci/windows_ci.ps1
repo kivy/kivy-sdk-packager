@@ -30,6 +30,8 @@ function Upload-windows-wheels-to-server($ip) {
 }
 
 function Test-kivy() {
+    $env:GST_REGISTRY=~/registry.bin
+    $env:KIVY_GL_BACKEND=angle_sdl2
     python -m pip config set install.find-links "$(pwd)\dist"
     Invoke-WebRequest -Uri "https://github.com/kivy/kivy/archive/master.zip" -OutFile master.zip
     python -m pip install "master.zip[full,dev]"
@@ -39,5 +41,13 @@ function Test-kivy() {
     cd "$test_path"
 
     echo "[run]`nplugins = kivy.tools.coverage`n" > .coveragerc
-    python -m pytest .
+    try {
+      python -m pytest .
+    } catch {
+      if ($LastExitCode -ne 0) {
+        throw $_
+      } else {
+        echo $_
+      }
+    }
 }

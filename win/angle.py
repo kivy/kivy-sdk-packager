@@ -2,7 +2,7 @@ from __future__ import absolute_import, print_function
 from .common import *
 from zipfile import ZipFile
 
-__version__ = '0.2.0'
+__version__ = '0.1.11'
 
 
 def get_angle(cache, build_path, arch, package, output, download_only=False):

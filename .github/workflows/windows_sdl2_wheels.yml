@@ -47,7 +47,7 @@ jobs:
     needs: prepare_cache
     strategy:
       matrix:
-        python: [ '3.5', '3.6', '3.7', '3.8' ]
+        python: [ '3.6', '3.7', '3.8' ]
         arch: ['x64', 'x86']
     env:
       PACKAGE_ARCH: ${{ matrix.arch }}

@@ -36,13 +36,13 @@ jobs:
           python scripts/bootstrap.py
           gclient sync
 
-          gn gen out/Release_x64 --args="is_debug=false"
-          autoninja -C out\Release_x64 libEGL
-          autoninja -C out\Release_x64 libGLESv2
-
-          gn gen out/Release_x86 --args='is_debug=false target_cpu=x86'
+          gn gen out/Release_x86 '--args=is_debug=false target_cpu="x86"'
           autoninja -C out\Release_x86 libEGL
           autoninja -C out\Release_x86 libGLESv2
+
+          gn gen out/Release_x64 '--args=is_debug=false target_cpu="x64"'
+          autoninja -C out\Release_x64 libEGL
+          autoninja -C out\Release_x64 libGLESv2
 
           dir out\Release_x64
           dir out\Release_x86
@@ -57,7 +57,7 @@ jobs:
     needs: prepare_angle
     strategy:
       matrix:
-        python: [ '3.5', '3.6', '3.7', '3.8' ]
+        python: [ '3.6', '3.7', '3.8' ]
         arch: ['x64', 'x86']
     env:
       PACKAGE_ARCH: ${{ matrix.arch }}

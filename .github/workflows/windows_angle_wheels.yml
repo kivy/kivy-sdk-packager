@@ -37,14 +37,12 @@ jobs:
           gclient sync
 
           gn gen out/Release_x86 --args="is_debug=false"
-          ls out/Release_x86
-          type out/Release_x86/args.gn
-
-          gn gen out/Release_x86 --args="target_cpu=`"x86`" is_debug=false"
+          echo target_cpu=`"x86`" >> out/Release_x86/args.gn
           autoninja -C out\Release_x86 libEGL
           autoninja -C out\Release_x86 libGLESv2
 
-          gn gen out/Release_x64 --args="target_cpu=`"x64`" is_debug=false"
+          gn gen out/Release_x64 --args="is_debug=false"
+          echo target_cpu=`"x64`" >> out/Release_x64/args.gn
           autoninja -C out\Release_x64 libEGL
           autoninja -C out\Release_x64 libGLESv2
 

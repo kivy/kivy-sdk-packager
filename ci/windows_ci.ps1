@@ -89,6 +89,6 @@ function Build-angle() {
     cd ..
     mkdir angle_dlls\Release_x64
     mkdir angle_dlls\Release_x86
-    cp out\Release_x64\*.dll angle_dlls\Release_x64
-    cp out\Release_x86\*.dll angle_dlls\Release_x86
+    cp angle_src\out\Release_x64\*.dll angle_dlls\Release_x64
+    cp angle_src\out\Release_x86\*.dll angle_dlls\Release_x86
 }

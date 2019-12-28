@@ -35,21 +35,14 @@ jobs:
           gclient
           python scripts/bootstrap.py
           gclient sync
-      - name: Build angle
-        run: |
-          $env:PATH="$(pwd)\depot_tools;$env:PATH"
-          $env:PATH="$(python -c "import os; print(';'.join([p for p in os.environ['PATH'].split(';') if 'Python' not in p and 'python' not in p and 'Chocolatey' not in p]))")"
-          cd angle_src
 
-          gclient
+          gn gen out/Release_x64 --args="is_debug=false target_cpu=\"x64\""
+          autoninja -C out\Release_x64 libEGL
+          autoninja -C out\Release_x64 libGLESv2
 
           gn gen out/Release_x86 --args='is_debug=false target_cpu="x86"'
           autoninja -C out\Release_x86 libEGL
           autoninja -C out\Release_x86 libGLESv2
-
-          gn gen out/Release_x64 --args='is_debug=false target_cpu="x64"'
-          autoninja -C out\Release_x64 libEGL
-          autoninja -C out\Release_x64 libGLESv2
 
           dir out\Release_x64
           dir out\Release_x86

@@ -26,7 +26,6 @@ jobs:
           Invoke-WebRequest -Uri "https://storage.googleapis.com/chrome-infra/depot_tools.zip" -OutFile depot_tools.zip
           7z x depot_tools.zip -odepot_tools
           git clone https://github.com/google/angle.git angle_src
-          Install-Module Pscx -Scope CurrentUser
       - name: Build dependecies
         run: |
           $env:PATH="$(pwd)\depot_tools;$env:PATH"
@@ -43,7 +42,6 @@ jobs:
           cd angle_src
 
           gclient
-          Invoke-BatchFile "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\Common7\Tools\VsDevCmd.bat"
 
           gn gen out/Release_x86 --args='is_debug=false target_cpu="x86"'
           autoninja -C out\Release_x86 libEGL

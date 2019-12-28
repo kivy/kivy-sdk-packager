@@ -31,7 +31,7 @@ function Upload-windows-wheels-to-server($ip) {
 
 function Test-kivy() {
     python -m pip config set install.find-links "$(pwd)\dist"
-    wget https://github.com/kivy/kivy/archive/master.zip
+    Invoke-WebRequest -Uri "https://github.com/kivy/kivy/archive/master.zip" -OutFile master.zip
     python -m pip install "master.zip[full,dev]"
 
     python -c 'import kivy'

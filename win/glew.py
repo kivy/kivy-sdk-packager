@@ -3,7 +3,7 @@ from .common import *
 from zipfile import ZipFile
 import tarfile
 
-__version__ = '0.1.13'
+__version__ = '0.2.0'
 
 glew_ver = '2.1.0'
 

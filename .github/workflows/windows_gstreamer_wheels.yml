@@ -2,6 +2,9 @@ name: Gstreamer wheels
 
 on:
   push:
+    branches:
+      - master
+      - windows_ci
     paths:
       - 'win/gstreamer.py'
       - '.github/workflows/windows_gstreamer_wheels.yml'

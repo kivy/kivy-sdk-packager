@@ -2,6 +2,9 @@ name: Angle wheels
 
 on:
   push:
+    branches:
+      - master
+      - windows_ci
     paths:
       - 'win/angle.py'
       - '.github/workflows/windows_angle_wheels.yml'

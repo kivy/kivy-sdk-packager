@@ -2,6 +2,9 @@ name: SDL2 wheels
 
 on:
   push:
+    branches:
+      - master
+      - windows_ci
     paths:
       - 'win/sdl2.py'
       - '.github/workflows/windows_sdl2_wheels.yml'

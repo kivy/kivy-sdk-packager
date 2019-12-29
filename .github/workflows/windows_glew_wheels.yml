@@ -2,6 +2,9 @@ name: Glew wheels
 
 on:
   push:
+    branches:
+      - master
+      - windows_ci
     paths:
       - 'win/glew.py'
       - '.github/workflows/windows_glew_wheels.yml'

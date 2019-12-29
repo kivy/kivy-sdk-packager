@@ -1,0 +1,92 @@
+name: Angle wheels
+
+on:
+  push:
+    branches:
+      - master
+      - windows_ci
+    paths:
+      - 'win/angle.py'
+      - '.github/workflows/windows_angle_wheels.yml'
+
+env:
+  SERVER_IP: '159.203.106.198'
+  KIVY_BUILD_DIR: angle_dlls
+  KIVY_BUILD_CACHE: kivy_build_cache
+  PACKAGE_TARGET: angle
+  PYTHONPATH: .
+
+jobs:
+  prepare_angle:
+    runs-on: windows-latest
+    env:
+      DEPOT_TOOLS_WIN_TOOLCHAIN: 0
+    steps:
+      - uses: actions/checkout@v1
+      - name: Get dependecies
+        run: |
+          . .\ci\windows_ci.ps1
+          Get-angle-deps
+      - name: Build dependecies
+        run: |
+          . .\ci\windows_ci.ps1
+          Build-angle
+      - uses: actions/upload-artifact@v1
+        with:
+          name: angle_dlls
+          path: angle_dlls
+
+
+  windows_wheels:
+    runs-on: windows-latest
+    needs: prepare_angle
+    strategy:
+      matrix:
+        python: [ '3.6', '3.7', '3.8' ]
+        arch: ['x64', 'x86']
+    env:
+      PACKAGE_ARCH: ${{ matrix.arch }}
+    steps:
+    - uses: actions/checkout@v1
+    - name: Set up Python
+      uses: actions/setup-python@v1
+      with:
+        python-version: ${{ matrix.python }}
+        architecture: ${{ matrix.arch }}
+    - name: Prepare Environment
+      run: |
+        . .\ci\windows_ci.ps1
+        Prepre-env
+    - uses: actions/download-artifact@v1
+      with:
+        name: angle_dlls
+    - name: Build package
+      run: |
+        . .\ci\windows_ci.ps1
+        Create-Packages
+    - name: Install MSYS2
+      run: choco install msys2
+    - name: Upload wheels to server
+      if: contains(github.event.head_commit.message, '[publish angle win]')
+      env:
+        UBUNTU_UPLOAD_KEY: ${{ secrets.UBUNTU_UPLOAD_KEY }}
+        MSYSTEM: MINGW64
+        CHERE_INVOKING: 1
+      run: |
+        . .\ci\windows_ci.ps1
+        Upload-windows-wheels-to-server -ip "$env:SERVER_IP"
+    - name: Upload wheels as artifact
+      uses: actions/upload-artifact@master
+      with:
+        name: angle_wheels
+        path: dist
+    - name: Publish to PyPI
+      if: contains(github.event.head_commit.message, '[publish angle win]')
+      uses: pypa/gh-action-pypi-publish@master
+      with:
+        user: __token__
+        password: ${{ secrets.pypi_password }}
+    - name: Test package
+      run: |
+        . .\ci\windows_ci.ps1
+        Test-kivy

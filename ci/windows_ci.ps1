@@ -13,7 +13,7 @@ function raise-only-error{
 }
 
 function Prepre-env {
-    pip install requests
+    pip install requests twine
 
     mkdir "$(pwd)\dist"
     mkdir "$(pwd)\$env:KIVY_BUILD_DIR"
@@ -39,8 +39,8 @@ function Create-Packages() {
 
 function Upload-windows-wheels-to-server($ip) {
     echo "Uploading wheels*:"
-    C:\tools\msys64\usr\bin\bash --login -c ".ci/windows-server-upload.sh $ip '$(pwd)\dist' 'kivy_deps.$env:PACKAGE_TARGET`_dev-*.whl' ci/win/deps/$env:PACKAGE_TARGET`_dev/"
-    C:\tools\msys64\usr\bin\bash --login -c ".ci/windows-server-upload.sh $ip '$(pwd)\dist' 'kivy_deps.$env:PACKAGE_TARGET-*.whl' ci/win/deps/$env:PACKAGE_TARGET/"
+    C:\tools\msys64\usr\bin\bash --login -c "ci/windows-server-upload.sh $ip dist 'kivy_deps.$env:PACKAGE_TARGET`_dev-*.whl' ci/win/deps/$env:PACKAGE_TARGET`_dev/"
+    C:\tools\msys64\usr\bin\bash --login -c "ci/windows-server-upload.sh $ip dist 'kivy_deps.$env:PACKAGE_TARGET-*.whl' ci/win/deps/$env:PACKAGE_TARGET/"
 }
 
 function Test-kivy() {

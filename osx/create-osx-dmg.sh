@@ -71,8 +71,9 @@ echo '
    end tell
 ' | osascript
  
+echo "Osascript Finished"
 sync
-sleep 3
+sleep 10
 
 # unmount it
 hdiutil detach "${DEVICE}"

@@ -139,7 +139,7 @@ source venv/bin/activate
 #curl -O -L https://github.com/docutils-mirror/docutils/archive/0.12.zip && venv/bin/pip install 0.12.zip && rm 0.12.zip
 curl -OL http://bootstrap.pypa.io/get-pip.py
 ./venv/bin/python get-pip.py
-./venv/bin/python -m pip install virtualenv
+./venv/bin/python -m pip install virtualenv==16.7.10
 ./venv/bin/python -m pip install pygments
 ./venv/bin/python -m pip install cython==0.28.2
 ./venv/bin/python -m pip install docutils

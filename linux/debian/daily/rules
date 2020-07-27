@@ -26,6 +26,7 @@ override_dh_installdocs:
 	python3 -m pip install $(CURDIR)/setuptools -t $(CURDIR)/pypackages --no-deps --upgrade || true;
 	python3 -m pip install $(CURDIR)/pip -t $(CURDIR)/pypackages --no-deps --upgrade || true;
 	python3 -m pip install $(CURDIR)/wheel -t $(CURDIR)/pypackages --no-deps --upgrade || true;
+	python3 -m pip install $(CURDIR)/packaging -t $(CURDIR)/pypackages --no-deps --upgrade || true;
 	python3 -m pip install $(CURDIR)/cython -t $(CURDIR)/pypackages --no-deps --upgrade || true;
 	python3 -m pip list;
 	$(MAKE) PYTHON=python3 force;
@@ -43,6 +44,7 @@ override_dh_auto_install:
 	    $$PYX -m pip install $(CURDIR)/setuptools -t $(CURDIR)/pypackages --no-deps --upgrade; \
 	    $$PYX -m pip install $(CURDIR)/pip -t $(CURDIR)/pypackages --no-deps --upgrade; \
 	    $$PYX -m pip install $(CURDIR)/wheel -t $(CURDIR)/pypackages --no-deps --upgrade; \
+	    $$PYX -m pip install $(CURDIR)/packaging -t $(CURDIR)/pypackages --no-deps --upgrade; \
 	    $$PYX -m pip install $(CURDIR)/cython -t $(CURDIR)/pypackages --no-deps --upgrade; \
 	    $$PYX -m pip list; \
 	    $(MAKE) install PYTHON=$$PYX INSTALL_ROOT=$(CURDIR)/debian/tmp INSTALL_PREFIX=/usr INSTALL_LAYOUT=deb; \

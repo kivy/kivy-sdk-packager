@@ -28,6 +28,5 @@ echo "Making scripts relative"
 (export LANG=C LC_ALL=C; find . -type f -name '*' -print0 | xargs -0  sed -i '.bak' "s~$APP_PATH/Contents/Resources/venv/bin/python~python~")
 
 popd
-popd
 
 echo "Done"

@@ -33,8 +33,7 @@ if [ -d "$KIVY_PATH" ]; then
     KIVY_PATH="$(pwd)"
     popd
 else
-    curl -O -L "https://github.com/kivy/kivy/archive/$KIVY_PATH.zip"
-    KIVY_PATH="$KIVY_PATH.zip"
+    KIVY_PATH="https://github.com/kivy/kivy/archive/$KIVY_PATH.zip"
 fi
 
 echo "Using Kivy $KIVY_PATH"
@@ -176,7 +175,7 @@ source venv/bin/activate
 
 ./venv/bin/python -m pip install git+https://github.com/tito/osxrelocator
 export USE_SDL2=1
-./venv/bin/python -m pip install "${KIVY_PATH}[base]"
+./venv/bin/python -m pip install "kivy[base] @ $KIVY_PATH"
 echo "-- Link python to the right location for relocation"
 ln -s ./venv/bin/python ./python
 

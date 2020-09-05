@@ -33,7 +33,8 @@ if [ -d "$KIVY_PATH" ]; then
     KIVY_PATH="$(pwd)"
     popd
 else
-    KIVY_PATH="https://github.com/kivy/kivy/archive/$KIVY_PATH.zip"
+    curl -O -L "https://github.com/kivy/kivy/archive/$KIVY_PATH.zip"
+    KIVY_PATH="$KIVY_PATH.zip"
 fi
 
 echo "Using Kivy $KIVY_PATH"

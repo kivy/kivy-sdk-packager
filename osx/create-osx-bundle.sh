@@ -1,82 +1,117 @@
 #!/bin/bash
-
-USAGE="Usage::
-
-    create-osx-bundle.sh <Kivy version> <Python version>
-
-For Example::
-
-    sh ./create-osx-bundle.sh 1.11.1 3.7.4
-"
-
-# -- VERSION=1.11.1
-if [ "x$1" != "x" ]; then
-    VERSION=$1
-else
-    echo "$USAGE"
-    exit 1
-fi
-
-echo "Using kivy version $VERSION"
-
-# -- PYVER=3.7.4
-
-if [ "x$2" != "x" ]; then
-    PYVER=$2
-else
-    echo "$USAGE"
-    exit 1
-fi
-
-echo "Using Python version $PYVER"
-
 set -x  # verbose
 set -e  # exit on error
 
-PLATYPUS=/usr/local/bin/platypus
-SCRIPT_PATH="${BASH_SOURCE[0]}";
+USAGE="Usage::
 
-PYTHON=python
+    create-osx-bundle.sh <Kivy version or path> <Python version> <App name> <App version> <org> <app_main_script>
 
-if([ -h "${SCRIPT_PATH}" ]) then
-  while([ -h "${SCRIPT_PATH}" ]) do SCRIPT_PATH=`readlink "${SCRIPT_PATH}"`; done
+Requirements::
+
+    The SDL2, SDL2_image, SDL2_ttf, and SDL2_mixer frameworks needs to be installed.
+    If gstreamer is enabled (the default), gstreamer-1.0 also need to be installed.
+    To disable gstreamer, export USE_GSTREAMER=0 and it won't be packaged.
+
+    Platypus also needs to be installed.
+
+For Example::
+
+    sh ./create-osx-bundle.sh 1.11.1 3.7.4 Kivy 1.11.1 org.kivy.osxlauncher data/script
+    sh ./create-osx-bundle.sh path_to_cloned_kivy 3.7.4 MyApp 1.2.3 org.kivy.osxlauncher data/script
+"
+
+if [ $# -lt 6 ]; then
+    echo "$USAGE"
+    exit 1
 fi
 
-SCRIPT_PATH=$(python -c "import os; print(os.path.realpath(os.path.dirname('${SCRIPT_PATH}')))")
+# get kivy path or url
+KIVY_PATH="$1"
+if [ -d "$KIVY_PATH" ]; then
+    # get full path
+    pushd "$KIVY_PATH"
+    KIVY_PATH="$(pwd)"
+    popd
+else
+    KIVY_PATH="https://github.com/kivy/kivy/archive/$KIVY_PATH.zip"
+fi
+
+echo "Using Kivy $KIVY_PATH"
+
+PYVER="$2"
+echo "Using Python version $PYVER"
+
+APP_NAME="$3"
+APP_VERSION="$4"
+APP_ORG="$5"
+echo "Build $APP_NAME version $APP_VERSION org $APP_ORG"
+
+APP_SCRIPT="$6"
+echo "App will launch with $APP_SCRIPT"
+
+PLATYPUS=/usr/local/bin/platypus
+if [ ! -f "$PLATYPUS" ]; then
+    echo "Could not find platypus at $PLATYPUS"
+    exit 1
+fi
+
+SCRIPT_PATH="${BASH_SOURCE[0]}"
+PYTHON=python3
+USE_GSTREAMER=${USE_GSTREAMER:-1}
+
+# follow any symbolic links
+if [ -h "${SCRIPT_PATH}" ]; then
+  while [ -h "${SCRIPT_PATH}" ]; do
+      SCRIPT_PATH=$(readlink "${SCRIPT_PATH}")
+  done
+fi
+
+SCRIPT_PATH=$($PYTHON -c "import os; print(os.path.realpath(os.path.dirname('$SCRIPT_PATH')))")
 OSXRELOCATOR="osxrelocator"
-echo "-- Create initial Kivy.app package"
+
+
+echo "-- Create initial $APP_NAME.app package"
 $PLATYPUS -DBR -x -y \
     -i "$SCRIPT_PATH/data/icon.icns" \
-    -a "Kivy" \
+    -a "$APP_NAME" \
     -o "None" \
     -p "/bin/bash" \
-    -V "$VERSION" \
-    -I "org.kivy.osxlauncher" \
+    -V "$APP_VERSION" \
+    -I "$APP_ORG" \
     -X "*" \
-    "$SCRIPT_PATH/data/script" \
-    "$SCRIPT_PATH/Kivy.app"
-
+    "$APP_SCRIPT" \
+    "$SCRIPT_PATH/$APP_NAME.app"
 
 
 echo "--- Frameworks"
 
 echo "-- Create Frameworks directory"
-mkdir -p Kivy.app/Contents/Frameworks
+mkdir -p "$APP_NAME.app/Contents/Frameworks"
+
+echo "Install Python"
 if [ ! -f ~/.pyenv/bin/pyenv ]; then
   curl -L https://raw.githubusercontent.com/yyuu/pyenv-installer/master/bin/pyenv-installer | bash
-  ~/.pyenv/bin/pyenv install $PYVER
+  ~/.pyenv/bin/pyenv install "$PYVER"
 fi
-PYPATH="$SCRIPT_PATH/Kivy.app/Contents/Frameworks/python"
+
+# move python install path
+PYPATH="$SCRIPT_PATH/$APP_NAME.app/Contents/Frameworks/python"
 mkdir "$PYPATH"
-cp -a ~/.pyenv/versions/$PYVER "$PYPATH"
-find -E "$PYPATH/$PYVER" -regex '.*.pyc' | grep -v "opt-2.pyc" | xargs rm
+cp -a ~/.pyenv/versions/"$PYVER" "$PYPATH"
 PYTHON="$PYPATH/$PYVER/bin/python"
-rm -rf python/$PYVER/share
-rm -rf python/$PYVER/lib/python${PYVER[@]:0:3}/{test,unittest/test,turtledemo,tkinter}
-pushd Kivy.app/Contents/Frameworks
+
+# remove pyc because they contain absolute paths
+find -E "$PYPATH/$PYVER" -regex '.*.pyc' | grep -v "opt-2.pyc" | xargs rm  # todo: fix
+
+rm -rf "$PYPATH/$PYVER/share"
+rm -rf "$PYPATH/$PYVER/lib/python${PYVER:0:3}"/{test,unittest/test,turtledemo,tkinter}
+pushd "$APP_NAME.app/Contents/Frameworks"
 
 echo "-- Copy frameworks"
-cp -a /Library/Frameworks/GStreamer.framework .
+
+if [ "$USE_GSTREAMER" != "0" ]; then
+    cp -a /Library/Frameworks/GStreamer.framework .
+fi
 cp -a /Library/Frameworks/SDL2.framework .
 cp -a /Library/Frameworks/SDL2_image.framework .
 cp -a /Library/Frameworks/SDL2_ttf.framework .
@@ -84,7 +119,7 @@ cp -a /Library/Frameworks/SDL2_mixer.framework .
 mkdir ../lib/
 
 echo "-- Reduce frameworks size"
-rm -rf {SDL2,SDL2_image,SDL2_ttf,SDL2_mixer,GStreamer}.framework/Headers
+rm -rf {SDL2,SDL2_image,SDL2_ttf,SDL2_mixer}.framework/Headers
 rm -rf {SDL2,SDL2_image,SDL2_ttf,SDL2_mixer}.framework/Versions/A/Headers
 rm -rf SDL2_ttf.framework/Versions/A/Frameworks/FreeType.framework/Versions/A/Headers
 rm -rf SDL2_ttf.framework/Versions/A/Frameworks/FreeType.framework/Versions/Current
@@ -93,83 +128,69 @@ rm -rf Current
 ln -s A Current
 cd -
 rm -rf SDL2_ttf.framework/Versions/A/Frameworks/FreeType.framework/Headers
-rm -rf GStreamer.framework/Versions/1.0/share/locale
-rm -rf GStreamer.framework/Versions/1.0/lib/gstreamer-1.0/static
-rm -rf GStreamer.framework/Versions/1.0/share/gstreamer-1.0/validate-scenario
-rm -rf GStreamer.framework/Versions/1.0/share/fontconfig/conf.avail
-rm -rf GStreamer.framework/Versions/1.0/include
-rm -rf GStreamer.framework/Versions/1.0/lib/gst-validate-launcher
-rm -rf GStreamer.framework/Versions/1.0/Headers
-rm -rf GStreamer.framework/Versions/1.0/lib/pkgconfig
-rm -rf GStreamer.framework/Versions/1.0/bin
-rm -rf GStreamer.framework/Versions/1.0/etc
-rm -rf GStreamer.framework/Versions/1.0/share/gstreamer
+if [ "$USE_GSTREAMER" != "0" ]; then
+    rm -rf GStreamer.framework/Headers
+    rm -rf GStreamer.framework/Versions/1.0/share/locale
+    rm -rf GStreamer.framework/Versions/1.0/lib/gstreamer-1.0/static
+    rm -rf GStreamer.framework/Versions/1.0/share/gstreamer-1.0/validate-scenario
+    rm -rf GStreamer.framework/Versions/1.0/share/fontconfig/conf.avail
+    rm -rf GStreamer.framework/Versions/1.0/include
+    rm -rf GStreamer.framework/Versions/1.0/lib/gst-validate-launcher
+    rm -rf GStreamer.framework/Versions/1.0/Headers
+    rm -rf GStreamer.framework/Versions/1.0/lib/pkgconfig
+    rm -rf GStreamer.framework/Versions/1.0/bin
+    rm -rf GStreamer.framework/Versions/1.0/etc
+    rm -rf GStreamer.framework/Versions/1.0/share/gstreamer
+fi
 find -E . -regex '.*\.a$' -exec rm {} \;
 find -E . -regex '.*\.la$' -exec rm {} \;
 find -E . -regex '.*\.exe$' -exec rm {} \;
 
-echo "-- Remove duplicate gstreamer libraries"
-$PYTHON $SCRIPT_PATH/data/link_duplicate.py GStreamer.framework/Libraries
+if [ "$USE_GSTREAMER" != "0" ]; then
+    echo "-- Remove duplicate gstreamer libraries"
+    $PYTHON "$SCRIPT_PATH/data/link_duplicate.py" GStreamer.framework/Libraries
+fi
 
 echo "-- Remove broken symlink"
 find . -type l -exec sh -c "file -b {} | grep -q ^broken" \; -print
 find . -type l -exec sh -c "file -b {} | grep -q ^broken" \; -print | xargs rm
 
-echo "-- Copy gst-plugin-scanner"
-mv GStreamer.framework/Versions/Current/libexec/gstreamer-1.0/gst-plugin-scanner ../Resources
+if [ "$USE_GSTREAMER" != "0" ]; then
+  echo "-- Copy gst-plugin-scanner"
+  mv GStreamer.framework/Versions/Current/libexec/gstreamer-1.0/gst-plugin-scanner ../Resources
+fi
 
 popd
 
 # --- Python resources
 
-pushd Kivy.app/Contents/Resources/
+pushd "$APP_NAME.app/Contents/Resources/"
 
 echo "-- Create a virtualenv"
-if [ ${PYVER[@]:0:1} = 3 ]; then
-    $PYTHON -m venv venv
-else
-    $PYTHON -m pip install virtualenv
-    $PYTHON -m virtualenv venv
-fi
+$PYTHON -m pip install --upgrade pip virtualenv
+$PYTHON -m virtualenv venv
 
 echo "-- Install dependencies"
 source venv/bin/activate
-#curl -O -L https://github.com/cython/cython/archive/0.28.1.zip && venv/bin/pip install 0.28.1.zip && rm 0.28.1.zip
-#curl -O -L https://github.com/sol/pygments/archive/2.2.0.zip && venv/bin/pip install 2.2.0.zip && rm 2.2.0.zip
-#curl -O -L https://github.com/docutils-mirror/docutils/archive/0.12.zip && venv/bin/pip install 0.12.zip && rm 0.12.zip
-curl -OL http://bootstrap.pypa.io/get-pip.py
-./venv/bin/python get-pip.py
-./venv/bin/python -m pip install virtualenv==16.7.10
-./venv/bin/python -m pip install pygments
-./venv/bin/python -m pip install cython==0.28.2
-./venv/bin/python -m pip install docutils
+
 ./venv/bin/python -m pip install git+https://github.com/tito/osxrelocator
+export USE_SDL2=1
+./venv/bin/python -m pip install "$KIVY_PATH"
 echo "-- Link python to the right location for relocation"
 ln -s ./venv/bin/python ./python
 
 popd
 
-# --- Kivy
-
-echo "-- Download and compile Kivy"
-pushd Kivy.app/Contents/Resources
-curl -L -O https://github.com/kivy/kivy/archive/$VERSION.zip
-unzip $VERSION.zip
-rm $VERSION.zip
-mv kivy-$VERSION kivy
-
-cd kivy
-USE_SDL2=1 ../venv/bin/python setup.py build_ext --inplace
-popd
-
 # --- Relocation
 
 echo "-- Relocate frameworks"
-pushd Kivy.app
+pushd "$APP_NAME.app"
 osxrelocator -r . /usr/local/lib/ \
     @executable_path/../lib/
-osxrelocator -r . /Library/Frameworks/GStreamer.framework/ \
-    @executable_path/../Frameworks/GStreamer.framework/
+if [ "$USE_GSTREAMER" != "0" ]; then
+    osxrelocator -r . /Library/Frameworks/GStreamer.framework/ \
+        @executable_path/../Frameworks/GStreamer.framework/
+fi
 osxrelocator -r . /Library/Frameworks/SDL2/ \
     @executable_path/../Frameworks/SDL2/
 osxrelocator -r . /Library/Frameworks/SDL2_ttf/ \
@@ -184,20 +205,24 @@ osxrelocator -r . @rpath/SDL2_image.framework/Versions/A/SDL2_image \
     @executable_path/../Frameworks/SDL2_image.framework/Versions/A/SDL2_image
 osxrelocator -r . @rpath/SDL2_mixer.framework/Versions/A/SDL2_mixer \
     @executable_path/../Frameworks/SDL2_mixer.framework/Versions/A/SDL2_mixer
-osxrelocator -r . ~/.pyenv/versions/3.6.5/openssl/lib/ \
-    @executable_path/../Frameworks/python/3.6.5/openssl/lib
+osxrelocator -r . ~/.pyenv/versions/"$PYVER"/openssl/lib/ \
+    @executable_path/../Frameworks/python/"$PYVER"/openssl/lib
 popd
 
-# relocate the activate script
 echo "-- Relocate virtualenv"
-pushd Kivy.app/Contents/Resources/venv
-virtualenv --relocatable .
-sed -i -r 's#^VIRTUAL_ENV=.*#VIRTUAL_ENV=$(cd $(dirname "$BASH_SOURCE"); dirname `pwd`)#' bin/activate
+pushd "$APP_NAME.app/Contents/Resources/venv"
+
 rm bin/activate.csh
 rm bin/activate.fish
+
+pushd bin
+rm ./python ./python3
+ln -s "../../../Frameworks/python/$PYVER/bin/python" .
+ln -s "../../../Frameworks/python/$PYVER/bin/python3" .
+
+popd
 popd
 
-pushd Kivy.app/Contents/Resources/venv/bin/
-rm ./python
-ln -s ../../../Frameworks/python/$PYVER/bin/python .
+./relocate.sh "$APP_NAME.app"
+
 echo "-- Done !"

@@ -25,8 +25,9 @@ pushd "$APP_PATH/Contents/Resources/venv"
 grep -irl --include=\*.pyc "$APP_PATH/Contents/Resources/venv" . | xargs rm
 
 echo "Making scripts relative"
-(export LANG=C LC_ALL=C; find . -type f -name '*' -print0 | xargs -0  sed -i '.bak' "s~$APP_PATH/Contents/Resources/venv/bin/python~python~")
-
+(export LANG=C LC_ALL=C; find . -type f -name '*' -print0 | xargs -0  sed -i '.bak' "s~$APP_PATH/Contents/Resources/venv/bin/python~/usr/bin/env python~")
+sed -E -i '.bak' 's#^VIRTUAL_ENV=.*#VIRTUAL_ENV=$(cd $(dirname "$BASH_SOURCE"); dirname `pwd`)#' bin/activate
+find . -type f -name "*.bak" -print0 | xargs -0 rm
 popd
 
 echo "Done"

@@ -178,7 +178,11 @@ source venv/bin/activate
 
 ./venv/bin/python -m pip install git+https://github.com/tito/osxrelocator
 export USE_SDL2=1
-./venv/bin/python -m pip install "kivy[base] @ $KIVY_PATH"
+if [ -d "$KIVY_PATH" ]; then
+    ./venv/bin/python -m pip install "${KIVY_PATH}[base]"
+else
+    ./venv/bin/python -m pip install "kivy[base] @ $KIVY_PATH"
+fi
 echo "-- Link python to the right location for relocation"
 ln -s ./venv/bin/python ./python
 

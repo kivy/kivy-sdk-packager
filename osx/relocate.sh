@@ -2,13 +2,24 @@
 set -x  # verbose
 set -e  # exit on error
 
-USAGE="Usage::
+USAGE="Fixes the paths of scripts and removes compiled pyc/pyo files. This is required so that
+the bundle created with create-osx-bundle.sh could be moved to a different path or made into a
+dmg.
 
-    relocate.sh <app_root>
+The should be run every time after new packages are installed into the venv before
+a dmg is created or before the bundle is moved to a different path.
+
+Usage::
+
+    relocate.sh <Path to bundle.app>
+
+Requirements::
+
+    A previously created bundle using create-osx-bundle.sh
 
 For Example::
 
-    sh ./relocate.sh Kivy.app
+    ./relocate.sh MyApp.app
 "
 
 if [ $# -lt 1 ]; then
@@ -23,11 +34,14 @@ popd
 echo "Remove path specific pyc files"
 pushd "$APP_PATH/Contents/Resources/venv"
 grep -irl --include=\*.pyc "$APP_PATH/Contents/Resources/venv" . | xargs rm
+grep -irl --include=\*.pyo "$APP_PATH/Contents/Resources/venv" . | xargs rm
 
 echo "Making scripts relative"
-(export LANG=C LC_ALL=C; find . -type f -name '*' -print0 | xargs -0  sed -i '.bak' "s~$APP_PATH/Contents/Resources/venv/bin/python~/usr/bin/env python~")
-sed -E -i '.bak' 's#^VIRTUAL_ENV=.*#VIRTUAL_ENV=$(cd $(dirname "$BASH_SOURCE"); dirname `pwd`)#' bin/activate
+pushd bin
+(export LANG=C LC_ALL=C; find . -type f -name '*' -print0 | \
+    xargs -0  sed -i '.bak' "s~$APP_PATH/Contents/Resources/venv/bin/python~/usr/bin/env python~")
 find . -type f -name "*.bak" -print0 | xargs -0 rm
+popd
 popd
 
 echo "Done"

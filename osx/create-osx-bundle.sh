@@ -2,9 +2,11 @@
 set -x  # verbose
 set -e  # exit on error
 
-USAGE="Usage::
+USAGE="Creates a Kivy bundle that can be used to build your app into a dmg. See documentation.
 
-    create-osx-bundle.sh <Kivy version or path> <Python version> <App name> <App version> <org> <app_main_script>
+Usage::
+
+    create-osx-bundle.sh <Kivy version or path> <Python version> <App name> <App version> <Author> <org> <icon> <app_main_script>
 
 Requirements::
 
@@ -14,13 +16,12 @@ Requirements::
 
     Platypus also needs to be installed.
 
-For Example::
+For Example, to build Kivy we use::
 
-    sh ./create-osx-bundle.sh 1.11.1 3.7.4 Kivy 1.11.1 org.kivy.osxlauncher data/script
-    sh ./create-osx-bundle.sh path_to_cloned_kivy 3.7.4 MyApp 1.2.3 org.kivy.osxlauncher data/script
+    ./create-osx-bundle.sh 1.11.1 3.7.4 Kivy 1.11.1 \"Kivy Developers\" org.kivy.osxlauncher data/icon.icns data/script
 "
 
-if [ $# -lt 6 ]; then
+if [ $# -lt 8 ]; then
     echo "$USAGE"
     exit 1
 fi
@@ -43,11 +44,13 @@ echo "Using Python version $PYVER"
 
 APP_NAME="$3"
 APP_VERSION="$4"
-APP_ORG="$5"
-echo "Build $APP_NAME version $APP_VERSION org $APP_ORG"
+AUTHOR="$5"
+APP_ORG="$6"
+echo "Build $APP_NAME version $APP_VERSION org $APP_ORG by $AUTHOR"
 
-APP_SCRIPT="$6"
-echo "App will launch with $APP_SCRIPT"
+ICON_PATH="$6"
+APP_SCRIPT="$7"
+echo "App will launch with $APP_SCRIPT using icon $ICON_PATH"
 
 PLATYPUS=/usr/local/bin/platypus
 if [ ! -f "$PLATYPUS" ]; then
@@ -72,7 +75,7 @@ OSXRELOCATOR="osxrelocator"
 
 echo "-- Create initial $APP_NAME.app package"
 $PLATYPUS -DBR -x -y \
-    -i "$SCRIPT_PATH/data/icon.icns" \
+    -i "$ICON_PATH" \
     -a "$APP_NAME" \
     -o "None" \
     -p "/bin/bash" \
@@ -219,6 +222,8 @@ pushd bin
 rm ./python ./python3
 ln -s "../../../Frameworks/python/$PYVER/bin/python" .
 ln -s "../../../Frameworks/python/$PYVER/bin/python3" .
+
+sed -E -i '.bak' 's#^VIRTUAL_ENV=.*#VIRTUAL_ENV=$(cd $(dirname "$BASH_SOURCE"); dirname `pwd`)#' activate
 
 popd
 popd

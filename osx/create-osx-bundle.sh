@@ -48,8 +48,8 @@ AUTHOR="$5"
 APP_ORG="$6"
 echo "Build $APP_NAME version $APP_VERSION org $APP_ORG by $AUTHOR"
 
-ICON_PATH="$6"
-APP_SCRIPT="$7"
+ICON_PATH="$7"
+APP_SCRIPT="$8"
 echo "App will launch with $APP_SCRIPT using icon $ICON_PATH"
 
 PLATYPUS=/usr/local/bin/platypus

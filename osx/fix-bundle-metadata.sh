@@ -4,9 +4,15 @@ set -e  # exit on error
 
 USAGE="Updates the metadata of a bundle created with create-osx-bundle.sh.
 
-Usage::
+Usage: fix-bundle-metadata.sh <Path to bundle> [options]
 
-    fix-bundle-metadata.sh <Path to bundle.app> <App name> <App version> <author> <org> <icon>
+    <Path to bundle>    The path to the app bundle (e.g. MyApp.app).
+
+    -n --name     <App name>          The name of the app.
+    -v --version  <App version>       The version of the app.
+    -a --author   <Author>            The author name.
+    -o --org      <org>               The org id used for the app.
+    -i --icon     <icon>              A png or icns icon file path.
 
 Requirements::
 
@@ -14,39 +20,60 @@ Requirements::
 
 For Example::
 
-    ./fix-bundle-metadata.sh MyApp.app MyApp 1.2.3 Me org.myorg.myapp my_icon.png
+    ./fix-bundle-metadata.sh MyApp.app -n MyNewApp -i my_icon.png
 "
 
-if [ $# -lt 6 ]; then
+if [ $# -lt 1 ]; then
     echo "$USAGE"
     exit 1
 fi
 
 PLIST_PATH="$1/Contents/info.plist"
+shift
 
-echo "Setting Bundle display name and Bundle name to $2"
-plutil -replace "Bundle display name" -string "$2" "$PLIST_PATH"
-plutil -replace "Bundle name" -string "$2" "$PLIST_PATH"
+while [[ "$#" -gt 0 ]]; do
+    # empty arg?
+    if [ -z "$2" ]; then
+        echo "$USAGE"
+        exit 1
+    fi
 
-echo "Setting Bundle version to $3"
-plutil -replace "Bundle version" -string "$3" "$PLIST_PATH"
+    case $1 in
+        -n|--name)
+          echo "Setting Bundle display name and Bundle name to $2"
+          plutil -replace "Bundle display name" -string "$2" "$PLIST_PATH"
+          plutil -replace "Bundle name" -string "$2" "$PLIST_PATH"
+          ;;
+        -v|--version)
+          echo "Setting Bundle version to $2"
+          plutil -replace "Bundle version" -string "$2" "$PLIST_PATH"
+          ;;
+        -a|--author)
+          echo "Setting NSHumanReadableCopyright to $2"
+          plutil -replace "NSHumanReadableCopyright" -string "$2" "$PLIST_PATH"
+          ;;
+        -o|--org)
+          echo "Setting Bundle identifier to $2"
+          plutil -replace "Bundle identifier" -string "$2" "$PLIST_PATH"
+          ;;
+        -i|--icon)
+          echo "Changing icon to $2"
+          h=$(sips -g pixelHeight "$2")
+          w=$(sips -g pixelWidth "$2")
+          if [ "$h" -ne "$w" ]; then
+              echo "The icon width and height should be the same, but they are $w x $h"
+              exit 1
+          fi
 
-echo "Setting NSHumanReadableCopyright to $4"
-plutil -replace "NSHumanReadableCopyright" -string "$4" "$PLIST_PATH"
-
-echo "Setting Bundle identifier to $5"
-plutil -replace "Bundle identifier" -string "$5" "$PLIST_PATH"
-
-echo "Changing icon to $6"
-h=$(sips -g pixelHeight "$6")
-w=$(sips -g pixelWidth "$6")
-if [ "$h" -ne "$w" ]; then
-    echo "The icon width and height should be the same, but they are $w x $h"
-    exit 1
-fi
-
-if [ "${6##*.}" != "icns" ]; then
-    sips -s format icns "$6" --out "$1/Contents/Resources/appIcon.icns"
-fi
+          if [ "${2##*.}" != "icns" ]; then
+              sips -s format icns "$2" --out "$1/Contents/Resources/appIcon.icns"
+          else
+              cp "$2" "$1/Contents/Resources/appIcon.icns"
+          fi
+          ;;
+        *) echo "Unknown parameter passed: $1"; echo "$USAGE"; exit 1 ;;
+    esac
+    shift; shift
+done
 
 echo "-- Done !"

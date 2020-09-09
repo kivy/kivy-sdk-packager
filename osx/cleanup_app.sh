@@ -16,11 +16,11 @@ rm -rf "$APPPATH/"Contents/Resources/venv/bin/{cython*,cygdb,osxrelocator,pip*,p
 rm -rf "$APPPATH/"Contents/Resources/venv/lib/python3.*/site-packages/{pip*,Cython*,setuptools*,osxrelocator*,cython*,wheel/test*}
 rm -rf "$APPPATH/"Contents/Resources/venv/lib/python3.*/site-packages/wheel/test
 rm -rf "$PYPATH/"3.*/lib/python3.*/{turtledemo,test,curses,unittest,ensurepip,idlelib,pydoc_data,setuptools*}
-rm -rf "$PYPATH/"3.*/lib/python3.*/site-packages/{easy_install*,pip*}
+rm -rf "$PYPATH/"3.*/lib/python3.*/site-packages/{easy_install*,pip*,virtualenv,setuptools*}
 rm -rf "$PYPATH/"3.*/lib/python3.*/site-packages/wheel/test
-rm -rf "$PYPATH/3.*/lib/python3.*/sqlite3"
-rm -rf "$PYPATH/3.*/lib/python3.*/tkinter"
-rm -rf "$PYPATH/"3.*/bin/{pygmentize,2to*,pip*,*-config,easy_install*,idle*,pydoc*,python3.5m*,rst*,pip*}
+rm -rf "$PYPATH"/3.*/lib/python3.*/sqlite3
+rm -rf "$PYPATH"/3.*/lib/python3.*/tkinter
+rm -rf "$PYPATH/"3.*/bin/{pygmentize,2to*,pip*,*-config,easy_install*,idle*,pydoc*,rst*,pip*}
 rm -rf "$PYPATH/"3.*/lib/{lib*,pkgconfig}
 rm -rf "$PYPATH/"3.*/include
-rm -rf "$PYPATH/3.*/lib/pkgconfig"
+rm -rf "$PYPATH"/3.*/lib/pkgconfig

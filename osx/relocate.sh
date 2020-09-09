@@ -9,9 +9,7 @@ dmg.
 The should be run every time after new packages are installed into the venv before
 a dmg is created or before the bundle is moved to a different path.
 
-Usage::
-
-    relocate.sh <Path to bundle.app>
+Usage: relocate.sh <Path to bundle.app>
 
 Requirements::
 

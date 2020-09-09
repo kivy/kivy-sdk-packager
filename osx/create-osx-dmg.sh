@@ -4,9 +4,10 @@ set -e  # exit on error
 
 USAGE="Creates a dmg from a bundle previously created with create-osx-bundle.sh.
 
-Usage::
+Usage: create-osx-dmg.sh <Path to bundle.app> <App name> [options]
 
-    create-osx-dmg.sh <Path to bundle.app> <App name>
+    -s --symlink     <Include symlink script, default:0>          \
+Whether to include the symlink creation button. One of 0 or 1.
 
 Requirements::
 
@@ -14,7 +15,7 @@ Requirements::
 
 For Example::
 
-    ./create-osx-dmg.sh MyApp.app MyApp
+    ./create-osx-dmg.sh MyApp.app MyApp -s 1
 "
 
 if [ $# -lt 2 ]; then
@@ -24,6 +25,23 @@ fi
 
 BUNDLE_PATH="$1"
 APP_NAME="$2"
+shift
+shift
+
+COPY_SYMLINK="0"
+while [[ "$#" -gt 0 ]]; do
+    # empty arg?
+    if [ -z "$2" ]; then
+        echo "$USAGE"
+        exit 1
+    fi
+
+    case $1 in
+        -s|--symlink) COPY_SYMLINK="$2";;
+        *) echo "Unknown parameter passed: $1"; echo "$USAGE"; exit 1 ;;
+    esac
+    shift; shift
+done
 
 DMG_BACKGROUND_IMG="background.png"
 SYMLINKS_SCRIPT="MakeSymlinks"
@@ -41,7 +59,10 @@ cp -a "$BUNDLE_PATH" "$work_dir/${STAGING_DIR}"
 ln -s /Applications "$work_dir/${STAGING_DIR}/Applications"
 mkdir "$work_dir/${STAGING_DIR}/.background"
 cp "data/${DMG_BACKGROUND_IMG}" "$work_dir/${STAGING_DIR}/.background/"
-cp "data/${SYMLINKS_SCRIPT}" "$work_dir/${STAGING_DIR}/${SYMLINKS_SCRIPT}"
+
+if [ "$COPY_SYMLINK" != "0" ]; then
+    cp "data/${SYMLINKS_SCRIPT}" "$work_dir/${STAGING_DIR}/${SYMLINKS_SCRIPT}"
+fi
 
 # create the initial dmg
 echo "-- Create volume"

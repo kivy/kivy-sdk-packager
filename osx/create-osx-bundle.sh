@@ -4,30 +4,59 @@ set -e  # exit on error
 
 USAGE="Creates a Kivy bundle that can be used to build your app into a dmg. See documentation.
 
-Usage::
+Usage: create-osx-bundle.sh [options]
 
-    create-osx-bundle.sh <Kivy version or path> <Python version> <App name> <App version> <Author> <org> <icon> <app_main_script>
+    -k --kivy     <Kivy version or path, default:master>  The local path to Kivy source or a git tag/branch/commit.
+    -p --python   <Python version, default:3.8.5>         The Python version to use.
+    -n --name     <App name, default:Kivy>                The name of the app.
+    -v --version  <App version, default:master>           The version of the app.
+    -a --author   <Author, default:Kivy Developers>       The author name.
+    -o --org      <org, default:org.kivy.osxlauncher>     The org id used for the app.
+    -i --icon     <icon, default:data/icon.icns>          A icns icon file path.
+    -s --script   <app_main_script, default:data/script>  The script to run when the user clicks the app.
+    -g --gstreamer<using gstreamer, default:1>            Whether to include gstreamer. Must be one of 1 or 0.
 
 Requirements::
 
     The SDL2, SDL2_image, SDL2_ttf, and SDL2_mixer frameworks needs to be installed.
     If gstreamer is enabled (the default), gstreamer-1.0 also need to be installed.
-    To disable gstreamer, export USE_GSTREAMER=0 and it won't be packaged.
 
     Platypus also needs to be installed.
-
-For Example, to build Kivy we use::
-
-    ./create-osx-bundle.sh 1.11.1 3.7.4 Kivy 1.11.1 \"Kivy Developers\" org.kivy.osxlauncher data/icon.icns data/script
 "
 
-if [ $# -lt 8 ]; then
-    echo "$USAGE"
-    exit 1
-fi
+KIVY_PATH="master"
+PYVER="3.8.5"
+APP_NAME="Kivy"
+APP_VERSION="master"
+AUTHOR="Kivy Developers"
+APP_ORG="org.kivy.osxlauncher"
+ICON_PATH="data/icon.icns"
+APP_SCRIPT="data/script"
+USE_GSTREAMER="1"
+
+while [[ "$#" -gt 0 ]]; do
+    # empty arg?
+    if [ -z "$2" ]; then
+        echo "$USAGE"
+        exit 1
+    fi
+
+    case $1 in
+        -k|--kivy) KIVY_PATH="$2";;
+        -p|--python) PYVER="$2";;
+        -n|--name) APP_NAME="$2";;
+        -v|--version) APP_VERSION="$2";;
+        -a|--author) AUTHOR="$2";;
+        -o|--org) APP_ORG="$2";;
+        -i|--icon) ICON_PATH="$2";;
+        -s|--script) APP_SCRIPT="$2";;
+        -g|--gstreamer) USE_GSTREAMER="$2";;
+        *) echo "Unknown parameter passed: $1"; echo "$USAGE"; exit 1 ;;
+    esac
+    shift; shift
+done
 
 # get kivy path or url
-KIVY_PATH="$1"
 if [ -d "$KIVY_PATH" ]; then
     # get full path
     pushd "$KIVY_PATH"
@@ -38,18 +67,8 @@ else
 fi
 
 echo "Using Kivy $KIVY_PATH"
-
-PYVER="$2"
 echo "Using Python version $PYVER"
-
-APP_NAME="$3"
-APP_VERSION="$4"
-AUTHOR="$5"
-APP_ORG="$6"
 echo "Build $APP_NAME version $APP_VERSION org $APP_ORG by $AUTHOR"
-
-ICON_PATH="$7"
-APP_SCRIPT="$8"
 echo "App will launch with $APP_SCRIPT using icon $ICON_PATH"
 
 PLATYPUS=/usr/local/bin/platypus
@@ -60,7 +79,6 @@ fi
 
 SCRIPT_PATH="${BASH_SOURCE[0]}"
 PYTHON=python3
-USE_GSTREAMER=${USE_GSTREAMER:-1}
 
 # follow any symbolic links
 if [ -h "${SCRIPT_PATH}" ]; then
@@ -70,7 +88,6 @@ if [ -h "${SCRIPT_PATH}" ]; then
 fi
 
 SCRIPT_PATH=$($PYTHON -c "import os; print(os.path.realpath(os.path.dirname('$SCRIPT_PATH')))")
-OSXRELOCATOR="osxrelocator"
 
 
 echo "-- Create initial $APP_NAME.app package"
@@ -227,7 +244,7 @@ rm ./python ./python3
 ln -s "../../../Frameworks/python/$PYVER/bin/python" .
 ln -s "../../../Frameworks/python/$PYVER/bin/python3" .
 
-sed -E -i '.bak' 's#^VIRTUAL_ENV=.*#VIRTUAL_ENV=$(cd $(dirname "$BASH_SOURCE"); dirname `pwd`)#' activate
+sed -E -i '.bak' 's#^VIRTUAL_ENV=.*#VIRTUAL_ENV="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"#' activate
 
 popd
 popd

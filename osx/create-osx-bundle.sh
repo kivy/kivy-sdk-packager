@@ -195,6 +195,7 @@ source venv/bin/activate
 
 ./venv/bin/python -m pip install git+https://github.com/tito/osxrelocator
 export USE_SDL2=1
+export USE_GSTREAMER="$USE_GSTREAMER"
 if [ -d "$KIVY_PATH" ]; then
     ./venv/bin/python -m pip install "${KIVY_PATH}[base]"
 else

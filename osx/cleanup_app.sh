@@ -1,26 +1,48 @@
-# Cleanup script for cleaning up <yourapp>.app
-#
-#
+#!/bin/bash
+set -x  # verbose
+set -e  # exit on error
 
-if [ 'x$1' == 'x' ]; then
-    echo "Usage: cleanup_app.py <app_name.app>"
+USAGE="Removes files and packages which are very likely not needed in a final app to help reduce the
+final app size.
+
+E.g. it removes the kivy examples, pip, headers, etc.
+
+Usage: cleanup_app.sh <Path to bundle.app>
+
+Requirements::
+
+    A previously created bundle using create-osx-bundle.sh
+
+For Example::
+
+    ./cleanup_app.sh MyApp.app
+"
+
+if [ $# -lt 1 ]; then
+    echo "$USAGE"
     exit 1
 fi
 
-APPPATH=$1
+pushd "$1"
+APP_PATH="$(pwd)"
+popd
 
-PYPATH="$APPPATH/Contents/Frameworks/python"
-rm -rf "$APPPATH/"Contents/Resources/kivy/{doc,build,examples}
-rm -rf "$APPPATH/"Contents/Resources/kivy/kivy/{tools,tests}
-rm -rf "$APPPATH/"Contents/Resources/venv/bin/{cython*,cygdb,osxrelocator,pip*,pygmentize,easy_install*,rst*}
-rm -rf "$APPPATH/"Contents/Resources/venv/lib/python3.*/site-packages/{pip*,Cython*,setuptools*,osxrelocator*,cython*,wheel/test*}
-rm -rf "$APPPATH/"Contents/Resources/venv/lib/python3.*/site-packages/wheel/test
-rm -rf "$PYPATH/"3.*/lib/python3.*/{turtledemo,test,curses,unittest,ensurepip,idlelib,pydoc_data,setuptools*}
-rm -rf "$PYPATH/"3.*/lib/python3.*/site-packages/{easy_install*,pip*,virtualenv,setuptools*}
-rm -rf "$PYPATH/"3.*/lib/python3.*/site-packages/wheel/test
-rm -rf "$PYPATH"/3.*/lib/python3.*/sqlite3
-rm -rf "$PYPATH"/3.*/lib/python3.*/tkinter
-rm -rf "$PYPATH/"3.*/bin/{pygmentize,2to*,pip*,*-config,easy_install*,idle*,pydoc*,rst*,pip*}
-rm -rf "$PYPATH/"3.*/lib/{lib*,pkgconfig}
-rm -rf "$PYPATH/"3.*/include
-rm -rf "$PYPATH"/3.*/lib/pkgconfig
+
+VENV_PATH="$APP_PATH/Contents/Resources/venv"
+rm -rf "$VENV_PATH"/share/kivy-examples
+rm -rf "$VENV_PATH"/lib/python3.*/site-packages/kivy/{tools,tests}
+rm -rf "$VENV_PATH"/bin/{cython*,cygdb,osxrelocator,pip*,pygmentize,easy_install*,rst*}
+rm -rf "$VENV_PATH"/lib/python3.*/site-packages/{pip*,Cython*,setuptools*,osxrelocator*,cython*,wheel/test*}
+rm -rf "$VENV_PATH"/lib/python3.*/site-packages/wheel/test
+
+
+PYTHON_PATH="$APP_PATH/Contents/Frameworks/python"
+rm -rf "$PYTHON_PATH/"3.*/lib/python3.*/{turtledemo,test,curses,unittest,ensurepip,idlelib,pydoc_data,setuptools*}
+rm -rf "$PYTHON_PATH/"3.*/lib/python3.*/site-packages/{easy_install*,pip*,virtualenv,setuptools*}
+rm -rf "$PYTHON_PATH/"3.*/lib/python3.*/site-packages/wheel/test
+rm -rf "$PYTHON_PATH"/3.*/lib/python3.*/sqlite3
+rm -rf "$PYTHON_PATH"/3.*/lib/python3.*/tkinter
+rm -rf "$PYTHON_PATH/"3.*/bin/{pygmentize,2to*,pip*,*-config,easy_install*,idle*,pydoc*,rst*,pip*}
+rm -rf "$PYTHON_PATH/"3.*/lib/{lib*,pkgconfig}
+rm -rf "$PYTHON_PATH/"3.*/include
+rm -rf "$PYTHON_PATH"/3.*/lib/pkgconfig

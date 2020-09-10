@@ -28,6 +28,7 @@ if [ $# -lt 1 ]; then
     exit 1
 fi
 
+APP_PATH="$1"
 PLIST_PATH="$1/Contents/info.plist"
 shift
 
@@ -66,9 +67,9 @@ while [[ "$#" -gt 0 ]]; do
           fi
 
           if [ "${2##*.}" != "icns" ]; then
-              sips -s format icns "$2" --out "$1/Contents/Resources/appIcon.icns"
+              sips -s format icns "$2" --out "$APP_PATH/Contents/Resources/appIcon.icns"
           else
-              cp "$2" "$1/Contents/Resources/appIcon.icns"
+              cp "$2" "$APP_PATH/Contents/Resources/appIcon.icns"
           fi
           ;;
         *) echo "Unknown parameter passed: $1"; echo "$USAGE"; exit 1 ;;

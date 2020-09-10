@@ -27,7 +27,7 @@ as a base into which your app can be installed and packaged again as a dmg. Belo
     * Mount it in the current directory and fix the name to your App's name::
 
           hdiutil attach Kivy-2.0.0-python3.8.dmg -mountroot .
-          mv Kivy/Kivy.app MyApp.app
+          cp -r Kivy/Kivy.app MyApp.app
 
       This should create the ``MyApp.app`` directory.
     * Fix the app's metadata to your app's metadata::

@@ -7,7 +7,7 @@ final app size.
 
 E.g. it removes the kivy examples, pip, headers, etc.
 
-Usage: cleanup_app.sh <Path to bundle.app> [options]
+Usage: cleanup-app.sh <Path to bundle.app> [options]
 
     -g --remove-gstreamer     <Remove gstreamer, default:0>        \
 Whether gstreamer should be removed from the package. One of 0 or 1.
@@ -18,7 +18,7 @@ Requirements::
 
 For Example::
 
-    ./cleanup_app.sh MyApp.app
+    ./cleanup-app.sh MyApp.app
 "
 
 if [ $# -lt 1 ]; then

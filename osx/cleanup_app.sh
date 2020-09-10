@@ -7,7 +7,10 @@ final app size.
 
 E.g. it removes the kivy examples, pip, headers, etc.
 
-Usage: cleanup_app.sh <Path to bundle.app>
+Usage: cleanup_app.sh <Path to bundle.app> [options]
+
+    -g --remove-gstreamer     <Remove gstreamer, default:0>        \
+Whether gstreamer should be removed from the package. One of 0 or 1.
 
 Requirements::
 
@@ -27,6 +30,26 @@ pushd "$1"
 APP_PATH="$(pwd)"
 popd
 
+shift
+
+REMOVE_GSTREAMER="0"
+while [[ "$#" -gt 0 ]]; do
+    # empty arg?
+    if [ -z "$2" ]; then
+        echo "$USAGE"
+        exit 1
+    fi
+
+    case $1 in
+        -g|--remove-gstreamer) REMOVE_GSTREAMER="$2";;
+        *) echo "Unknown parameter passed: $1"; echo "$USAGE"; exit 1 ;;
+    esac
+    shift; shift
+done
+
+if [ "$REMOVE_GSTREAMER" != "0" ]; then
+    rm -rf "$APP_PATH/Contents/Frameworks/GStreamer.framework"
+fi
 
 VENV_PATH="$APP_PATH/Contents/Resources/venv"
 rm -rf "$VENV_PATH"/share/kivy-examples

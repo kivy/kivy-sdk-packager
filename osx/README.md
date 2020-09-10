@@ -102,4 +102,35 @@ as a base into which your app can be installed and packaged again as a dmg. Belo
 * Clean up and unmount and mounted DMGs if needed.
 
 
+Example using Kivy.app
+----------------------
+
+A complete example using ``Kivy.app`` with a entry_point pointing to your app is
+(notice the metadata and download URLs need to be replaced with actual metadata and URLs)::
+
+    git clone https://github.com/user/myapp.git
+    git clone https://github.com/kivy/kivy-sdk-packager.git
+    cd kivy-sdk-packager/osx
+
+    curl -O -L https://xxx/Kivy-xxx.dmg
+    hdiutil attach Kivy-xxx.dmg -mountroot .
+
+    cp -r Kivy/Kivy.app MyApp.app
+    ./fix-bundle-metadata.sh MyApp.app -n MyApp -v "0.1.1" -a "Name" -o \
+        "org.myorg.myapp" -i "../../myapp/doc/source/images/myapp_icon.png"
+
+    pushd MyApp.app/Contents/Resources/venv/bin
+    source activate
+    popd
+
+    python -m pip install --upgrade pyobjus plyer ...
+    python -m pip install ../../myapp/
+
+    # remove gstreamer
+    ./cleanup-app.sh MyApp.app -g 1
+
+    ln -s "MyApp.app/Contents/Resources/venv/bin/myapp" MyApp.app/Contents/Resources/yourapp
+    ./relocate.sh MyApp.app
+    ./create-osx-dmg.sh MyApp.app MyApp
+
 Buildozer uses this repository for its OS X packaging process.

@@ -253,7 +253,6 @@ sed -E -i '.bak' 's#unset PYTHONHOME$#export PYTHONHOME="$(cd "$(dirname "$BASH_
 popd
 popd
 
-chmod +x relocate.sh
 ./relocate.sh "$APP_NAME.app"
 
 echo "-- Done !"

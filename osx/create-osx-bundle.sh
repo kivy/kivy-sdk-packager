@@ -248,6 +248,7 @@ ln -s "../../../Frameworks/python/$PYVER/bin/python3" .
 # fix path
 sed -E -i '.bak' 's#^VIRTUAL_ENV=.*#VIRTUAL_ENV=$(cd $(dirname "$BASH_SOURCE"); dirname `pwd`)#' activate
 # fix PYTHONHOME
+sed -i '.bak' 's#if ! [ -z "${PYTHONHOME+_}" ] ; then#if [ "_" ] ; then#' activate
 sed -E -i '.bak' 's#unset PYTHONHOME$#export PYTHONHOME="$(cd "$(dirname "$BASH_SOURCE")"/../../../Frameworks/python/3*; echo "$(pwd)")"#' activate
 
 popd

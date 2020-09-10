@@ -245,7 +245,7 @@ rm ./python ./python3
 ln -s "../../../Frameworks/python/$PYVER/bin/python" .
 ln -s "../../../Frameworks/python/$PYVER/bin/python3" .
 
-sed -E -i '.bak' 's#^VIRTUAL_ENV=.*#VIRTUAL_ENV="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"#' activate
+sed -E -i '.bak' 's#^VIRTUAL_ENV=.*#VIRTUAL_ENV=$(cd $(dirname "$BASH_SOURCE"); dirname `pwd`)#' activate
 
 popd
 popd

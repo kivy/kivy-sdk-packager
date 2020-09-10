@@ -7,7 +7,7 @@ USAGE="Creates a dmg from a bundle previously created with create-osx-bundle.sh.
 Usage: create-osx-dmg.sh <Path to bundle.app> <App name> [options]
 
     -s --symlink     <Include symlink script, default:0>          \
-Whether to include the symlink creation button. One of 0 or 1.
+Whether to include the symlink creation button for creating a kivy binary under /usr/local/bin. One of 0 or 1.
 
 Requirements::
 

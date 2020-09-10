@@ -40,7 +40,8 @@ as a base into which your app can be installed and packaged again as a dmg. Belo
       source activate
       popd
 
-    On the default mac shell you must be in the bin directory to be able to activate the virtualenv.
+    On the default mac shell you **must** be in the bin directory containing ``activate`` to be
+    able to ``activate`` the virtualenv.
   * Install any frameworks and relocate them:
     * Mount any frameworks e.g. ``MyFramework`` on your system and copy it over to the app::
 

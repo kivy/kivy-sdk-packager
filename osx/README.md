@@ -105,7 +105,7 @@ as a base into which your app can be installed and packaged again as a dmg. Belo
 Example using Kivy.app
 ----------------------
 
-A complete example using ``Kivy.app`` with a entry_point pointing to your app is
+A complete example using ``Kivy.app`` with a entry_point pointing to your app as described above
 (notice the metadata and download URLs need to be replaced with actual metadata and URLs)::
 
     git clone https://github.com/user/myapp.git
@@ -126,11 +126,83 @@ A complete example using ``Kivy.app`` with a entry_point pointing to your app is
     python -m pip install --upgrade pyobjus plyer ...
     python -m pip install ../../myapp/
 
-    # remove gstreamer
+    # remove gstreamer and reduce app size
     ./cleanup-app.sh MyApp.app -g 1
 
     ln -s "MyApp.app/Contents/Resources/venv/bin/myapp" MyApp.app/Contents/Resources/yourapp
     ./relocate.sh MyApp.app
     ./create-osx-dmg.sh MyApp.app MyApp
 
-Buildozer uses this repository for its OS X packaging process.
+
+Example create app from scratch
+-------------------------------
+
+A complete example creating a bundle and building a dmg without using the prepared Kivy.app.
+Also using a entry_point pointing to your app as described above
+(notice the metadata and download URLs need to be replaced with actual metadata and URLs).
+The dependencies versions and url should be updated as needed. Note that gstreamer is not
+included::
+
+    # configure kivy
+    export CC=clang
+    export CXX=clang
+    export FFLAGS='-ff2c'
+    export USE_SDL2=1
+    export USE_GSTREAMER=0
+
+    # get the dependencies
+    export SDL2=2.0.12
+    export SDL2_IMAGE=2.0.5
+    export SDL2_MIXER=2.0.4
+    export SDL2_TTF=2.0.15
+    export PLATYPUS=5.3
+
+    curl -O -L "https://www.libsdl.org/release/SDL2-$SDL2.dmg"
+    curl -O -L "https://www.libsdl.org/projects/SDL_image/release/SDL2_image-$SDL2_IMAGE.dmg"
+    curl -O -L "https://www.libsdl.org/projects/SDL_mixer/release/SDL2_mixer-$SDL2_MIXER.dmg"
+    curl -O -L "https://www.libsdl.org/projects/SDL_ttf/release/SDL2_ttf-$SDL2_TTF.dmg"
+    curl -O -L "http://www.sveinbjorn.org/files/software/platypus/platypus$PLATYPUS.zip"
+
+    hdiutil attach SDL2-$SDL2.dmg
+    sudo cp -a /Volumes/SDL2/SDL2.framework /Library/Frameworks/
+    hdiutil attach SDL2_image-$SDL2_IMAGE.dmg
+    sudo cp -a /Volumes/SDL2_image/SDL2_image.framework /Library/Frameworks/
+    hdiutil attach SDL2_ttf-$SDL2_TTF.dmg
+    sudo cp -a /Volumes/SDL2_ttf/SDL2_ttf.framework /Library/Frameworks/
+    hdiutil attach SDL2_mixer-$SDL2_MIXER.dmg
+    sudo cp -a /Volumes/SDL2_mixer/SDL2_mixer.framework /Library/Frameworks/
+
+    unzip platypus$PLATYPUS.zip
+    gunzip Platypus.app/Contents/Resources/platypus_clt.gz
+    gunzip Platypus.app/Contents/Resources/ScriptExec.gz
+    mkdir -p /usr/local/bin
+    mkdir -p /usr/local/share/platypus
+    cp Platypus.app/Contents/Resources/platypus_clt /usr/local/bin/platypus
+    cp Platypus.app/Contents/Resources/ScriptExec /usr/local/share/platypus/ScriptExec
+    cp -a Platypus.app/Contents/Resources/MainMenu.nib /usr/local/share/platypus/MainMenu.nib
+    chmod -R 755 /usr/local/share/platypus
+
+    # create app
+    git clone https://github.com/user/myapp.git
+    git clone https://github.com/kivy/kivy-sdk-packager.git
+    cd kivy-sdk-packager/osx
+
+    ./create-osx-bundle.sh -k master -n MyApp -v "0.1.1" -a "Name" -o \
+        "org.myorg.myapp" -i "../../myapp/doc/source/images/myapp_icon.png" -g 0
+
+    pushd MyApp.app/Contents/Resources/venv/bin
+    source activate
+    popd
+
+    python -m pip install --upgrade pyobjus plyer ...
+    python -m pip install ../../myapp/
+
+    # reduce app size
+    ./cleanup-app.sh MyApp.app -g 1
+
+    ln -s "MyApp.app/Contents/Resources/venv/bin/myapp" MyApp.app/Contents/Resources/yourapp
+    ./relocate.sh MyApp.app
+    ./create-osx-dmg.sh MyApp.app MyApp
+
+
+Dev note:: Buildozer uses this repository for its OS X packaging process.

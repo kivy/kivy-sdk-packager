@@ -36,32 +36,34 @@ as a base into which your app can be installed and packaged again as a dmg. Belo
 * Install your dependencies and your app:
   * Activate the included virtualenv so you can install your app and its dependencies::
 
-      pushd MyApp.app/Contents/Resources/venv/bin
-      source activate
-      popd
+        pushd MyApp.app/Contents/Resources/venv/bin
+        source activate
+        popd
 
     On the default mac shell you **must** be in the bin directory containing ``activate`` to be
     able to ``activate`` the virtualenv.
   * Install any frameworks and relocate them:
     * Mount any frameworks e.g. ``MyFramework`` on your system and copy it over to the app::
 
-        hdiutil attach MyFramework.dmg
-        cp -a /Volumes/MyFramework/MyFramework.framework MyApp.app/Contents/Frameworks/
+          hdiutil attach MyFramework.dmg
+          cp -a /Volumes/MyFramework/MyFramework.framework MyApp.app/Contents/Frameworks/
 
     * Relocate the framework so it can be used from a different path. E.g.::
 
-        python -m pip install git+https://github.com/tito/osxrelocator
-        osxrelocator -r MyApp.app MyApp.app/Contents/Frameworks/SDL2_ttf/ @executable_path/../Frameworks/MyFramework/
-        osxrelocator -r MyApp.app @rpath/MyFramework.framework/Versions/A/MyFramework \
-            @executable_path/../Frameworks/MyFramework.framework/Versions/A/MyFramework
+          python -m pip install git+https://github.com/tito/osxrelocator
+          osxrelocator -r MyApp.app MyApp.app/Contents/Frameworks/SDL2_ttf/ @executable_path/../Frameworks/MyFramework/
+          osxrelocator -r MyApp.app @rpath/MyFramework.framework/Versions/A/MyFramework \
+              @executable_path/../Frameworks/MyFramework.framework/Versions/A/MyFramework
 
       This should be customized for each framework.
   * Install your dependencies with e.g. ``pip``::
 
-      python -m pip install ...
+        python -m pip install ...
+
   * Install your app::
 
-      python -m pip install myapp
+        python -m pip install myapp
+
   * Deactivate the virtualenv by running ``deactivate`` in the shell.
 * Reduce app size (optional):
 
@@ -91,6 +93,7 @@ as a base into which your app can be installed and packaged again as a dmg. Belo
   into a dmg install to a different path. Do::
 
       ./relocate.sh MyApp.app
+
 * Finally, package the app into a dmg as follows::
 
       ./create-osx-dmg.sh MyApp.app MyApp

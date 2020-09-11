@@ -130,6 +130,8 @@ cp -a /Library/Frameworks/SDL2_ttf.framework .
 cp -a /Library/Frameworks/SDL2_mixer.framework .
 mkdir ../lib/
 
+chmod -R 775 .
+
 echo "-- Reduce frameworks size"
 
 # remove pyc because they contain absolute paths

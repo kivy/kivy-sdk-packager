@@ -210,6 +210,29 @@ ln -s ./venv/bin/python ./python3
 popd
 
 # --- Relocation
+echo "-- Relocate virtualenv"
+pushd "$APP_NAME.app/Contents/Resources/venv"
+
+rm bin/activate.csh
+rm bin/activate.fish
+
+pushd bin
+rm -f ./python ./python3 ./python3.*
+ln -s ../../../Frameworks/Python.framework/Versions/3*/bin/python"${PYVER:0:3}" python
+ln -s ../../../Frameworks/Python.framework/Versions/3*/bin/python"${PYVER:0:3}" python3
+ln -s ../../../Frameworks/Python.framework/Versions/3*/bin/python"${PYVER:0:3}" "python${PYVER:0:3}"
+
+# fix path
+sed -E -i '.bak' 's#^VIRTUAL_ENV=.*#VIRTUAL_ENV=$(cd $(dirname "$BASH_SOURCE"); dirname `pwd`)#' activate
+# fix PYTHONHOME
+sed -i '.bak' 's#if ! \[ -z "\${PYTHONHOME+_}" ] ; then#if [ "_" ] ; then#' activate
+sed -E -i '.bak' 's#unset PYTHONHOME$#export PYTHONHOME="$(cd "$(dirname "$BASH_SOURCE")"/../../../Frameworks/Python.framework/Versions/3*; echo "$(pwd)")"#' activate
+rm -f ./*.bak
+
+popd
+popd
+
+./relocate.sh "$APP_NAME.app"
 
 echo "-- Relocate frameworks"
 pushd "$APP_NAME.app"
@@ -241,28 +264,5 @@ osxrelocator -r . @rpath/Python.framework/Versions/"${PYVER:0:3}"/Python \
     @executable_path/../Frameworks/Python.framework/Versions/"${PYVER:0:3}"/Python
 popd
 
-echo "-- Relocate virtualenv"
-pushd "$APP_NAME.app/Contents/Resources/venv"
-
-rm bin/activate.csh
-rm bin/activate.fish
-
-pushd bin
-rm -f ./python ./python3 ./python3.*
-ln -s ../../../Frameworks/Python.framework/Versions/3*/bin/python"${PYVER:0:3}" python
-ln -s ../../../Frameworks/Python.framework/Versions/3*/bin/python"${PYVER:0:3}" python3
-ln -s ../../../Frameworks/Python.framework/Versions/3*/bin/python"${PYVER:0:3}" "python${PYVER:0:3}"
-
-# fix path
-sed -E -i '.bak' 's#^VIRTUAL_ENV=.*#VIRTUAL_ENV=$(cd $(dirname "$BASH_SOURCE"); dirname `pwd`)#' activate
-# fix PYTHONHOME
-sed -i '.bak' 's#if ! \[ -z "\${PYTHONHOME+_}" ] ; then#if [ "_" ] ; then#' activate
-sed -E -i '.bak' 's#unset PYTHONHOME$#export PYTHONHOME="$(cd "$(dirname "$BASH_SOURCE")"/../../../Frameworks/Python.framework/Versions/3*; echo "$(pwd)")"#' activate
-rm -f ./*.bak
-
-popd
-popd
-
-./relocate.sh "$APP_NAME.app"
 
 echo "-- Done !"

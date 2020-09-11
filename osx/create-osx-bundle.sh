@@ -249,9 +249,9 @@ rm bin/activate.fish
 
 pushd bin
 rm -f ./python ./python3 ./python3.*
-ln -s ../../../Frameworks/Python.framework/Versions/3*/bin/python3.* python
-ln -s ../../../Frameworks/Python.framework/Versions/3*/bin/python3.* python3
-ln -s ../../../Frameworks/Python.framework/Versions/3*/bin/python3.* .
+ln -s ../../../Frameworks/Python.framework/Versions/3*/bin/python"${PYVER:0:3}" python
+ln -s ../../../Frameworks/Python.framework/Versions/3*/bin/python"${PYVER:0:3}" python3
+ln -s ../../../Frameworks/Python.framework/Versions/3*/bin/python"${PYVER:0:3}" "python${PYVER:0:3}"
 
 # fix path
 sed -E -i '.bak' 's#^VIRTUAL_ENV=.*#VIRTUAL_ENV=$(cd $(dirname "$BASH_SOURCE"); dirname `pwd`)#' activate

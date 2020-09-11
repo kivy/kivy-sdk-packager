@@ -8,6 +8,8 @@ Usage: create-osx-dmg.sh <Path to bundle.app> <App name> [options]
 
     -s --symlink     <Include symlink script, default:0>          \
 Whether to include the symlink creation button for creating a kivy binary under /usr/local/bin. One of 0 or 1.
+    -b --background     <Background image, default:data/background.png>          \
+The path to the background image when installing the DMG.
 
 Requirements::
 
@@ -29,6 +31,7 @@ shift
 shift
 
 COPY_SYMLINK="0"
+DMG_BACKGROUND_IMG="data/background.png"
 while [[ "$#" -gt 0 ]]; do
     # empty arg?
     if [ -z "$2" ]; then
@@ -38,12 +41,12 @@ while [[ "$#" -gt 0 ]]; do
 
     case $1 in
         -s|--symlink) COPY_SYMLINK="$2";;
+        -b|--background) DMG_BACKGROUND_IMG="$2";;
         *) echo "Unknown parameter passed: $1"; echo "$USAGE"; exit 1 ;;
     esac
     shift; shift
 done
 
-DMG_BACKGROUND_IMG="background.png"
 SYMLINKS_SCRIPT="MakeSymlinks"
 VOL_NAME="${APP_NAME}"
 DMG_TEMP="${VOL_NAME}-temp.dmg"
@@ -58,7 +61,7 @@ mkdir "$work_dir/${STAGING_DIR}"
 cp -a "$BUNDLE_PATH" "$work_dir/${STAGING_DIR}"
 ln -s /Applications "$work_dir/${STAGING_DIR}/Applications"
 mkdir "$work_dir/${STAGING_DIR}/.background"
-cp "data/${DMG_BACKGROUND_IMG}" "$work_dir/${STAGING_DIR}/.background/"
+cp "$DMG_BACKGROUND_IMG" "$work_dir/${STAGING_DIR}/.background/"
 
 if [ "$COPY_SYMLINK" != "0" ]; then
     cp "data/${SYMLINKS_SCRIPT}" "$work_dir/${STAGING_DIR}/${SYMLINKS_SCRIPT}"
@@ -98,7 +101,7 @@ echo '
            set viewOptions to the icon view options of container window
            set arrangement of viewOptions to not arranged
            set icon size of viewOptions to 128
-           set background picture of viewOptions to file ".background:'${DMG_BACKGROUND_IMG}'"
+           set background picture of viewOptions to file ".background:'"$(basename "$DMG_BACKGROUND_IMG")"'"
            set position of item "'"$APP_NAME.app"'" of container window to {160, 265}
            set position of item "Applications" of container window to {384, 265}
            close

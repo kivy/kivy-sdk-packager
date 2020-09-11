@@ -59,13 +59,14 @@ rm -rf "$VENV_PATH"/lib/python3.*/site-packages/{pip*,Cython*,setuptools*,osxrel
 rm -rf "$VENV_PATH"/lib/python3.*/site-packages/wheel/test
 
 
-PYTHON_PATH="$APP_PATH/Contents/Frameworks/python"
-rm -rf "$PYTHON_PATH/"3.*/lib/python3.*/{turtledemo,test,curses,unittest,ensurepip,idlelib,pydoc_data,setuptools*}
-rm -rf "$PYTHON_PATH/"3.*/lib/python3.*/site-packages/{easy_install*,pip*,virtualenv,setuptools*}
-rm -rf "$PYTHON_PATH/"3.*/lib/python3.*/site-packages/wheel/test
-rm -rf "$PYTHON_PATH"/3.*/lib/python3.*/sqlite3
-rm -rf "$PYTHON_PATH"/3.*/lib/python3.*/tkinter
-rm -rf "$PYTHON_PATH/"3.*/bin/{pygmentize,2to*,pip*,*-config,easy_install*,idle*,pydoc*,rst*,pip*}
-rm -rf "$PYTHON_PATH/"3.*/lib/{lib*,pkgconfig}
-rm -rf "$PYTHON_PATH/"3.*/include
-rm -rf "$PYTHON_PATH"/3.*/lib/pkgconfig
+PYTHON_PATH=$(ls "$APP_PATH/Contents/Frameworks/Python.framework/Versions"/3*)
+rm -rf "$PYTHON_PATH/"lib/python3.*/{turtledemo,test,curses,unittest,ensurepip,idlelib,pydoc_data,setuptools*}
+rm -rf "$PYTHON_PATH/"lib/python3.*/site-packages/{easy_install*,pip*,virtualenv,setuptools*}
+rm -rf "$PYTHON_PATH/"lib/python3.*/site-packages/wheel/test
+rm -rf "$PYTHON_PATH"/lib/python3.*/sqlite3
+rm -rf "$PYTHON_PATH"/lib/python3.*/tkinter
+rm -rf "$PYTHON_PATH/"bin/{pygmentize,2to*,pip*,*-config,easy_install*,idle*,pydoc*,rst*,pip*}
+rm -rf "$PYTHON_PATH/"lib/{lib*,pkgconfig}
+rm -rf "$PYTHON_PATH/"include
+rm -rf "$PYTHON_PATH"/lib/pkgconfig
+rm -rf "$PYTHON_PATH"/lib/{itcl*,tcl*,tdbc*,tk*,tK*,libtk*,libtcl*}

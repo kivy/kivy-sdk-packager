@@ -21,7 +21,8 @@ Requirements::
     The SDL2, SDL2_image, SDL2_ttf, and SDL2_mixer frameworks needs to be installed.
     If gstreamer is enabled (the default), gstreamer-1.0 also need to be installed.
 
-    Platypus also needs to be installed.
+    Platypus also needs to be installed. Finally, any python3 version must be available for
+    initial scripting.
 "
 
 KIVY_PATH="master"
@@ -109,26 +110,17 @@ echo "-- Create Frameworks directory"
 mkdir -p "$APP_NAME.app/Contents/Frameworks"
 
 echo "Install Python"
-if [ ! -f ~/.pyenv/bin/pyenv ]; then
-  curl -L https://raw.githubusercontent.com/yyuu/pyenv-installer/master/bin/pyenv-installer | bash
-  ~/.pyenv/bin/pyenv install "$PYVER"
+if [ ! -d "/Library/Frameworks/Python.framework/Versions/${PYVER:0:3}" ]; then
+    curl -L -O "https://www.python.org/ftp/python/$PYVER/python-$PYVER-macosx10.9.pkg"
+    sudo installer -pkg "python-$PYVER-macosx10.9.pkg" -target /
 fi
-
-# move python install path
-PYPATH="$SCRIPT_PATH/$APP_NAME.app/Contents/Frameworks/python"
-mkdir "$PYPATH"
-cp -a ~/.pyenv/versions/"$PYVER" "$PYPATH"
-PYTHON="$PYPATH/$PYVER/bin/python"
-
-# remove pyc because they contain absolute paths
-find -E "$PYPATH/$PYVER" -regex '.*.pyc' | grep -v "opt-2.pyc" | xargs rm  # todo: fix
-
-rm -rf "$PYPATH/$PYVER/share"
-rm -rf "$PYPATH/$PYVER/lib/python${PYVER:0:3}"/{test,unittest/test,turtledemo,tkinter}
-pushd "$APP_NAME.app/Contents/Frameworks"
+SRC_PYTHON="/Library/Frameworks/Python.framework/Versions/${PYVER:0:3}/bin/python3"
 
 echo "-- Copy frameworks"
 
+pushd "$APP_NAME.app/Contents/Frameworks"
+
+cp -a "/Library/Frameworks/Python.framework" .
 if [ "$USE_GSTREAMER" != "0" ]; then
     cp -a /Library/Frameworks/GStreamer.framework .
 fi
@@ -139,14 +131,22 @@ cp -a /Library/Frameworks/SDL2_mixer.framework .
 mkdir ../lib/
 
 echo "-- Reduce frameworks size"
+
+# remove pyc because they contain absolute paths
+find "Python.framework/" -name "*.pyc" -print0 | xargs -0 rm
+
+rm -rf "Python.framework/Versions/${PYVER:0:3}"/{share,Resources._CodeSignature,Headers}
+
 rm -rf {SDL2,SDL2_image,SDL2_ttf,SDL2_mixer}.framework/Headers
 rm -rf {SDL2,SDL2_image,SDL2_ttf,SDL2_mixer}.framework/Versions/A/Headers
 rm -rf SDL2_ttf.framework/Versions/A/Frameworks/FreeType.framework/Versions/A/Headers
 rm -rf SDL2_ttf.framework/Versions/A/Frameworks/FreeType.framework/Versions/Current
-cd SDL2_ttf.framework/Versions/A/Frameworks/FreeType.framework/Versions/
+
+pushd SDL2_ttf.framework/Versions/A/Frameworks/FreeType.framework/Versions/
 rm -rf Current
 ln -s A Current
-cd -
+popd
+
 rm -rf SDL2_ttf.framework/Versions/A/Frameworks/FreeType.framework/Headers
 if [ "$USE_GSTREAMER" != "0" ]; then
     rm -rf GStreamer.framework/Headers
@@ -168,7 +168,7 @@ find -E . -regex '.*\.exe$' -exec rm {} \;
 
 if [ "$USE_GSTREAMER" != "0" ]; then
     echo "-- Remove duplicate gstreamer libraries"
-    $PYTHON "$SCRIPT_PATH/data/link_duplicate.py" GStreamer.framework/Libraries
+    $SRC_PYTHON "$SCRIPT_PATH/data/link_duplicate.py" GStreamer.framework/Libraries
 fi
 
 echo "-- Remove broken symlink"
@@ -187,8 +187,8 @@ popd
 pushd "$APP_NAME.app/Contents/Resources/"
 
 echo "-- Create a virtualenv"
-$PYTHON -m pip install --upgrade pip virtualenv
-$PYTHON -m virtualenv venv
+$SRC_PYTHON -m pip install --upgrade pip virtualenv --user
+$SRC_PYTHON -m virtualenv venv
 
 echo "-- Install dependencies"
 source venv/bin/activate
@@ -203,6 +203,7 @@ else
 fi
 echo "-- Link python to the right location for relocation"
 ln -s ./venv/bin/python ./python
+ln -s ./venv/bin/python ./python3
 
 popd
 
@@ -212,6 +213,7 @@ echo "-- Relocate frameworks"
 pushd "$APP_NAME.app"
 osxrelocator -r . /usr/local/lib/ \
     @executable_path/../lib/
+
 if [ "$USE_GSTREAMER" != "0" ]; then
     osxrelocator -r . /Library/Frameworks/GStreamer.framework/ \
         @executable_path/../Frameworks/GStreamer.framework/
@@ -230,8 +232,11 @@ osxrelocator -r . @rpath/SDL2_image.framework/Versions/A/SDL2_image \
     @executable_path/../Frameworks/SDL2_image.framework/Versions/A/SDL2_image
 osxrelocator -r . @rpath/SDL2_mixer.framework/Versions/A/SDL2_mixer \
     @executable_path/../Frameworks/SDL2_mixer.framework/Versions/A/SDL2_mixer
-osxrelocator -r . ~/.pyenv/versions/"$PYVER"/openssl/lib/ \
-    @executable_path/../Frameworks/python/"$PYVER"/openssl/lib
+
+osxrelocator -r . /Library/Frameworks/Python/ \
+    @executable_path/../Frameworks/Python/
+osxrelocator -r . @rpath/Python.framework/Versions/"${PYVER:0:3}"/Python \
+    @executable_path/../Frameworks/Python.framework/Versions/"${PYVER:0:3}"/Python
 popd
 
 echo "-- Relocate virtualenv"
@@ -241,15 +246,17 @@ rm bin/activate.csh
 rm bin/activate.fish
 
 pushd bin
-rm ./python ./python3
-ln -s "../../../Frameworks/python/$PYVER/bin/python" .
-ln -s "../../../Frameworks/python/$PYVER/bin/python3" .
+rm -f ./python ./python3 ./python3.*
+ln -s ../../../Frameworks/Python.framework/Versions/3*/bin/python3.* python
+ln -s ../../../Frameworks/Python.framework/Versions/3*/bin/python3.* python3
+ln -s ../../../Frameworks/Python.framework/Versions/3*/bin/python3.* .
 
 # fix path
 sed -E -i '.bak' 's#^VIRTUAL_ENV=.*#VIRTUAL_ENV=$(cd $(dirname "$BASH_SOURCE"); dirname `pwd`)#' activate
 # fix PYTHONHOME
 sed -i '.bak' 's#if ! \[ -z "\${PYTHONHOME+_}" ] ; then#if [ "_" ] ; then#' activate
-sed -E -i '.bak' 's#unset PYTHONHOME$#export PYTHONHOME="$(cd "$(dirname "$BASH_SOURCE")"/../../../Frameworks/python/3*; echo "$(pwd)")"#' activate
+sed -E -i '.bak' 's#unset PYTHONHOME$#export PYTHONHOME="$(cd "$(dirname "$BASH_SOURCE")"/../../../Frameworks/Python.framework/Versions/3*; echo "$(pwd)")"#' activate
+rm -f ./*.bak
 
 popd
 popd

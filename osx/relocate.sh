@@ -30,15 +30,17 @@ APP_PATH="$(pwd)"
 popd
 
 echo "Remove path specific pyc files"
-pushd "$APP_PATH/Contents/Resources/venv"
-grep -irl --include=\*.pyc "$APP_PATH/Contents/Resources/venv" . | xargs rm
-grep -irl --include=\*.pyo "$APP_PATH/Contents/Resources/venv" . | xargs rm
+pushd "$APP_PATH/Contents/Frameworks/Python.framework"
+find . -name "*.pyc" -print0 | xargs -0 rm
+find . -name "*.pyo" -print0 | xargs -0 rm
 
 echo "Making scripts relative"
-pushd bin
+pushd "$APP_PATH/Contents/Resources/venv/bin"
+
 (export LANG=C LC_ALL=C; find . -type f -name '*' -print0 | \
     xargs -0  sed -i '.bak' "s~$APP_PATH/Contents/Resources/venv/bin/python~/usr/bin/env python~")
-find . -type f -name "*.bak" -print0 | xargs -0 rm
+rm -f ./*.bak
+
 popd
 popd
 

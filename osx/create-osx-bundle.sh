@@ -238,13 +238,14 @@ echo "-- Relocate frameworks"
 pushd "$APP_NAME.app"
 osxrelocator -r . /usr/local/lib/ \
     @executable_path/../../../lib/
+echo "Done relocating lib"
 
 if [ "$USE_GSTREAMER" != "0" ]; then
     # we get install_name_tool: changing install names or rpaths can't be redone for: GStreamer.framework/Versions/1.0/GStreamer
     # (for architecture x86_64) because larger updated load commands do not fit
     # (the program must be relinked, and you may need to use -headerpad or -headerpad_max_install_names)
     # so use symlink to make path shorter
-    pushd "$APP_NAME.app/Contents/Resources/venv/bin"
+    pushd "Contents/Resources/venv/bin"
     ln -s ../../../Frameworks/ Frameworks
     popd
 

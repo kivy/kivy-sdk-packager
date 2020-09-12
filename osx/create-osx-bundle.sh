@@ -237,36 +237,36 @@ popd
 echo "-- Relocate frameworks"
 pushd "$APP_NAME.app"
 osxrelocator -r . /usr/local/lib/ \
-    @executable_path/../lib/
+    @executable_path/../../../lib/
 
 if [ "$USE_GSTREAMER" != "0" ]; then
     osxrelocator -r . /Library/Frameworks/GStreamer.framework/ \
-        @executable_path/../Frameworks/GStreamer.framework/
+        @executable_path/../../../Frameworks/GStreamer.framework/
 fi
 osxrelocator -r . /Library/Frameworks/SDL2/ \
-    @executable_path/../Frameworks/SDL2/
+    @executable_path/../../../Frameworks/SDL2/
 osxrelocator -r . /Library/Frameworks/SDL2_ttf/ \
-    @executable_path/../Frameworks/SDL2_ttf/
+    @executable_path/../../../Frameworks/SDL2_ttf/
 osxrelocator -r . /Library/Frameworks/SDL2_image/ \
-    @executable_path/../Frameworks/SDL2_image/
+    @executable_path/../../../Frameworks/SDL2_image/
 osxrelocator -r . @rpath/SDL2.framework/Versions/A/SDL2 \
-    @executable_path/../Frameworks/SDL2.framework/Versions/A/SDL2
+    @executable_path/../../../Frameworks/SDL2.framework/Versions/A/SDL2
 osxrelocator -r . @rpath/SDL2_ttf.framework/Versions/A/SDL2_ttf \
-    @executable_path/../Frameworks/SDL2_ttf.framework/Versions/A/SDL2_ttf
+    @executable_path/../../../Frameworks/SDL2_ttf.framework/Versions/A/SDL2_ttf
 osxrelocator -r . @rpath/SDL2_image.framework/Versions/A/SDL2_image \
-    @executable_path/../Frameworks/SDL2_image.framework/Versions/A/SDL2_image
+    @executable_path/../../../Frameworks/SDL2_image.framework/Versions/A/SDL2_image
 osxrelocator -r . @rpath/SDL2_mixer.framework/Versions/A/SDL2_mixer \
-    @executable_path/../Frameworks/SDL2_mixer.framework/Versions/A/SDL2_mixer
+    @executable_path/../../../Frameworks/SDL2_mixer.framework/Versions/A/SDL2_mixer
 
 osxrelocator -r . /Library/Frameworks/Python/ \
-    @executable_path/../Frameworks/Python/
+    @executable_path/../../../Frameworks/Python/
 osxrelocator -r . @rpath/Python.framework/Versions/"${PYVER:0:3}"/Python \
-    @executable_path/../Frameworks/Python.framework/Versions/"${PYVER:0:3}"/Python
+    @executable_path/../../../Frameworks/Python.framework/Versions/"${PYVER:0:3}"/Python
 
 install_name_tool -change "/Library/Frameworks/Python.framework/Versions/${PYVER:0:3}/Python" \
-  "@loader_path/../../../Frameworks/Python.framework/Python" \
+  "@executable_path/../../../Frameworks/Python.framework/Python" \
   "Contents/Frameworks/Python.framework/Versions/${PYVER:0:3}/bin/python${PYVER:0:3}"
-install_name_tool -change "@executable_path/../Frameworks/Python.framework/Versions/${PYVER:0:3}/Python" \
+install_name_tool -change "@executable_path/../../../Frameworks/Python.framework/Versions/${PYVER:0:3}/Python" \
   '@executable_path/../../../../Python' \
   "Contents/Frameworks/Python.framework/Versions/${PYVER:0:3}/Resources/Python.app/Contents/MacOS/Python"
 

@@ -252,6 +252,7 @@ if [ "$USE_GSTREAMER" != "0" ]; then
         @executable_path/Frameworks/GStreamer.framework/
     osxrelocator -r . @rpath/GStreamer.framework/Versions/1.0/SDL2 \
         @executable_path/Frameworks/GStreamer.framework/Versions/1.0/SDL2
+    echo "Done relocating gstreamer"
 fi
 osxrelocator -r . /Library/Frameworks/SDL2/ \
     @executable_path/../../../Frameworks/SDL2/
@@ -261,6 +262,7 @@ osxrelocator -r . /Library/Frameworks/SDL2_image/ \
     @executable_path/../../../Frameworks/SDL2_image/
 osxrelocator -r . /Library/Frameworks/SDL2_mixer/ \
     @executable_path/../../../Frameworks/SDL2_mixer/
+echo "Done relocating SDL2"
 
 osxrelocator -r . @rpath/SDL2.framework/Versions/A/SDL2 \
     @executable_path/../../../Frameworks/SDL2.framework/Versions/A/SDL2
@@ -270,11 +272,13 @@ osxrelocator -r . @rpath/SDL2_image.framework/Versions/A/SDL2_image \
     @executable_path/../../../Frameworks/SDL2_image.framework/Versions/A/SDL2_image
 osxrelocator -r . @rpath/SDL2_mixer.framework/Versions/A/SDL2_mixer \
     @executable_path/../../../Frameworks/SDL2_mixer.framework/Versions/A/SDL2_mixer
+echo "Done relocating SDL2 rpath"
 
 osxrelocator -r . /Library/Frameworks/Python/ \
     @executable_path/../../../Frameworks/Python/
 osxrelocator -r . @rpath/Python.framework/Versions/"${PYVER:0:3}"/Python \
     @executable_path/../../../Frameworks/Python.framework/Versions/"${PYVER:0:3}"/Python
+echo "Done relocating Python"
 
 install_name_tool -change "/Library/Frameworks/Python.framework/Versions/${PYVER:0:3}/Python" \
   "@executable_path/../../../Frameworks/Python.framework/Python" \

@@ -262,7 +262,14 @@ osxrelocator -r . /Library/Frameworks/Python/ \
     @executable_path/../Frameworks/Python/
 osxrelocator -r . @rpath/Python.framework/Versions/"${PYVER:0:3}"/Python \
     @executable_path/../Frameworks/Python.framework/Versions/"${PYVER:0:3}"/Python
-popd
 
+install_name_tool -change "/Library/Frameworks/Python.framework/Versions/${PYVER:0:3}/Python" \
+  "@loader_path/../../../Frameworks/Python.framework/Python" \
+  "Contents/Frameworks/Python.framework/Versions/${PYVER:0:3}/bin/python${PYVER:0:3}"
+install_name_tool -change "@executable_path/../Frameworks/Python.framework/Versions/${PYVER:0:3}/Python" \
+  '@executable_path/../../../../Python' \
+  "Contents/Frameworks/Python.framework/Versions/${PYVER:0:3}/Resources/Python.app/Contents/MacOS/Python"
+
+popd
 
 echo "-- Done !"

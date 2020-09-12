@@ -240,8 +240,18 @@ osxrelocator -r . /usr/local/lib/ \
     @executable_path/../../../lib/
 
 if [ "$USE_GSTREAMER" != "0" ]; then
+    # we get install_name_tool: changing install names or rpaths can't be redone for: GStreamer.framework/Versions/1.0/GStreamer
+    # (for architecture x86_64) because larger updated load commands do not fit
+    # (the program must be relinked, and you may need to use -headerpad or -headerpad_max_install_names)
+    # so use symlink to make path shorter
+    pushd "$APP_NAME.app/Contents/Resources/venv/bin"
+    ln -s ../../../Frameworks/ Frameworks
+    popd
+
     osxrelocator -r . /Library/Frameworks/GStreamer.framework/ \
-        @executable_path/../../../Frameworks/GStreamer.framework/
+        @executable_path/Frameworks/GStreamer.framework/
+    osxrelocator -r . @rpath/GStreamer.framework/Versions/1.0/SDL2 \
+        @executable_path/Frameworks/GStreamer.framework/Versions/1.0/SDL2
 fi
 osxrelocator -r . /Library/Frameworks/SDL2/ \
     @executable_path/../../../Frameworks/SDL2/
@@ -249,6 +259,9 @@ osxrelocator -r . /Library/Frameworks/SDL2_ttf/ \
     @executable_path/../../../Frameworks/SDL2_ttf/
 osxrelocator -r . /Library/Frameworks/SDL2_image/ \
     @executable_path/../../../Frameworks/SDL2_image/
+osxrelocator -r . /Library/Frameworks/SDL2_mixer/ \
+    @executable_path/../../../Frameworks/SDL2_mixer/
+
 osxrelocator -r . @rpath/SDL2.framework/Versions/A/SDL2 \
     @executable_path/../../../Frameworks/SDL2.framework/Versions/A/SDL2
 osxrelocator -r . @rpath/SDL2_ttf.framework/Versions/A/SDL2_ttf \

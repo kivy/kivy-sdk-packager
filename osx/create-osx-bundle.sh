@@ -246,12 +246,6 @@ pushd "$APP_NAME.app"
 # Python.app/Contents/MacOS/Python. So we create a symlink next to each python pointing to
 # Contents/ so we can simply do @executable_path/Contents/... and it will always work.
 # maybe in the future we can make sure which one it is and reduce the need for the multiple symlinks.
-#
-# Additionally, we get the following error if the fixed path is too long, so make sure it's short.
-# we get install_name_tool: changing install names or rpaths can't be redone for: GStreamer.framework/Versions/1.0/GStreamer
-# (for architecture x86_64) because larger updated load commands do not fit
-# (the program must be relinked, and you may need to use -headerpad or -headerpad_max_install_names)
-# so use symlink to make path shorter
 pushd "Contents/Frameworks/Python.framework/Versions/${PYVER:0:3}/Resources/Python.app/Contents/MacOS/"
 ln -s ../../../../../../../../../Contents Contents
 popd
@@ -267,10 +261,18 @@ osxrelocator -r . /usr/local/lib/ \
 echo "Done relocating lib"
 
 if [ "$USE_GSTREAMER" != "0" ]; then
-    osxrelocator -r . /Library/Frameworks/GStreamer.framework/ \
-        @executable_path/Contents/Frameworks/GStreamer.framework/
-    osxrelocator -r . @rpath/GStreamer.framework/Versions/1.0/SDL2 \
-        @executable_path/Contents/Frameworks/GStreamer.framework/Versions/1.0/SDL2
+    # Additionally, we get the following error if the fixed path is too long, so make sure it's short.
+    # we get install_name_tool: changing install names or rpaths can't be redone for: GStreamer.framework/Versions/1.0/GStreamer
+    # (for architecture x86_64) because larger updated load commands do not fit
+    # (the program must be relinked, and you may need to use -headerpad or -headerpad_max_install_names)
+    # so use symlink to make path shorter
+    pushd Contents
+    ln -s Frameworks/GStreamer.framework/Versions/1.0 GSt1.0
+    popd
+    osxrelocator -r . /Library/Frameworks/GStreamer.framework/Versions/1.0 \
+        @executable_path/Contents/GSt1.0
+    osxrelocator -r . @rpath/GStreamer.framework/Versions/1.0/GStreamer \
+        @executable_path/Contents/GSt1.0/GStreamer
     echo "Done relocating gstreamer"
 fi
 osxrelocator -r . /Library/Frameworks/SDL2/ \
@@ -294,7 +296,7 @@ osxrelocator -r . @rpath/SDL2_mixer.framework/Versions/A/SDL2_mixer \
 echo "Done relocating SDL2 rpath"
 
 osxrelocator -r . /Library/Frameworks/Python \
-    @executable_path/Contents/Frameworks/Python/
+    @executable_path/Contents/Frameworks/Python
 # Python.app/Contents/MacOS/Python should link to Python.framework/Versions/${PYVER:0:3}/Python,
 # which this fixes
 osxrelocator -r . @rpath/Python.framework/Versions/"${PYVER:0:3}"/Python \

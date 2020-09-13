@@ -7,12 +7,14 @@ fi
 SCRIPT_PATH=$(python -c "import os; print(os.path.realpath(os.path.dirname('${SCRIPT_PATH}')))")
 
 # activate the virtualenv
-source "${SCRIPT_PATH}/venv/bin/activate"
+pushd "${SCRIPT_PATH}/venv/bin"
+# must be in current directory
+source activate
+popd
 
 # setup the environment to not mess with the system
-export PYTHONPATH="${SCRIPT_PATH}/kivy:${PYTHONPATH}"
-export DYLD_FALLBACK_LIBRARY_PATH="${SCRIPT_PATH}/lib"
-export LD_PRELOAD_PATH="${SCRIPT_PATH}/lib"
+export DYLD_FALLBACK_LIBRARY_PATH="${SCRIPT_PATH}/../lib"
+export LD_PRELOAD_PATH="${SCRIPT_PATH}/../lib"
 export GST_REGISTRY="${SCRIPT_PATH}/gst.registry"
 export GST_PLUGIN_SCANNER="${SCRIPT_PATH}/gst-plugin-scanner"
 export GTK_PATH="${SCRIPT_PATH}/../Frameworks/GStreamer.framework/Versions/Current"
@@ -21,7 +23,10 @@ export GIO_EXTRA_MODULES="${SCRIPT_PATH}/../Frameworks/GStreamer.framework/Versi
 export KIVY_HOME="${SCRIPT_PATH}/.kivy"
 
 # if an app is available, use it
-if [ -d "${SCRIPT_PATH}/yourapp" ]; then
+if [ -f "${SCRIPT_PATH}/yourapp" ] || [ -h "${SCRIPT_PATH}/yourapp" ]; then
+  "${SCRIPT_PATH}/yourapp"
+  exit 0
+elif [ -d "${SCRIPT_PATH}/yourapp" ]; then
   cd "${SCRIPT_PATH}/yourapp"
   if [ -f "main.so" ]; then
       exec "${SCRIPT_PATH}/python" -c "import main"

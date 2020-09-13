@@ -27,9 +27,11 @@ as a base into which your app can be installed and packaged again as a dmg. Belo
     * Mount it in the current directory and fix the name to your App's name::
 
           hdiutil attach Kivy-2.0.0-python3.8.dmg -mountroot .
-          cp -r Kivy/Kivy.app MyApp.app
+          cp -R Kivy/Kivy.app MyApp.app
 
       This should create the ``MyApp.app`` directory.
+
+      Notice the capitalized ``R``, don't use lowercase as it will copy symbolic links in a cycle.
     * Fix the app's metadata to your app's metadata::
 
           ./fix-bundle-metadata.sh MyApp.app -n MyApp ...
@@ -115,7 +117,8 @@ A complete example using ``Kivy.app`` with a entry_point pointing to your app as
     curl -O -L https://xxx/Kivy-xxx.dmg
     hdiutil attach Kivy-xxx.dmg -mountroot .
 
-    cp -r Kivy/Kivy.app MyApp.app
+    # notice capital R, don't use lowercase as it will copy symbolic links in a cycle
+    cp -R Kivy/Kivy.app MyApp.app
     ./fix-bundle-metadata.sh MyApp.app -n MyApp -v "0.1.1" -a "Name" -o \
         "org.myorg.myapp" -i "../../myapp/doc/source/images/myapp_icon.png"
 
@@ -129,7 +132,11 @@ A complete example using ``Kivy.app`` with a entry_point pointing to your app as
     # remove gstreamer and reduce app size
     ./cleanup-app.sh MyApp.app -g 1
 
-    ln -s "MyApp.app/Contents/Resources/venv/bin/myapp" MyApp.app/Contents/Resources/yourapp
+    # the link needs to be created relative to the yourapp path, so go to that directory
+    pushd MyApp.app/Contents/Resources/
+    ln -s ./venv/bin/myapp yourapp
+    popd
+
     ./relocate.sh MyApp.app
     ./create-osx-dmg.sh MyApp.app MyApp
 
@@ -200,7 +207,11 @@ included::
     # reduce app size
     ./cleanup-app.sh MyApp.app -g 1
 
-    ln -s "MyApp.app/Contents/Resources/venv/bin/myapp" MyApp.app/Contents/Resources/yourapp
+    # the link needs to be created relative to the yourapp path, so go to that directory
+    pushd MyApp.app/Contents/Resources/
+    ln -s ./venv/bin/myapp yourapp
+    popd
+
     ./relocate.sh MyApp.app
     ./create-osx-dmg.sh MyApp.app MyApp
 

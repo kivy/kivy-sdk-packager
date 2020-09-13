@@ -311,6 +311,8 @@ install_name_tool -change "/Library/Frameworks/Python.framework/Versions/${PYVER
   "@executable_path/Contents/Frameworks/Python.framework/Python" \
   "Contents/Frameworks/Python.framework/Versions/${PYVER:0:3}/bin/python${PYVER:0:3}"
 
+codesign -fs - "Contents/Frameworks/Python.framework/Versions/${PYVER:0:3}/Python"
+
 popd
 
 echo "-- Done !"

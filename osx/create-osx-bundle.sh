@@ -92,7 +92,7 @@ SCRIPT_PATH=$($PYTHON -c "import os; print(os.path.realpath(os.path.dirname('$SC
 
 
 echo "-- Create initial $APP_NAME.app package"
-$PLATYPUS -DBR -x -y \
+$PLATYPUS -DBR -y \
     -i "$ICON_PATH" \
     -a "$APP_NAME" \
     -o "None" \

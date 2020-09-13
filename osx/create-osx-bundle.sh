@@ -236,57 +236,78 @@ popd
 
 echo "-- Relocate frameworks"
 pushd "$APP_NAME.app"
+
+# it's not clear where executable_path is. The way python works on osx
+# is that /Python.framework/Versions/3.x/Python actually launches internally
+# Python.framework/Versions/3.8/Resources/Python.app/Contents/MacOS/Python. And then we
+# also have the venv's python. So which of them are the executable_path?
+#
+# It seems that sometimes it is the venv's python, but it could also be
+# Python.app/Contents/MacOS/Python. So we create a symlink next to each python pointing to
+# Contents/ so we can simply do @executable_path/Contents/... and it will always work.
+# maybe in the future we can make sure which one it is and reduce the need for the multiple symlinks.
+#
+# Additionally, we get the following error if the fixed path is too long, so make sure it's short.
+# we get install_name_tool: changing install names or rpaths can't be redone for: GStreamer.framework/Versions/1.0/GStreamer
+# (for architecture x86_64) because larger updated load commands do not fit
+# (the program must be relinked, and you may need to use -headerpad or -headerpad_max_install_names)
+# so use symlink to make path shorter
+pushd "Contents/Frameworks/Python.framework/Versions/${PYVER:0:3}/Resources/Python.app/Contents/MacOS/"
+ln -s ../../../../../../../../../Contents Contents
+popd
+pushd "Contents/Resources/venv/bin"
+ln -s ../../../../Contents Contents
+popd
+pushd "Contents/Frameworks/Python.framework/Versions/${PYVER:0:3}/"
+ln -s ../../../../../Contents Contents
+popd
+
 osxrelocator -r . /usr/local/lib/ \
-    @executable_path/../../../lib/
+    @executable_path/Contents/lib/
 echo "Done relocating lib"
 
 if [ "$USE_GSTREAMER" != "0" ]; then
-    # we get install_name_tool: changing install names or rpaths can't be redone for: GStreamer.framework/Versions/1.0/GStreamer
-    # (for architecture x86_64) because larger updated load commands do not fit
-    # (the program must be relinked, and you may need to use -headerpad or -headerpad_max_install_names)
-    # so use symlink to make path shorter
-    pushd "Contents/Resources/venv/bin"
-    ln -s ../../../Frameworks/ Frameworks
-    popd
-
     osxrelocator -r . /Library/Frameworks/GStreamer.framework/ \
-        @executable_path/Frameworks/GStreamer.framework/
+        @executable_path/Contents/Frameworks/GStreamer.framework/
     osxrelocator -r . @rpath/GStreamer.framework/Versions/1.0/SDL2 \
-        @executable_path/Frameworks/GStreamer.framework/Versions/1.0/SDL2
+        @executable_path/Contents/Frameworks/GStreamer.framework/Versions/1.0/SDL2
     echo "Done relocating gstreamer"
 fi
 osxrelocator -r . /Library/Frameworks/SDL2/ \
-    @executable_path/../../../Frameworks/SDL2/
+    @executable_path/Contents/Frameworks/SDL2/
 osxrelocator -r . /Library/Frameworks/SDL2_ttf/ \
-    @executable_path/../../../Frameworks/SDL2_ttf/
+    @executable_path/Contents/Frameworks/SDL2_ttf/
 osxrelocator -r . /Library/Frameworks/SDL2_image/ \
-    @executable_path/../../../Frameworks/SDL2_image/
+    @executable_path/Contents/Frameworks/SDL2_image/
 osxrelocator -r . /Library/Frameworks/SDL2_mixer/ \
-    @executable_path/../../../Frameworks/SDL2_mixer/
+    @executable_path/Contents/Frameworks/SDL2_mixer/
 echo "Done relocating SDL2"
 
 osxrelocator -r . @rpath/SDL2.framework/Versions/A/SDL2 \
-    @executable_path/../../../Frameworks/SDL2.framework/Versions/A/SDL2
+    @executable_path/Contents/Frameworks/SDL2.framework/Versions/A/SDL2
 osxrelocator -r . @rpath/SDL2_ttf.framework/Versions/A/SDL2_ttf \
-    @executable_path/../../../Frameworks/SDL2_ttf.framework/Versions/A/SDL2_ttf
+    @executable_path/Contents/Frameworks/SDL2_ttf.framework/Versions/A/SDL2_ttf
 osxrelocator -r . @rpath/SDL2_image.framework/Versions/A/SDL2_image \
-    @executable_path/../../../Frameworks/SDL2_image.framework/Versions/A/SDL2_image
+    @executable_path/Contents/Frameworks/SDL2_image.framework/Versions/A/SDL2_image
 osxrelocator -r . @rpath/SDL2_mixer.framework/Versions/A/SDL2_mixer \
-    @executable_path/../../../Frameworks/SDL2_mixer.framework/Versions/A/SDL2_mixer
+    @executable_path/Contents/Frameworks/SDL2_mixer.framework/Versions/A/SDL2_mixer
 echo "Done relocating SDL2 rpath"
 
-osxrelocator -r . /Library/Frameworks/Python/ \
-    @executable_path/../../../Frameworks/Python/
+osxrelocator -r . /Library/Frameworks/Python \
+    @executable_path/Contents/Frameworks/Python/
+# Python.app/Contents/MacOS/Python should link to Python.framework/Versions/${PYVER:0:3}/Python,
+# which this fixes
 osxrelocator -r . @rpath/Python.framework/Versions/"${PYVER:0:3}"/Python \
-    @executable_path/../../../Frameworks/Python.framework/Versions/"${PYVER:0:3}"/Python
+    @executable_path/Contents/Frameworks/Python.framework/Versions/"${PYVER:0:3}"/Python
 echo "Done relocating Python"
 
+# for some reason Python.framework/Versions/3.x/bin/python3.x originally links to
+# /Library/Frameworks/Python.framework/Versions/3.x/Python, but it needs to be updated to
+# Frameworks/Python.framework/Python (which seems to be a link to
+# Frameworks/Python.framework/Versions/Current/Python).
 install_name_tool -change "/Library/Frameworks/Python.framework/Versions/${PYVER:0:3}/Python" \
-  "@executable_path/../../../Frameworks/Python.framework/Python" \
+  "@executable_path/Contents/Frameworks/Python.framework/Python" \
   "Contents/Frameworks/Python.framework/Versions/${PYVER:0:3}/bin/python${PYVER:0:3}"
-install_name_tool -change "@executable_path/../../../Frameworks/Python.framework/Versions/${PYVER:0:3}/Python" \
-  '@executable_path/../../../../Python' \
-  "Contents/Frameworks/Python.framework/Versions/${PYVER:0:3}/Resources/Python.app/Contents/MacOS/Python"
 
 popd
 

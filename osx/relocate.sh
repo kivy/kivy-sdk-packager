@@ -38,10 +38,11 @@ echo "Making scripts relative"
 pushd "$APP_PATH/Contents/Resources/venv/bin"
 
 (export LANG=C LC_ALL=C; find . -type f -name '*' -print0 | \
-    xargs -0  sed -i '.bak' "s~$APP_PATH/Contents/Resources/venv/bin/python~/usr/bin/env python~")
+    xargs -0  sed -i '.bak' "s~#\\!$APP_PATH/Contents/Resources/venv/bin/python~#\\!/usr/bin/env python~")
 rm -f ./*.bak
 
 popd
 popd
+
 
 echo "Done"

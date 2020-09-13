@@ -53,11 +53,11 @@ as a base into which your app can be installed and packaged again as a dmg. Belo
     * Relocate the framework so it can be used from a different path. E.g.::
 
           python -m pip install git+https://github.com/tito/osxrelocator
-          osxrelocator -r MyApp.app MyApp.app/Contents/Frameworks/SDL2_ttf/ @executable_path/../Frameworks/MyFramework/
+          osxrelocator -r MyApp.app MyApp.app/Contents/Frameworks/MyFramework/ @executable_path/Contents/Frameworks/MyFramework/
           osxrelocator -r MyApp.app @rpath/MyFramework.framework/Versions/A/MyFramework \
-              @executable_path/../Frameworks/MyFramework.framework/Versions/A/MyFramework
+              @executable_path/Contents/Frameworks/MyFramework.framework/Versions/A/MyFramework
 
-      This should be customized for each framework.
+      This should be customized for each framework. See the ``create-osx-bundle.sh`` script for examples.
   * Install your dependencies with e.g. ``pip``::
 
         python -m pip install ...
@@ -104,6 +104,7 @@ as a base into which your app can be installed and packaged again as a dmg. Belo
       ./create-osx-dmg.sh MyApp.app MyApp
 
   This creates the MyApp.dmg in your current directory.
+* TODO: figure out how to sign the dmg/app.
 * Clean up and unmount and mounted DMGs if needed.
 
 

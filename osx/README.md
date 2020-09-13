@@ -88,9 +88,12 @@ as a base into which your app can be installed and packaged again as a dmg. Belo
   script that runs your app. Then, create a symlink to ``myapp``, and your app will run
   when the user clicks the applications. E.g.::
 
-      ln -s "MyApp.app/Contents/Resources/venv/bin/myapp" MyApp.app/Contents/Resources/yourapp
+      pushd MyApp.app/Contents/Resources/
+      ln -s ./venv/bin/myapp yourapp
+      popd
 
-  will create such a symlink.
+  will create such a symlink. The link needs to be created relative to the ``yourapp`` path,
+  so we go to that directory.
 * Relocate the hard-coded links created by pip. This is required to be able to compile the app
   into a dmg install to a different path. Do::
 

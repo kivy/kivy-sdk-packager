@@ -137,7 +137,9 @@ echo "-- Reduce frameworks size"
 # remove pyc because they contain absolute paths
 find "Python.framework/" -name "*.pyc" -print0 | xargs -0 rm
 
-rm -rf "Python.framework/Versions/${PYVER:0:3}"/{share,Resources._CodeSignature,Headers}
+rm -rf "Python.framework/Versions/${PYVER:0:3}"/{share,Headers}
+rm -rf "Python.framework/Versions/${PYVER:0:3}/Resources"/{*.lproj,Info.plist}
+rm -rf "Python.framework/Versions/${PYVER:0:3}/Resources/Python.app/Contents/"{Resources,Info.plist,PkgInfo}
 
 rm -rf {SDL2,SDL2_image,SDL2_ttf,SDL2_mixer}.framework/Headers
 rm -rf {SDL2,SDL2_image,SDL2_ttf,SDL2_mixer}.framework/Versions/A/Headers

@@ -9,6 +9,10 @@ The packaged dmg contains a Python virtualenv, Kivy and its binary dependencies 
 provides an existing dmg containing the virtualenv and Kivy pre-installed that can be used
 as a base into which your app can be installed and packaged again as a dmg. Below are the steps:
 
+**Note:** A Kivy.app build on one OS X version will typically
+not work on older OS X versions. For older OS X versions, you need to build Kivy.app
+on the oldest machine you wish to support.
+
 * Get the Kivy sdk repo with e.g.
   ``git clone https://github.com/kivy/kivy-sdk-packager.git`` and ``cd`` into
   ``kivy-sdk-packager/osx``.

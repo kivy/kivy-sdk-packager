@@ -209,6 +209,8 @@ echo "-- Link python to the right location for relocation"
 ln -s ./venv/bin/python ./python
 ln -s ./venv/bin/python ./python3
 
+cp ../../../data/kivy_activate "venv/bin"
+
 popd
 
 # --- Relocation

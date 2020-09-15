@@ -44,10 +44,13 @@ on the oldest machine you wish to support.
 
         pushd MyApp.app/Contents/Resources/venv/bin
         source activate
+        source kivy_activate
         popd
 
     On the default mac shell you **must** be in the bin directory containing ``activate`` to be
-    able to ``activate`` the virtualenv.
+    able to ``activate`` the virtualenv. ``kivy_activate`` is only necessary if you'll run
+    Kivy in the environment - it sets up the Kivy home, gstreamer and other Kivy environment
+    variables.
   * Install any frameworks and relocate them:
     * Mount any frameworks e.g. ``MyFramework`` on your system and copy it over to the app::
 
@@ -82,7 +85,9 @@ on the oldest machine you wish to support.
 * Create a script that will run when the user clicks on the installed app.
 
   To do this, you'll copy a shell, python file, or other script into
-  ``MyApp.app/Contents/Resources`` with the name ``yourapp``. The app will automatically run it.
+  ``MyApp.app/Contents/Resources`` with the name ``yourapp``. The app will automatically run it
+  using a launcher script that activates the venv, initializes the kivy environment similarly to
+  ``kivy_activate`` and runs ``yourapp`` whenever the user runs the app.
 
   A common technique is in your ``setup.py`` add something like::
 

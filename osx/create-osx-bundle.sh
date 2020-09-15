@@ -273,6 +273,11 @@ if [ "$USE_GSTREAMER" != "0" ]; then
     pushd Contents
     ln -s Frameworks/GStreamer.framework/Versions/1.0 GSt1.0
     popd
+    pushd Contents/Resources
+    # gst-plugin-scanner is looking for dylib relative to itself, so we need to add another
+    # Contents symlink next to it.
+    ln -s ../../Contents Contents
+    popd
     osxrelocator -r . /Library/Frameworks/GStreamer.framework/Versions/1.0 \
         @executable_path/Contents/GSt1.0
     osxrelocator -r . @rpath/GStreamer.framework/Versions/1.0/GStreamer \

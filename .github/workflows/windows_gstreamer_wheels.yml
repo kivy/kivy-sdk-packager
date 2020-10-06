@@ -16,6 +16,7 @@ env:
   PACKAGE_TARGET: gstreamer
   PYTHONPATH: .
 
+
 jobs:
   prepare_cache:
     runs-on: windows-latest
@@ -27,7 +28,7 @@ jobs:
     steps:
       - uses: actions/checkout@v1
       - name: Set up Python
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v2
         with:
           python-version: 3.x
       - name: Cache deps
@@ -49,14 +50,14 @@ jobs:
     needs: prepare_cache
     strategy:
       matrix:
-        python: [ '3.6', '3.7', '3.8' ]
+        python: [ '3.6', '3.7', '3.8', '3.9' ]
         arch: ['x64', 'x86']
     env:
       PACKAGE_ARCH: ${{ matrix.arch }}
     steps:
     - uses: actions/checkout@v1
     - name: Set up Python
-      uses: actions/setup-python@v1
+      uses: actions/setup-python@v2
       with:
         python-version: ${{ matrix.python }}
         architecture: ${{ matrix.arch }}
@@ -69,6 +70,8 @@ jobs:
       run: |
         . .\ci\windows_ci.ps1
         Prepre-env
+    - name: Install lessmsi
+      run: choco install lessmsi
     - name: Build package
       run: |
         . .\ci\windows_ci.ps1

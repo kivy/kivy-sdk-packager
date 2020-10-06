@@ -1,7 +1,7 @@
 from __future__ import absolute_import, print_function
 from .common import *
 
-__version__ = '0.2.0'
+__version__ = '0.3.0'
 
 
 def get_angle(cache, build_path, arch, package, output, download_only=False):

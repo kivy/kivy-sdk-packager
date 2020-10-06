@@ -51,12 +51,12 @@ function Test-kivy() {
 
     python -m pip config set install.find-links "$(pwd)\dist"
 
-    git clone --depth 1 git://github.com/kivy/kivy.git
+    git clone --depth 1 git://github.com/kivy/kivy.git kivy_src
     # use the current kivy_deps just built, not the older version specified in the reqs
-    ((get-content -Path kivy/pyproject.toml -Raw) -replace "kivy_deps.$env:PACKAGE_TARGET`_dev~.+;","kivy_deps.$env:PACKAGE_TARGET`_dev;") | set-content -Path kivy/pyproject.toml
-    ((get-content -Path kivy/pyproject.toml -Raw) -replace "kivy_deps.$env:PACKAGE_TARGET~.+;","kivy_deps.$env:PACKAGE_TARGET;") | set-content -Path kivy/pyproject.toml
-    ((get-content -Path kivy/setup.cfg -Raw) -replace "kivy_deps.$env:PACKAGE_TARGET~.+;","kivy_deps.$env:PACKAGE_TARGET;") | set-content -Path kivy/setup.cfg
-    python -m pip install "./kivy[full,dev]"
+    ((get-content -Path kivy_src/pyproject.toml -Raw) -replace "kivy_deps.$env:PACKAGE_TARGET`_dev~.+;","kivy_deps.$env:PACKAGE_TARGET`_dev;") | set-content -Path kivy_src/pyproject.toml
+    ((get-content -Path kivy_src/pyproject.toml -Raw) -replace "kivy_deps.$env:PACKAGE_TARGET~.+;","kivy_deps.$env:PACKAGE_TARGET;") | set-content -Path kivy_src/pyproject.toml
+    ((get-content -Path kivy_src/setup.cfg -Raw) -replace "kivy_deps.$env:PACKAGE_TARGET~.+;","kivy_deps.$env:PACKAGE_TARGET;") | set-content -Path kivy_src/setup.cfg
+    python -m pip install "./kivy_src[full,dev]"
 
     raise-only-error -Func {python -c 'import kivy'}
     $test_path=python -c 'import kivy.tests as tests; print(tests.__path__[0])'  --config "kivy:log_level:error"

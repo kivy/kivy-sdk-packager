@@ -35,16 +35,20 @@ def get_gstreamer(cache, build_path, arch, package, output, download_only=False)
         local_url = download_cache(cache, url, build_path)
 
         if not download_only:
+            extract_path = gst
+            if not extract_path.endswith('\\'):
+                # it must end with a backslash
+                extract_path += '\\'
+
             exec_binary(
-                "Extracting {} to {}".format(local_url, gst),
-                ['msiexec', '/a', local_url, '/qb',
-                 'TARGETDIR={}'.format(gst)],
+                "Extracting {} to {}".format(local_url, extract_path),
+                ['lessmsi', 'x', local_url, extract_path],
                 cwd=gst, shell=False)
     if download_only:
         return
 
-    gst = join(gst, 'gstreamer')
-    gst = join(gst, list(listdir(gst))[0], bitness)
+    gst = join(gst, 'SourceDir', 'gstreamer')
+    gst = join(gst, list(listdir(gst))[0], f'{compiler}_{bitness}')
 
     # remove from the includes directory anything that isn't needed to compile
     inc = join(gst, 'include')

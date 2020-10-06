@@ -69,6 +69,8 @@ jobs:
       run: |
         . .\ci\windows_ci.ps1
         Prepre-env
+    - name: Install lessmsi
+      run: choco install lessmsi
     - name: Build package
       run: |
         . .\ci\windows_ci.ps1

@@ -6,7 +6,7 @@ from os import walk, listdir, remove
 from .common import *
 import glob  # also imported in common so it must be after
 
-__version__ = '0.3.0'
+__version__ = '0.3.1'
 
 gst_ver = '1.18.0'
 

@@ -48,6 +48,7 @@ jobs:
     runs-on: windows-latest
     needs: prepare_cache
     strategy:
+      fail-fast: false
       matrix:
         python: [ '3.6', '3.7', '3.8', '3.9' ]
         arch: ['x64', 'x86']
@@ -73,6 +74,11 @@ jobs:
       run: |
         . .\ci\windows_ci.ps1
         Create-Packages
+    - name: Upload wheels as artifact
+      uses: actions/upload-artifact@master
+      with:
+        name: glew_wheels
+        path: dist
     - name: Install MSYS2
       run: choco install msys2
     - name: Upload wheels to server
@@ -84,11 +90,6 @@ jobs:
       run: |
         . .\ci\windows_ci.ps1
         Upload-windows-wheels-to-server -ip "$env:SERVER_IP"
-    - name: Upload wheels as artifact
-      uses: actions/upload-artifact@master
-      with:
-        name: glew_wheels
-        path: dist
     - name: Publish to PyPI
       if: contains(github.event.head_commit.message, '[publish glew win]')
       env:

@@ -6,9 +6,9 @@ from os import walk, listdir, remove
 from .common import *
 import glob  # also imported in common so it must be after
 
-__version__ = '0.2.0'
+__version__ = '0.3.0'
 
-gst_ver = '1.16.2'
+gst_ver = '1.18.0'
 
 try:
     glob_escape = glob.escape
@@ -19,7 +19,7 @@ except AttributeError:  # python 2
 def get_gstreamer(cache, build_path, arch, package, output, download_only=False):
     data = []
     bitness = 'x86_64' if arch == 'x64' else 'x86'
-    compiler = 'msvc' if arch == 'x64' else 'mingw'
+    compiler = 'msvc'
     runtime_name = 'gstreamer-1.0-{}-{}-{}.msi'.format(
         compiler, bitness, gst_ver)
     devel_name = 'gstreamer-1.0-devel-{}-{}-{}.msi'.format(
@@ -30,7 +30,8 @@ def get_gstreamer(cache, build_path, arch, package, output, download_only=False)
 
     for name in (runtime_name, devel_name):
         url = (
-            'https://gstreamer.freedesktop.org/data/pkg/windows/{}/{}'.format(gst_ver, name))
+            'https://gstreamer.freedesktop.org/data/pkg/windows/{}/{}/{}'
+            .format(gst_ver, compiler, name))
         local_url = download_cache(cache, url, build_path)
 
         if not download_only:

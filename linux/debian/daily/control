@@ -19,7 +19,7 @@ Build-Depends: debhelper (>= 7.0.50~), dh-python, pkg-config, git,
 # setuptools
  python3-setuptools,
 # measuring code coverage during during test execution
- python-coverage,
+ python3-coverage,
 # Mesa OpenGL / -ES development files
  libgl1-mesa-dev, libgles2-mesa-dev,
 # SDL(1) dependencies
@@ -43,7 +43,7 @@ Build-Depends: debhelper (>= 7.0.50~), dh-python, pkg-config, git,
 # LaTex
  texlive-latex-base, texlive-latex-recommended, texlive-latex-extra, texlive-fonts-extra, texlive-fonts-recommended,
 # Raises an ImportError if not installed
- python-pygments, python3-pygments,
+ python3-pygments,
 Standards-Version: 3.9.1
 Homepage: http://kivy.org/
 Vcs-Git:  https://github.com/kivy/kivy.git

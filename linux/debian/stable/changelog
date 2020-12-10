@@ -1,3 +1,9 @@
+kivy (2.0.0-0) stable; urgency=medium
+
+  * update to new release
+
+ -- Matthew Einhorn <moiein2000@gmail.com>  Wed, 09 Dec 2020 19:57:00 -0500
+
 kivy (1.11.1-0) stable; urgency=medium
 
   * update to new release

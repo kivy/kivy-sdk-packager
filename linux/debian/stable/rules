@@ -8,10 +8,11 @@
 
 # Uncomment this to turn on verbose mode.
 export DH_VERBOSE=1
+export KIVY_NO_CONFIG=1
 export PYTHONPATH=$(CURDIR)/pypackages:$PYTHONPATH
 
 %:
-	dh $@ --with python2,python3
+	dh $@ --with python3
 
 override_dh_auto_build:
 	echo "Skipping any builds - doing them on install..."
@@ -25,6 +26,7 @@ override_dh_installdocs:
 	python3 -m pip install $(CURDIR)/setuptools -t $(CURDIR)/pypackages --no-deps --upgrade || true;
 	python3 -m pip install $(CURDIR)/pip -t $(CURDIR)/pypackages --no-deps --upgrade || true;
 	python3 -m pip install $(CURDIR)/wheel -t $(CURDIR)/pypackages --no-deps --upgrade || true;
+	python3 -m pip install $(CURDIR)/packaging -t $(CURDIR)/pypackages --no-deps --upgrade || true;
 	python3 -m pip install $(CURDIR)/cython -t $(CURDIR)/pypackages --no-deps --upgrade || true;
 	python3 -m pip list;
 	$(MAKE) PYTHON=python3 force;
@@ -33,7 +35,7 @@ override_dh_installdocs:
 
 override_dh_auto_install:
 	echo "PYTHONPATH is $$PYTHONPATH"
-	for PYX in $(shell py3versions -r) $(shell pyversions -r); do \
+	for PYX in $(shell py3versions -r); do \
 	    rm -rf pypackages setuptools/setuptools.egg-info || true; \
 	    $(MAKE) clean; \
 	    mkdir pypackages && cd setuptools; \
@@ -42,6 +44,7 @@ override_dh_auto_install:
 	    $$PYX -m pip install $(CURDIR)/setuptools -t $(CURDIR)/pypackages --no-deps --upgrade; \
 	    $$PYX -m pip install $(CURDIR)/pip -t $(CURDIR)/pypackages --no-deps --upgrade; \
 	    $$PYX -m pip install $(CURDIR)/wheel -t $(CURDIR)/pypackages --no-deps --upgrade; \
+	    $$PYX -m pip install $(CURDIR)/packaging -t $(CURDIR)/pypackages --no-deps --upgrade; \
 	    $$PYX -m pip install $(CURDIR)/cython -t $(CURDIR)/pypackages --no-deps --upgrade; \
 	    $$PYX -m pip list; \
 	    $(MAKE) install PYTHON=$$PYX INSTALL_ROOT=$(CURDIR)/debian/tmp INSTALL_PREFIX=/usr INSTALL_LAYOUT=deb; \

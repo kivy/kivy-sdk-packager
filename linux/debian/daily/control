@@ -47,7 +47,7 @@ Build-Depends: debhelper (>= 7.0.50~), dh-python, pkg-config, git,
 Standards-Version: 3.9.1
 Homepage: http://kivy.org/
 Vcs-Git:  https://github.com/kivy/kivy.git
-X-Python3-Version: >= 3.5
+X-Python3-Version: >= 3.6
 
 Package: kivy
 Architecture: all

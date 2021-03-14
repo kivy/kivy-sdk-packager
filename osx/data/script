@@ -29,22 +29,22 @@ if [ -f "${SCRIPT_PATH}/yourapp" ] || [ -h "${SCRIPT_PATH}/yourapp" ]; then
 elif [ -d "${SCRIPT_PATH}/yourapp" ]; then
   cd "${SCRIPT_PATH}/yourapp"
   if [ -f "main.so" ]; then
-      exec "${SCRIPT_PATH}/python" -c "import main"
+      exec "python" -c "import main"
     exit 1
   fi
     if [ -f "main.pyo" ] || [ -f "main.opt-2.pyc" ]; then
-        exec "${SCRIPT_PATH}/python" -OO -m main "$@"
+        exec "python" -OO -m main "$@"
     exit 1
     else
-        exec "${SCRIPT_PATH}/python" -m main "$@"
+        exec "python" -m main "$@"
     exit 1
     fi
 
 # default drag & drop support
 elif [ $# -ne 0 ]; then
-        exec "${SCRIPT_PATH}/python" "$@"
+        exec "python" "$@"
 
 # start a python shell, only if we didn't double-clicked
 elif [ "$SHLVL" -gt 1 ]; then
-        exec "${SCRIPT_PATH}/python"
+        exec "python"
 fi

@@ -104,8 +104,8 @@ function Build-angle() {
 function Prepare-ttf($arch) {
     python -m pip install --upgrade meson ninja fonttools
 
-    root="harfbuzz-2.8.0"
-    harf_path="$(pwd)\$root"
+    $root="harfbuzz-2.8.0"
+    $harf_path="$(pwd)\$root"
 
     # get and compile harfbuzz
     Invoke-WebRequest -Uri "https://github.com/harfbuzz/harfbuzz/releases/download/2.8.0/$root.tar.xz" -OutFile "$root.tar.xz"
@@ -121,7 +121,7 @@ function Prepare-ttf($arch) {
     cp "$env:KIVY_BUILD_CACHE\SDL2-devel-*-VC.zip" .
     C:\"Program Files"\7-Zip\7z.exe x "SDL2-devel-*-VC.zip"
     cd "SDL2-*"
-    sdl2="$(pwd)"
+    $sdl2="$(pwd)"
     cd ..
 
     # get sdl_ttf
@@ -135,9 +135,9 @@ function Prepare-ttf($arch) {
     $env:CL="/DTTF_USE_HARFBUZZ#1"
 
     if ($arch -eq "x64") {
-        ttf_arch="x64"
+        $ttf_arch="x64"
     } else {
-        ttf_arch="Win32"
+        $ttf_arch="Win32"
     }
 
     cd .\SDL_ttf-main\VisualC\

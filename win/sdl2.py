@@ -19,13 +19,13 @@ def get_sdl2(cache, build_path, arch, package, output, download_only=False):
          sdl2_ver),
         ('https://www.libsdl.org/projects/SDL_mixer/release/SDL2_mixer-devel-{}-VC.zip',
          sdl2_mixer_ver),
-        ('http://www.libsdl.org/projects/SDL_ttf/release/SDL2_ttf-devel-{}-VC.zip',
-         sdl2_ttf_ver),
         ('http://www.libsdl.org/projects/SDL_image/release/SDL2_image-devel-{}-VC.zip',
          sdl2_image_ver)):
         url = name.format(ver)
         fname = url.split('/')[-1]
         paths.append(download_cache(cache, url, build_path, fname))
+
+    paths.append(join(cache, 'SDL2_ttf-devel-main-VC.zip'))
 
     if download_only:
         return
@@ -42,9 +42,8 @@ def get_sdl2(cache, build_path, arch, package, output, download_only=False):
             'include': join(base_dir, 'include')
             }
 
-        for d in sources.keys():
+        for d, src in sources.items():
             # bin goes to python/share/kivy_package
-            src = sources[d]
             for dirpath, dirnames, filenames in walk(src):
                 root = dirpath
 
@@ -53,7 +52,12 @@ def get_sdl2(cache, build_path, arch, package, output, download_only=False):
                 elif d == 'lib':
                     base = 'libs'
                 elif d == 'include':
-                    base = join(d, 'SDL2')
+                    if 'harfbuzz' not in dirpath:
+                        # sdl2 h files are in the root include, but need to be
+                        # placed under sdl2 directory
+                        base = join(d, 'SDL2')
+                    else:
+                        base = d
                 else:
                     assert False
 

@@ -100,3 +100,70 @@ function Build-angle() {
     cp angle_src\out\Release_x64\*.dll angle_dlls\Release_x64
     cp angle_src\out\Release_x86\*.dll angle_dlls\Release_x86
 }
+
+function Prepare-ttf($arch) {
+    python -m pip install --upgrade meson ninja fonttools
+
+    root="harfbuzz-2.8.0"
+    harf_path="$(pwd)\$root"
+
+    # get and compile harfbuzz
+    Invoke-WebRequest -Uri "https://github.com/harfbuzz/harfbuzz/releases/download/2.8.0/$root.tar.xz" -OutFile "$root.tar.xz"
+    C:\"Program Files"\7-Zip\7z.exe x "$root.tar.xz"
+    C:\"Program Files"\7-Zip\7z.exe x "$root.tar"
+    cd "$root"
+
+    meson setup build --wrap-mode=default --buildtype=release -Dglib=enabled -Dfreetype=enabled -Dgdi=enabled -Ddirectwrite=enabled
+    meson compile -C build
+    cd ..
+
+    # get sdl2
+    cp "$env:KIVY_BUILD_CACHE\SDL2-devel-*-VC.zip" .
+    C:\"Program Files"\7-Zip\7z.exe x "SDL2-devel-*-VC.zip"
+    cd "SDL2-*"
+    sdl2="$(pwd)"
+    cd ..
+
+    # get sdl_ttf
+    Invoke-WebRequest -Uri "https://github.com/libsdl-org/SDL_ttf/archive/refs/heads/main.zip" -OutFile "SDL_ttf-main.zip"
+    C:\"Program Files"\7-Zip\7z.exe x "SDL_ttf-main.zip"
+
+    # now build it
+    $env:UseEnv="true"
+    $env:INCLUDE="$env:INCLUDE;$sdl2\include;$harf_path\src"
+    $env:LIB="$env:LIB;$sdl2\lib\$arch;$harf_path\build\src"
+    $env:CL="/DTTF_USE_HARFBUZZ#1"
+
+    if ($arch -eq "x64") {
+        ttf_arch="x64"
+    } else {
+        ttf_arch="Win32"
+    }
+
+    cd .\SDL_ttf-main\VisualC\
+    devenv .\SDL_ttf.sln /Upgrade
+    (Get-Content .\SDL_ttf.vcxproj).replace(";%(AdditionalDependencies)",";harfbuzz.lib;%(AdditionalDependencies)") | Set-Content .\SDL_ttf.vcxproj
+    devenv /UseEnv .\SDL_ttf.sln  /Build "Release|$ttf_arch"
+    cd "..\..\"
+
+    mkdir "SDL2_ttf-main"
+    mkdir "SDL2_ttf-main\include"
+    mkdir "SDL2_ttf-main\include\harfbuzz"
+    mkdir "SDL2_ttf-main\lib"
+    mkdir "SDL2_ttf-main\lib\$arch"
+
+    cp ".\SDL_ttf-main\VisualC\$arch\Release\*.dll" "SDL2_ttf-main\lib\$arch"
+    cp ".\SDL_ttf-main\VisualC\$arch\Release\*.lib" "SDL2_ttf-main\lib\$arch"
+    cp ".\SDL_ttf-main\VisualC\$arch\Release\LICENSE*.txt" "SDL2_ttf-main\lib\$arch"
+    cp ".\SDL_ttf-main\*.h" "SDL2_ttf-main\include"
+
+    cp "$harf_path\build\src\*.dll" "SDL2_ttf-main\lib\$arch"
+    cp "$harf_path\build\src\*.lib" "SDL2_ttf-main\lib\$arch"
+    cp "$harf_path\build\subprojects\*\*.dll" "SDL2_ttf-main\lib\$arch"
+    cp "$harf_path\build\subprojects\*\*\*.dll" "SDL2_ttf-main\lib\$arch"
+    cp "$harf_path\build\subprojects\*\*\*.dll" "SDL2_ttf-main\lib\$arch"
+    cp "$harf_path\src\*.h" "SDL2_ttf-main\include\harfbuzz"
+
+    Compress-Archive -LiteralPath "SDL2_ttf-main" -DestinationPath "SDL2_ttf-devel-main-VC.zip"
+    cp "SDL2_ttf-devel-main-VC.zip" "$env:KIVY_BUILD_CACHE"
+}

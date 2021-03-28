@@ -58,12 +58,12 @@ function Test-kivy() {
     ((get-content -Path kivy_src/setup.cfg -Raw) -replace "kivy_deps.$env:PACKAGE_TARGET~.+;","kivy_deps.$env:PACKAGE_TARGET;") | set-content -Path kivy_src/setup.cfg
     python -m pip install "./kivy_src[full,dev]"
 
-    raise-only-error -Func {python -c 'import kivy'}
+    python -c 'import kivy'
     $test_path=python -c 'import kivy.tests as tests; print(tests.__path__[0])'  --config "kivy:log_level:error"
     cd "$test_path"
 
     echo "[run]`nplugins = kivy.tools.coverage`n" > .coveragerc
-    raise-only-error -Func {python -m pytest .}
+    python -m pytest .
 }
 
 function Get-angle-deps() {

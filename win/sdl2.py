@@ -25,13 +25,13 @@ def get_sdl2(cache, build_path, arch, package, output, download_only=False):
         fname = url.split('/')[-1]
         paths.append(download_cache(cache, url, build_path, fname))
 
+    if download_only:
+        return
+
     copy2(
         join(cache, 'SDL2_ttf-devel-main-VC.zip'),
         join(build_path, 'SDL2_ttf-devel-main-VC.zip'))
     paths.append(join(build_path, 'SDL2_ttf-devel-main-VC.zip'))
-
-    if download_only:
-        return
 
     for local_url in paths:
         exec_binary(

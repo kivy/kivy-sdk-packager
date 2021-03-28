@@ -71,7 +71,7 @@ jobs:
         python-version: ${{ matrix.python }}
         architecture: ${{ matrix.arch }}
     - name: Cache deps
-      uses: actions/cache@v1
+      uses: actions/cache@v2
       with:
         path: kivy_build_cache
         key: cache-packages-sdl2-${{ matrix.arch }}-${{ hashFiles('win/sdl2.py') }}

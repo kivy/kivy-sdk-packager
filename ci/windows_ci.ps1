@@ -155,9 +155,9 @@ function Prepare-ttf($arch) {
     mkdir "SDL2_ttf-main\lib"
     mkdir "SDL2_ttf-main\lib\$arch"
 
-    cp ".\SDL_ttf-main\VisualC\$arch\Release\*.dll" "SDL2_ttf-main\lib\$arch"
-    cp ".\SDL_ttf-main\VisualC\$arch\Release\*.lib" "SDL2_ttf-main\lib\$arch"
-    cp ".\SDL_ttf-main\VisualC\$arch\Release\LICENSE*.txt" "SDL2_ttf-main\lib\$arch"
+    cp ".\SDL_ttf-main\VisualC\$ttf_arch\Release\*.dll" "SDL2_ttf-main\lib\$arch"
+    cp ".\SDL_ttf-main\VisualC\$ttf_arch\Release\*.lib" "SDL2_ttf-main\lib\$arch"
+    cp ".\SDL_ttf-main\VisualC\$ttf_arch\Release\LICENSE*.txt" "SDL2_ttf-main\lib\$arch"
     cp ".\SDL_ttf-main\*.h" "SDL2_ttf-main\include"
 
     cp "$harf_path\build\src\*.dll" "SDL2_ttf-main\lib\$arch"

@@ -167,7 +167,9 @@ function Prepare-ttf($arch) {
     cp "$harf_path\build\subprojects\*\*\*.dll" "result\SDL2_ttf-main\lib\$arch"
     cp "$harf_path\build\subprojects\*\*\*.dll" "result\SDL2_ttf-main\lib\$arch"
     cp "$harf_path\src\*.h" "result\SDL2_ttf-main\include\harfbuzz"
+    Get-ChildItem -Recurse result
 
     Compress-Archive -LiteralPath "result\SDL2_ttf-main" -DestinationPath "SDL2_ttf-devel-main-VC.zip"
     cp "SDL2_ttf-devel-main-VC.zip" "$env:KIVY_BUILD_CACHE"
+    C:\"Program Files"\7-Zip\7z.exe l "SDL2_ttf-devel-main-VC.zip"
 }

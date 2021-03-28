@@ -2,7 +2,7 @@ from __future__ import absolute_import, print_function
 from os import walk
 from .common import *
 
-__version__ = '0.4.0'
+__version__ = '0.4.1'
 
 sdl2_ver = '2.0.14'
 sdl2_mixer_ver = '2.0.4'
@@ -25,7 +25,10 @@ def get_sdl2(cache, build_path, arch, package, output, download_only=False):
         fname = url.split('/')[-1]
         paths.append(download_cache(cache, url, build_path, fname))
 
-    paths.append(join(cache, 'SDL2_ttf-devel-main-VC.zip'))
+    copy2(
+        join(cache, 'SDL2_ttf-devel-main-VC.zip'),
+        join(build_path, 'SDL2_ttf-devel-main-VC.zip'))
+    paths.append(join(build_path, 'SDL2_ttf-devel-main-VC.zip'))
 
     if download_only:
         return

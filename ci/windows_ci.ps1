@@ -116,7 +116,8 @@ function Prepare-ttf($arch) {
     # This dir contains a pkg-config which meson will happily use and later fail, so remove it
     $env:path = ($env:path.Split(';') | Where-Object { $_ -ne 'C:\Strawberry\perl\bin' }) -join ';'
 
-    meson setup build --wrap-mode=default --buildtype=release -Dglib=enabled -Dfreetype=enabled -Dgdi=enabled -Ddirectwrite=enabled
+    meson setup build --wrap-mode=default --buildtype=release -Dglib=disabled -Dgobject=disabled -Dcairo=disabled `
+-Dfreetype=enabled -Dgdi=enabled -Ddirectwrite=enabled -Dicu=disabled
     meson compile -C build
     cd ..
 

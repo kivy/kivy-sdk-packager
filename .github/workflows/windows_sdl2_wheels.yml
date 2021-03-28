@@ -90,6 +90,7 @@ jobs:
         name: sdl2_wheels
         path: dist
     - name: Install MSYS2
+      if: contains(github.event.head_commit.message, '[publish sdl2 win]')
       run: choco install msys2
     - name: Upload wheels to server
       if: contains(github.event.head_commit.message, '[publish sdl2 win]')

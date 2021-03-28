@@ -51,7 +51,7 @@ function Test-kivy() {
 
     python -m pip config set install.find-links "$(pwd)\dist"
 
-    git clone --depth 1 git://github.com/kivy/kivy.git kivy_src
+    git clone --depth 1 --branch harfbuzz git://github.com/matham/kivy.git kivy_src
     # use the current kivy_deps just built, not the older version specified in the reqs
     ((get-content -Path kivy_src/pyproject.toml -Raw) -replace "kivy_deps.$env:PACKAGE_TARGET`_dev~.+;","kivy_deps.$env:PACKAGE_TARGET`_dev;") | set-content -Path kivy_src/pyproject.toml
     ((get-content -Path kivy_src/pyproject.toml -Raw) -replace "kivy_deps.$env:PACKAGE_TARGET~.+;","kivy_deps.$env:PACKAGE_TARGET;") | set-content -Path kivy_src/pyproject.toml
@@ -145,7 +145,16 @@ function Prepare-ttf($arch) {
 
     cd .\SDL_ttf-main\VisualC\
     devenv .\SDL_ttf.sln /Upgrade
+
     (Get-Content .\SDL_ttf.vcxproj).replace(";%(AdditionalDependencies)",";harfbuzz.lib;%(AdditionalDependencies)") | Set-Content .\SDL_ttf.vcxproj
+    (Get-Content .\SDL_ttf.vcxproj).replace("libfreetype-6.dll","freetype-6.dll") | Set-Content .\SDL_ttf.vcxproj
+    (Get-Content .\SDL_ttf.vcxproj).replace("libfreetype-6.lib","freetype.lib") | Set-Content .\SDL_ttf.vcxproj
+    (Get-Content .\SDL_ttf.vcxproj).replace("zlib1.dll","z.dll") | Set-Content .\SDL_ttf.vcxproj
+    cp "$harf_path\build\subprojects\freetype2\freetype-6.dll" "..\..\SDL_ttf-main\VisualC\external\lib\$arch"
+    cp "$harf_path\build\subprojects\freetype2\freetype.lib" "..\..\SDL_ttf-main\VisualC\external\lib\$arch"
+    cp "$harf_path\build\subprojects\zlib-*\z.dll" "..\..\SDL_ttf-main\VisualC\external\lib\$arch"
+    cp "$harf_path\build\subprojects\zlib-*\z.lib" "..\..\SDL_ttf-main\VisualC\external\lib\$arch"
+
     devenv /UseEnv .\SDL_ttf.sln  /Build "Release|$ttf_arch"
     cd "..\..\"
 

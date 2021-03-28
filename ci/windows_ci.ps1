@@ -146,16 +146,7 @@ function Prepare-ttf($arch) {
 
     cd .\SDL_ttf-main\VisualC\
     devenv .\SDL_ttf.sln /Upgrade
-
     (Get-Content .\SDL_ttf.vcxproj).replace(";%(AdditionalDependencies)",";harfbuzz.lib;%(AdditionalDependencies)") | Set-Content .\SDL_ttf.vcxproj
-#    (Get-Content .\SDL_ttf.vcxproj).replace("libfreetype-6.dll","freetype-6.dll") | Set-Content .\SDL_ttf.vcxproj
-#    (Get-Content .\SDL_ttf.vcxproj).replace("libfreetype-6.lib","freetype.lib") | Set-Content .\SDL_ttf.vcxproj
-#    (Get-Content .\SDL_ttf.vcxproj).replace("zlib1.dll","z.dll") | Set-Content .\SDL_ttf.vcxproj
-#    cp "$harf_path\build\subprojects\freetype2\freetype-6.dll" "..\..\SDL_ttf-main\VisualC\external\lib\$arch"
-#    cp "$harf_path\build\subprojects\freetype2\freetype.lib" "..\..\SDL_ttf-main\VisualC\external\lib\$arch"
-#    cp "$harf_path\build\subprojects\zlib-*\z.dll" "..\..\SDL_ttf-main\VisualC\external\lib\$arch"
-#    cp "$harf_path\build\subprojects\zlib-*\z.lib" "..\..\SDL_ttf-main\VisualC\external\lib\$arch"
-
     devenv /UseEnv .\SDL_ttf.sln  /Build "Release|$ttf_arch"
     cd "..\..\"
 

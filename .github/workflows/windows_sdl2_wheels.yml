@@ -43,6 +43,13 @@ jobs:
         run: |
           . .\ci\windows_ci.ps1
           Download-Packages
+      - uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: ${{ matrix.arch }}
+      - name: Prepare HarfBuzz/sdl_ttf
+        run: |
+          . .\ci\windows_ci.ps1
+          Prepare-ttf -arch ${{ matrix.arch }}
 
   windows_wheels:
     runs-on: windows-latest

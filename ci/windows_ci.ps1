@@ -51,19 +51,19 @@ function Test-kivy() {
 
     python -m pip config set install.find-links "$(pwd)\dist"
 
-    git clone --depth 1 git://github.com/kivy/kivy.git kivy_src
+    git clone --depth 1 --branch harfbuzz git://github.com/matham/kivy.git kivy_src
     # use the current kivy_deps just built, not the older version specified in the reqs
     ((get-content -Path kivy_src/pyproject.toml -Raw) -replace "kivy_deps.$env:PACKAGE_TARGET`_dev~.+;","kivy_deps.$env:PACKAGE_TARGET`_dev;") | set-content -Path kivy_src/pyproject.toml
     ((get-content -Path kivy_src/pyproject.toml -Raw) -replace "kivy_deps.$env:PACKAGE_TARGET~.+;","kivy_deps.$env:PACKAGE_TARGET;") | set-content -Path kivy_src/pyproject.toml
     ((get-content -Path kivy_src/setup.cfg -Raw) -replace "kivy_deps.$env:PACKAGE_TARGET~.+;","kivy_deps.$env:PACKAGE_TARGET;") | set-content -Path kivy_src/setup.cfg
     python -m pip install "./kivy_src[full,dev]"
 
-    raise-only-error -Func {python -c 'import kivy'}
+    python -c 'import kivy'
     $test_path=python -c 'import kivy.tests as tests; print(tests.__path__[0])'  --config "kivy:log_level:error"
     cd "$test_path"
 
     echo "[run]`nplugins = kivy.tools.coverage`n" > .coveragerc
-    raise-only-error -Func {python -m pytest .}
+    python -m pytest .
 }
 
 function Get-angle-deps() {
@@ -102,6 +102,16 @@ function Build-angle() {
 }
 
 function Prepare-ttf($arch) {
+    # currently there's a binary incompatibility between gst and harfbuzz compiled here for x86. So
+    # don't include that for x86
+    if ($arch -eq "x64") {
+        Prepare-ttf-x64 -arch $arch
+    } else {
+        Prepare-ttf-x86 -arch $arch
+    }
+}
+
+function Prepare-ttf-x64($arch) {
     python -m pip install --upgrade meson ninja fonttools
 
     $root="harfbuzz-2.8.0"
@@ -116,7 +126,8 @@ function Prepare-ttf($arch) {
     # This dir contains a pkg-config which meson will happily use and later fail, so remove it
     $env:path = ($env:path.Split(';') | Where-Object { $_ -ne 'C:\Strawberry\perl\bin' }) -join ';'
 
-    meson setup build --wrap-mode=default --buildtype=release -Dglib=enabled -Dfreetype=enabled -Dgdi=enabled -Ddirectwrite=enabled
+    meson setup build --wrap-mode=default --buildtype=release -Dglib=disabled -Dgobject=disabled -Dcairo=disabled `
+-Dfreetype=enabled -Dgdi=enabled -Ddirectwrite=enabled -Dicu=disabled
     meson compile -C build
     cd ..
 
@@ -167,6 +178,43 @@ function Prepare-ttf($arch) {
     cp "$harf_path\build\subprojects\*\*\*.dll" "result\SDL2_ttf-main\lib\$arch"
     cp "$harf_path\build\subprojects\*\*\*.dll" "result\SDL2_ttf-main\lib\$arch"
     cp "$harf_path\src\*.h" "result\SDL2_ttf-main\include\harfbuzz"
+
+    Compress-Archive -LiteralPath "result\SDL2_ttf-main" -DestinationPath "SDL2_ttf-devel-main-VC.zip"
+    cp "SDL2_ttf-devel-main-VC.zip" "$env:KIVY_BUILD_CACHE"
+}
+
+function Prepare-ttf-x86($arch) {
+    # get sdl2
+    cp "$env:KIVY_BUILD_CACHE\SDL2-devel-*-VC.zip" .
+    C:\"Program Files"\7-Zip\7z.exe x "SDL2-devel-*-VC.zip"
+    cd "SDL2-*"
+    $sdl2="$(pwd)"
+    cd ..
+
+    # get sdl_ttf
+    Invoke-WebRequest -Uri "https://github.com/libsdl-org/SDL_ttf/archive/refs/heads/main.zip" -OutFile "SDL_ttf-main.zip"
+    C:\"Program Files"\7-Zip\7z.exe x "SDL_ttf-main.zip"
+
+    # now build it
+    $env:UseEnv="true"
+    $env:INCLUDE="$env:INCLUDE;$sdl2\include"
+    $env:LIB="$env:LIB;$sdl2\lib\$arch"
+
+    cd .\SDL_ttf-main\VisualC\
+    devenv .\SDL_ttf.sln /Upgrade
+    devenv /UseEnv .\SDL_ttf.sln  /Build "Release|Win32"
+    cd "..\..\"
+
+    mkdir "result"
+    mkdir "result\SDL2_ttf-main"
+    mkdir "result\SDL2_ttf-main\include"
+    mkdir "result\SDL2_ttf-main\lib"
+    mkdir "result\SDL2_ttf-main\lib\$arch"
+
+    cp ".\SDL_ttf-main\VisualC\Win32\Release\*.dll" "result\SDL2_ttf-main\lib\$arch"
+    cp ".\SDL_ttf-main\VisualC\Win32\Release\*.lib" "result\SDL2_ttf-main\lib\$arch"
+    cp ".\SDL_ttf-main\VisualC\Win32\Release\LICENSE*.txt" "result\SDL2_ttf-main\lib\$arch"
+    cp ".\SDL_ttf-main\*.h" "result\SDL2_ttf-main\include"
 
     Compress-Archive -LiteralPath "result\SDL2_ttf-main" -DestinationPath "SDL2_ttf-devel-main-VC.zip"
     cp "SDL2_ttf-devel-main-VC.zip" "$env:KIVY_BUILD_CACHE"

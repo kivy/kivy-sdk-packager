@@ -102,6 +102,8 @@ function Build-angle() {
 }
 
 function Prepare-ttf($arch) {
+    # currently there's a binary incompatibility between gst and harfbuzz compiled here for x86. So
+    # don't include that for x86
     if ($arch -eq "x64") {
         Prepare-ttf-x64 -arch $arch
     } else {

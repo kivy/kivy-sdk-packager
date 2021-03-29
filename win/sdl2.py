@@ -2,7 +2,7 @@ from __future__ import absolute_import, print_function
 from os import walk
 from .common import *
 
-__version__ = '0.4.4'
+__version__ = '0.4.2'
 
 sdl2_ver = '2.0.14'
 sdl2_mixer_ver = '2.0.4'
@@ -36,7 +36,8 @@ def get_sdl2(cache, build_path, arch, package, output, download_only=False):
     for local_url in paths:
         exec_binary(
             'Extracting {}'.format(local_url),
-            [zip7, 'x', '-y', local_url], cwd=build_path, shell=True, exclude=zip_q)
+            [zip7, 'x', '-y', local_url], cwd=build_path, shell=True,
+            exclude=zip_q)
 
         base_dir = local_url.replace('-VC.zip', '').replace('-devel', '')
 
@@ -80,7 +81,9 @@ def get_sdl2(cache, build_path, arch, package, output, download_only=False):
                         join(root, filename), join(d, dirpath, filename),
                         join(base, dirpath), is_dev))
 
-    make_package(join(build_path, 'project'), package, data, __version__, output, 'zlib')
+    make_package(
+        join(build_path, 'project'), package, data, __version__, output,
+        'zlib')
 
 
 if __name__ == '__main__':

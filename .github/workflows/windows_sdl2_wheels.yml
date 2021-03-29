@@ -19,17 +19,10 @@ env:
 
 jobs:
   prepare_cache:
-    runs-on: ${{ matrix.os }}
+    runs-on: windows-latest
     strategy:
       matrix:
-        os: [windows-2016, windows-latest]
-        include:
-          - name: msvc-2017-x86
-            os: windows-2016
-            arch: x86
-          - name: msvc-2019-x64
-            os: windows-latest
-            arch: x64
+        arch: ['x64', 'x86']
     env:
       PACKAGE_ARCH: ${{ matrix.arch }}
     steps:

@@ -102,6 +102,14 @@ function Build-angle() {
 }
 
 function Prepare-ttf($arch) {
+    if ($arch -eq "x64") {
+        Prepare-ttf-x64 -arch $arch
+    } else {
+        Prepare-ttf-x86 -arch $arch
+    }
+}
+
+function Prepare-ttf-x64($arch) {
     python -m pip install --upgrade meson ninja fonttools
 
     $root="harfbuzz-2.8.0"
@@ -168,6 +176,43 @@ function Prepare-ttf($arch) {
     cp "$harf_path\build\subprojects\*\*\*.dll" "result\SDL2_ttf-main\lib\$arch"
     cp "$harf_path\build\subprojects\*\*\*.dll" "result\SDL2_ttf-main\lib\$arch"
     cp "$harf_path\src\*.h" "result\SDL2_ttf-main\include\harfbuzz"
+
+    Compress-Archive -LiteralPath "result\SDL2_ttf-main" -DestinationPath "SDL2_ttf-devel-main-VC.zip"
+    cp "SDL2_ttf-devel-main-VC.zip" "$env:KIVY_BUILD_CACHE"
+}
+
+function Prepare-ttf-x86($arch) {
+    # get sdl2
+    cp "$env:KIVY_BUILD_CACHE\SDL2-devel-*-VC.zip" .
+    C:\"Program Files"\7-Zip\7z.exe x "SDL2-devel-*-VC.zip"
+    cd "SDL2-*"
+    $sdl2="$(pwd)"
+    cd ..
+
+    # get sdl_ttf
+    Invoke-WebRequest -Uri "https://github.com/libsdl-org/SDL_ttf/archive/refs/heads/main.zip" -OutFile "SDL_ttf-main.zip"
+    C:\"Program Files"\7-Zip\7z.exe x "SDL_ttf-main.zip"
+
+    # now build it
+    $env:UseEnv="true"
+    $env:INCLUDE="$env:INCLUDE;$sdl2\include"
+    $env:LIB="$env:LIB;$sdl2\lib\$arch"
+
+    cd .\SDL_ttf-main\VisualC\
+    devenv .\SDL_ttf.sln /Upgrade
+    devenv /UseEnv .\SDL_ttf.sln  /Build "Release|Win32"
+    cd "..\..\"
+
+    mkdir "result"
+    mkdir "result\SDL2_ttf-main"
+    mkdir "result\SDL2_ttf-main\include"
+    mkdir "result\SDL2_ttf-main\lib"
+    mkdir "result\SDL2_ttf-main\lib\$arch"
+
+    cp ".\SDL_ttf-main\VisualC\Win32\Release\*.dll" "result\SDL2_ttf-main\lib\$arch"
+    cp ".\SDL_ttf-main\VisualC\Win32\Release\*.lib" "result\SDL2_ttf-main\lib\$arch"
+    cp ".\SDL_ttf-main\VisualC\Win32\Release\LICENSE*.txt" "result\SDL2_ttf-main\lib\$arch"
+    cp ".\SDL_ttf-main\*.h" "result\SDL2_ttf-main\include"
 
     Compress-Archive -LiteralPath "result\SDL2_ttf-main" -DestinationPath "SDL2_ttf-devel-main-VC.zip"
     cp "SDL2_ttf-devel-main-VC.zip" "$env:KIVY_BUILD_CACHE"

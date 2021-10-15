@@ -42,12 +42,13 @@ while [[ "$#" -gt 0 ]]; do
     case $1 in
         -n|--name)
           echo "Setting Bundle display name and Bundle name to $2"
-          plutil -replace "Bundle display name" -string "$2" "$PLIST_PATH"
-          plutil -replace "Bundle name" -string "$2" "$PLIST_PATH"
+          plutil -replace "CFBundleDisplayName" -string "$2" "$PLIST_PATH"
+          plutil -replace "CFBundleName" -string "$2" "$PLIST_PATH"
           ;;
         -v|--version)
           echo "Setting Bundle version to $2"
-          plutil -replace "Bundle version" -string "$2" "$PLIST_PATH"
+          plutil -replace "CFBundleVersion" -string "$2" "$PLIST_PATH"
+          plutil -replace "CFBundleShortVersionString" -string "$2" "$PLIST_PATH"          
           ;;
         -a|--author)
           echo "Setting NSHumanReadableCopyright to $2"
@@ -55,7 +56,7 @@ while [[ "$#" -gt 0 ]]; do
           ;;
         -o|--org)
           echo "Setting Bundle identifier to $2"
-          plutil -replace "Bundle identifier" -string "$2" "$PLIST_PATH"
+          plutil -replace "CFBundleIdentifier" -string "$2" "$PLIST_PATH"
           ;;
         -i|--icon)
           echo "Changing icon to $2"

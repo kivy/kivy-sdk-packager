@@ -2,9 +2,9 @@ from __future__ import absolute_import, print_function
 from os import walk
 from .common import *
 
-__version__ = '0.4.2'
+__version__ = '0.4.3'
 
-sdl2_ver = '2.0.14'
+sdl2_ver = '2.0.16'
 sdl2_mixer_ver = '2.0.4'
 sdl2_ttf_ver = '2.0.15'
 sdl2_image_ver = '2.0.5'

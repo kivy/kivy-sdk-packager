@@ -21,16 +21,17 @@ on the oldest machine you wish to support.
 
         ./create-osx-bundle.sh -n MyApp -k ...
 
-    See in ``create-osx-bundle.sh`` for all the configuration options. This will create
-    a ``MyApp.app`` directory, where ``MyApp`` is the app's name.
+    See in ``create-osx-bundle.sh`` for all the configuration options.
+    This will build from scratch all the requirements (openssl, SDL2, SDL2_image, SDL2_mixer, SDL2_ttf, python3).
+    A ``build`` directory is created to contain the``MyApp.app`` directory, where ``MyApp`` is the app's name.
   * To use the existing Kivy app bundle:
     * Download the Kivy app from the Kivy download page, the GitHub releases, or the
       nightly release with e.g.::
 
-          curl -O -L https://xxx/Kivy-2.0.0-python3.8.dmg
+          curl -O -L https://xxx/Kivy-xxx.dmg
     * Mount it in the current directory and fix the name to your App's name::
 
-          hdiutil attach Kivy-2.0.0-python3.8.dmg -mountroot .
+          hdiutil attach Kivy-xxx.dmg -mountroot .
           cp -R Kivy/Kivy.app MyApp.app
 
       This should create the ``MyApp.app`` directory.
@@ -49,9 +50,9 @@ on the oldest machine you wish to support.
 
     On the default mac shell you **must** be in the bin directory containing ``activate`` to be
     able to ``activate`` the virtualenv. ``kivy_activate`` is only necessary if you'll run
-    Kivy in the environment - it sets up the Kivy home, gstreamer and other Kivy environment
+    Kivy in the environment - it sets up the Kivy home, and other Kivy environment
     variables.
-  * Install any frameworks and relocate them:
+  * Install any frameworks and relocate them (Consider building the needed frameworks from sources, so you can control the `MACOSX_DEPLOYMENT_TARGET` and supported archs):
     * Mount any frameworks e.g. ``MyFramework`` on your system and copy it over to the app::
 
           hdiutil attach MyFramework.dmg
@@ -77,7 +78,7 @@ on the oldest machine you wish to support.
 * Reduce app size (optional):
 
   You can reduce the app size by removing unnecessary files. We provide a script to remove files commonly
-  not needed and optionally gstreamer (see its options). Run it with::
+  not needed. Run it with::
 
       ./cleanup-app.sh MyApp.app
 
@@ -142,8 +143,8 @@ A complete example using ``Kivy.app`` with a entry_point pointing to your app as
     python -m pip install --upgrade pyobjus plyer ...
     python -m pip install ../../myapp/
 
-    # remove gstreamer and reduce app size
-    ./cleanup-app.sh MyApp.app -g 1
+    # Reduce app size
+    ./cleanup-app.sh MyApp.app
 
     # the link needs to be created relative to the yourapp path, so go to that directory
     pushd MyApp.app/Contents/Resources/
@@ -168,29 +169,11 @@ included::
     export CXX=clang
     export FFLAGS='-ff2c'
     export USE_SDL2=1
-    export USE_GSTREAMER=0
 
     # get the dependencies
-    export SDL2=2.0.12
-    export SDL2_IMAGE=2.0.5
-    export SDL2_MIXER=2.0.4
-    export SDL2_TTF=2.0.15
     export PLATYPUS=5.3
 
-    curl -O -L "https://www.libsdl.org/release/SDL2-$SDL2.dmg"
-    curl -O -L "https://www.libsdl.org/projects/SDL_image/release/SDL2_image-$SDL2_IMAGE.dmg"
-    curl -O -L "https://www.libsdl.org/projects/SDL_mixer/release/SDL2_mixer-$SDL2_MIXER.dmg"
-    curl -O -L "https://www.libsdl.org/projects/SDL_ttf/release/SDL2_ttf-$SDL2_TTF.dmg"
     curl -O -L "http://www.sveinbjorn.org/files/software/platypus/platypus$PLATYPUS.zip"
-
-    hdiutil attach SDL2-$SDL2.dmg
-    sudo cp -a /Volumes/SDL2/SDL2.framework /Library/Frameworks/
-    hdiutil attach SDL2_image-$SDL2_IMAGE.dmg
-    sudo cp -a /Volumes/SDL2_image/SDL2_image.framework /Library/Frameworks/
-    hdiutil attach SDL2_ttf-$SDL2_TTF.dmg
-    sudo cp -a /Volumes/SDL2_ttf/SDL2_ttf.framework /Library/Frameworks/
-    hdiutil attach SDL2_mixer-$SDL2_MIXER.dmg
-    sudo cp -a /Volumes/SDL2_mixer/SDL2_mixer.framework /Library/Frameworks/
 
     unzip platypus$PLATYPUS.zip
     gunzip Platypus.app/Contents/Resources/platypus_clt.gz
@@ -210,23 +193,23 @@ included::
     ./create-osx-bundle.sh -k master -n MyApp -v "0.1.1" -a "Name" -o \
         "org.myorg.myapp" -i "../../myapp/doc/source/images/myapp_icon.png" -g 0
 
-    pushd MyApp.app/Contents/Resources/venv/bin
+    pushd build/MyApp.app/Contents/Resources/venv/bin
     source activate
     popd
 
     python -m pip install --upgrade pyobjus plyer ...
-    python -m pip install ../../myapp/
+    python -m pip install ../../../myapp/
 
     # reduce app size
-    ./cleanup-app.sh MyApp.app -g 1
+    ./cleanup-app.sh MyApp.app
 
     # the link needs to be created relative to the yourapp path, so go to that directory
-    pushd MyApp.app/Contents/Resources/
+    pushd build/MyApp.app/Contents/Resources/
     ln -s ./venv/bin/myapp yourapp
     popd
 
-    ./relocate.sh MyApp.app
-    ./create-osx-dmg.sh MyApp.app MyApp
+    ./relocate.sh build/MyApp.app
+    ./create-osx-dmg.sh build/MyApp.app MyApp
 
 
 Dev note:: Buildozer uses this repository for its OS X packaging process.

@@ -7,7 +7,7 @@ Usage:
  --appname=<appname> --source-app=<source_app> --deps=<dep_list>\
  --gardendeps=<sep_list> --bundleid=<bundle_id> --displayname=<displayname>\
  --bundlename=<bundle_name> --bundleversion=<bundleversion>\
- --strip=<true_false> --with-gstreamer=<yes_no> --whitelist=<path/to/whitelist>\
+ --strip=<true_false> --whitelist=<path/to/whitelist>\
  --blacklist=<path/to/blacklist>]
     package-app -h | --help
     package-app --version
@@ -34,7 +34,6 @@ Options:
                                     lot of unneeded files. [default: True].
     --deps=<deplist>                Dependencies list.
     --gardendeps=<deplist>          Garden Dependencies list.
-    --with-gstreamer=<yes|no>       Include GStreamer framework. [default: yes]
     --whitelist=<path/to/whitelist> file to use as include list when copying app
     --blacklist=<path/to/blacklist> file to use as exclude list when copying app
 '''

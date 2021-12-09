@@ -67,8 +67,7 @@ if [ -d "$KIVY_PATH" ]; then
     KIVY_PATH="$(pwd)"
     popd
 else
-    # KIVY_PATH="https://github.com/kivy/kivy/archive/$KIVY_PATH.zip"
-    KIVY_PATH="git+https://github.com/misl6/kivy.git@fix/osx-frameworks-setup"
+    KIVY_PATH="https://github.com/kivy/kivy/archive/$KIVY_PATH.zip"
 fi
 
 echo "Using Kivy $KIVY_PATH"

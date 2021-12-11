@@ -110,7 +110,7 @@ echo '
            delay 2
      end tell
    end tell
-' | sudo osascript
+' | osascript
 
 echo "Osascript Finished"
 sync

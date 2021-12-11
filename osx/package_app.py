@@ -41,22 +41,10 @@ Options:
 __version__ = '0.1'
 __author__ = 'the kivy team'
 
-from docopt import docopt
-try:
-    import sh
-except ImportError:
-    print('Please install sh `pip install sh --user`')
-from os.path import exists, abspath, dirname, join
-from subprocess import check_call
-from os import walk, unlink
-from compileall import compile_dir
 from os.path import exists
 from subprocess import check_call
-
-try:
-    input = raw_input
-except NameError:
-    pass
+from docopt import docopt
+import sh
 
 
 def error(message):
@@ -87,6 +75,7 @@ def insert_app(path_to_app, appname, blacklist=None, whitelist=None):
         params.append('--exclude-from={}'.format(blacklist))
     sh.rsync(*params)
 
+
 def cleanup(appname, strip, gstreamer=True):
     if not strip:
         return
@@ -97,6 +86,7 @@ def cleanup(appname, strip, gstreamer=True):
         sh.rm('-rf', '{}/Contents/Frameworks/GStreamer.framework'.format(appname))
 
     print("Stripping complete")
+
 
 def fill_meta(appname, arguments):
     print('Editing info.plist')
@@ -110,6 +100,7 @@ def fill_meta(appname, arguments):
     rootObject['Bundle name'] = arguments.get('--bundlename')
     rootObject['Bundle version'] = arguments.get('--bundleversion')
     plistlib.writePlist(rootObject, info_plist)
+
 
 def setup_icon(path_to_app, path_to_icon):
     # check icon file
@@ -131,6 +122,7 @@ def setup_icon(path_to_app, path_to_icon):
     sh.command('sips', '-s', 'format', 'icns', path_to_icon, '--out',
         path_to_app + "/Contents/Resources/appIcon.icns")
     print('Icon set to {}'.format(path_to_icon))
+
 
 def compile_app(appname):
     #check python Versions
@@ -169,6 +161,7 @@ def compile_app(appname):
             ['/usr/bin/find -E {} -regex "(.*)\.c" -print0 | /usr/bin/xargs -0 /bin/rm'.format(appname)],
             shell=True)
     sh.command('mv', pypath + '/myapp', pypath + '/yourapp')
+
 
 def install_deps(appname, deps):
     print('managing dependencies {}'.format(deps))

@@ -1,0 +1,70 @@
+name: macOS Test
+
+on: [push, pull_request]
+
+jobs:
+  unit_test:
+    defaults:
+      run:
+        shell: ${{ matrix.run_wrapper || 'bash --noprofile --norc -eo pipefail {0}' }}
+    runs-on: ${{ matrix.runs_on || 'macos-latest' }}
+    strategy:
+      matrix:
+        include:
+          - runs_on: macos-11
+            python: 3.9
+          - runs_on: apple-silicon-m1
+            run_wrapper: arch -arm64 bash --noprofile --norc -eo pipefail {0}
+            python: 3.9.7
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.x
+        # Needs to be skipped on our self-hosted runners tagged as 'apple-silicon-m1'
+        if: ${{ matrix.runs_on  != 'apple-silicon-m1' }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install Platypus
+        run: |
+          source ci/osx_ci.sh
+          arm64_set_path_and_python_version ${{ matrix.python }}
+          install_platypus
+      - name: Create macOS App Bundle with default options
+        run: |
+          source ci/osx_ci.sh
+          arm64_set_path_and_python_version ${{ matrix.python }}
+          cd osx
+          ./create-osx-bundle.sh
+      - name: Test macOS App Bundle venv
+        run: |
+          source ci/osx_ci.sh
+          arm64_set_path_and_python_version ${{ matrix.python }}
+          pushd ./osx/build/Kivy.app/Contents/Resources/venv/bin
+          source activate
+          popd
+          pip freeze
+          deactivate
+      - name: Test Fix bundle metadata
+        run: |
+          source ci/osx_ci.sh
+          arm64_set_path_and_python_version ${{ matrix.python }}
+          cd osx
+          ./fix-bundle-metadata Kivy.app -v "1.2.3"
+      - name: Test Cleanup
+        run: |
+          source ci/osx_ci.sh
+          arm64_set_path_and_python_version ${{ matrix.python }}
+          cd osx
+          ./cleanup-app.sh build/Kivy.app
+      - name: Test Relocation
+        run: |
+          source ci/osx_ci.sh
+          arm64_set_path_and_python_version ${{ matrix.python }}
+          cd osx
+          ./relocate.sh build/Kivy.app
+      - name: Test dmg creation
+        run: |
+          source ci/osx_ci.sh
+          arm64_set_path_and_python_version ${{ matrix.python }}
+          cd osx
+          ./create-osx-dmg.sh build/Kivy.app Kivy

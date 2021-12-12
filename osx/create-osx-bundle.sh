@@ -127,6 +127,7 @@ curl -L -O "https://github.com/libsdl-org/SDL_image/archive/${SDL_IMAGE_VERSION}
 curl -L -O "https://github.com/libsdl-org/SDL_ttf/archive/${SDL_TTF_VERSION}.tar.gz"
 
 echo "-- Set MACOSX_DEPLOYMENT_TARGET=10.9"
+export SDKROOT=$(xcrun -sdk macosx --show-sdk-path)
 export MACOSX_DEPLOYMENT_TARGET=10.9
 
 echo "-- Build SDL2 (Universal)"

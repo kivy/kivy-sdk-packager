@@ -11,7 +11,7 @@ jobs:
     strategy:
       matrix:
         include:
-          - runs_on: macos-11
+          - runs_on: macos-latest
             python: 3.9
           - runs_on: apple-silicon-m1
             run_wrapper: arch -arm64 bash --noprofile --norc -eo pipefail {0}

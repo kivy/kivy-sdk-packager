@@ -63,9 +63,6 @@ jobs:
           arm64_set_path_and_python_version ${{ matrix.python }}
           cd osx
           ./relocate.sh build/Kivy.app
-          cd ..
-          mkdir osx_artifacts
-          cp -r osx/build/Kivy.app osx_artifacts/
       - name: Test dmg creation and store it in osx_artifacts
         # Needs to be skipped on our self-hosted runners tagged as 'apple-silicon-m1'
         if: ${{ matrix.runs_on  != 'apple-silicon-m1' }}
@@ -75,6 +72,7 @@ jobs:
           cd osx
           ./create-osx-dmg.sh build/Kivy.app Kivy
           cd ..
+          mkdir osx_artifacts
           cp osx/Kivy.dmg osx_artifacts/
       - name: Upload dmg and app as artifact
         uses: actions/upload-artifact@v2

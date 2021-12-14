@@ -1,6 +1,14 @@
 name: macOS Test
 
-on: [push, pull_request]
+on:
+  push:
+    paths:
+      - 'osx/**'
+      - '.github/workflows/test_macos.yaml'
+  pull_request:
+    paths:
+      - 'osx/**'
+      - '.github/workflows/test_macos.yaml'
 
 jobs:
   unit_test:

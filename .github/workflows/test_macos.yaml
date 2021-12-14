@@ -72,8 +72,6 @@ jobs:
           cd osx
           ./relocate.sh build/Kivy.app
       - name: Test dmg creation and store it in osx_artifacts
-        # Needs to be skipped on our self-hosted runners tagged as 'apple-silicon-m1'
-        if: ${{ matrix.runs_on  != 'apple-silicon-m1' }}
         run: |
           source ci/osx_ci.sh
           arm64_set_path_and_python_version ${{ matrix.python }}

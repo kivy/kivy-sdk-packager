@@ -24,6 +24,7 @@ jobs:
           - runs_on: apple-silicon-m1
             run_wrapper: arch -arm64 bash --noprofile --norc -eo pipefail {0}
             python: 3.9.7
+    name: macOS Test ( ${{ matrix.runs_on }} )
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python 3.x

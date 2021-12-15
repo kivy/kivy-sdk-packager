@@ -80,8 +80,8 @@ jobs:
           ./create-osx-dmg.sh build/Kivy.app Kivy
           cd ..
           mkdir osx_artifacts
-          cp osx/Kivy.dmg osx_artifacts/
-      - name: Upload dmg and app as artifact
+          mv osx/Kivy.dmg osx_artifacts/${{ matrix.runs_on }}-${{ matrix.python }}-Kivy.dmg
+      - name: Upload dmg as artifact
         uses: actions/upload-artifact@v2
         with:
           name: KivySDKPackager

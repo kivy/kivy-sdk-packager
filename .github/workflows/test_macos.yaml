@@ -51,12 +51,6 @@ jobs:
           cd osx
           ./fix-bundle-metadata.sh build/Kivy.app -v "1.2.3"
           ./fix-bundle-metadata.sh build/Kivy.app -v "master"
-      - name: Test Cleanup
-        run: |
-          source ci/osx_ci.sh
-          arm64_set_path_and_python_version ${{ matrix.python }}
-          cd osx
-          ./cleanup-app.sh build/Kivy.app
       - name: Test Relocation
         run: |
           source ci/osx_ci.sh

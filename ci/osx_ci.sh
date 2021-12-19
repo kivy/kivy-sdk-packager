@@ -43,3 +43,13 @@ install_platypus() {
   sudo cp -a Platypus.app/Contents/Resources/MainMenu.nib /usr/local/share/platypus/MainMenu.nib
   sudo chmod -R 755 /usr/local/share/platypus
 }
+
+activate_app_venv_and_test_kivy(){
+  pushd /Applications/Kivy.app/Contents/Resources/venv/bin
+  source activate
+  popd
+  python -c 'import kivy'
+  test_path=$(KIVY_NO_CONSOLELOG=1 python -c 'import kivy.tests as tests; print(tests.__path__[0])' --config "kivy:log_level:error")
+  cd "$test_path"
+  KIVY_GL_BACKEND='mock' KIVY_TEST_AUDIO=0 KIVY_NO_ARGS=1 python -m pytest --maxfail=10 --timeout=300 .
+}

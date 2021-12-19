@@ -7,6 +7,7 @@ USAGE="Creates a Kivy bundle that can be used to build your app into a dmg. See 
 Usage: create-osx-bundle.sh [options]
 
     -k --kivy     <Kivy version or path, default:master>  The local path to Kivy source or a git tag/branch/commit.
+    -e --extras   <Kivy extras selection, default:base>   The extras selection (base, full, dev ...).
     -p --python   <Python version, default:3.9.9>         The Python version to use.
     -n --name     <App name, default:Kivy>                The name of the app.
     -v --version  <App version, default:master>           The version of the app.
@@ -21,6 +22,7 @@ Requirements::
 "
 
 KIVY_PATH="master"
+EXTRAS="base"
 PYVER="3.9.9"
 OPENSSL_VERSION="1.1.1l"
 SDL_VERSION="release-2.0.18"
@@ -43,6 +45,7 @@ while [[ "$#" -gt 0 ]]; do
 
     case $1 in
     -k | --kivy) KIVY_PATH="$2" ;;
+    -e | --extras) EXTRAS="$2" ;;
     -p | --python) PYVER="$2" ;;
     -n | --name) APP_NAME="$2" ;;
     -v | --version) APP_VERSION="$2" ;;
@@ -227,9 +230,9 @@ echo "-- Build kivy from scratch"
 export KIVY_SDL2_FRAMEWORKS_SEARCH_PATH="${SCRIPT_PATH}/build/${APP_NAME}.app/Contents/Frameworks"
 python3 -m pip install Cython
 if [ -d "$KIVY_PATH" ]; then
-    python3 -m pip install "${KIVY_PATH}[base]"
+    python3 -m pip install "${KIVY_PATH}[${EXTRAS}]"
 else
-    python3 -m pip install "kivy[base] @ $KIVY_PATH"
+    python3 -m pip install "kivy[${EXTRAS}] @ $KIVY_PATH"
 fi
 
 echo "-- Relocate SDL2 frameworks"

@@ -11,7 +11,7 @@ on:
       - '.github/workflows/test_macos.yaml'
 
 jobs:
-  unit_test:
+  build_dmg:
     defaults:
       run:
         shell: ${{ matrix.run_wrapper || 'bash --noprofile --norc -eo pipefail {0}' }}
@@ -24,7 +24,7 @@ jobs:
           - runs_on: apple-silicon-m1
             run_wrapper: arch -arm64 bash --noprofile --norc -eo pipefail {0}
             python: 3.9.7
-    name: macOS Test ( ${{ matrix.runs_on }} )
+    name: macOS build dmg ( ${{ matrix.runs_on }} )
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python 3.x
@@ -38,21 +38,12 @@ jobs:
           source ci/osx_ci.sh
           arm64_set_path_and_python_version ${{ matrix.python }}
           install_platypus
-      - name: Create macOS App Bundle with default options
+      - name: Create macOS App Bundle with extras [dev]
         run: |
           source ci/osx_ci.sh
           arm64_set_path_and_python_version ${{ matrix.python }}
           cd osx
-          ./create-osx-bundle.sh
-      - name: Test macOS App Bundle venv
-        run: |
-          source ci/osx_ci.sh
-          arm64_set_path_and_python_version ${{ matrix.python }}
-          pushd ./osx/build/Kivy.app/Contents/Resources/venv/bin
-          source activate
-          popd
-          pip freeze
-          deactivate
+          ./create-osx-bundle.sh -e "dev"
       - name: Test Fix bundle metadata
         run: |
           source ci/osx_ci.sh
@@ -80,9 +71,42 @@ jobs:
           ./create-osx-dmg.sh build/Kivy.app Kivy
           cd ..
           mkdir osx_artifacts
-          mv osx/Kivy.dmg osx_artifacts/${{ matrix.runs_on }}-${{ matrix.python }}-Kivy.dmg
+          mv osx/Kivy.dmg osx_artifacts/${{ matrix.runs_on }}-Kivy.dmg
       - name: Upload dmg as artifact
         uses: actions/upload-artifact@v2
         with:
           name: KivySDKPackager
           path: osx_artifacts
+
+  test_dmg:
+    needs: build_dmg
+    defaults:
+      run:
+        shell: ${{ matrix.run_wrapper || 'bash --noprofile --norc -eo pipefail {0}' }}
+    runs-on: ${{ matrix.runs_on || 'macos-latest' }}
+    strategy:
+      matrix:
+        include:
+          - runs_on: macos-latest
+          - runs_on: apple-silicon-m1
+            run_wrapper: arch -arm64 bash --noprofile --norc -eo pipefail {0}
+    name: macOS test dmg ( ${{ matrix.runs_on }} )
+    steps:
+      - uses: actions/checkout@v2
+      - name: Download dmg from artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: KivySDKPackager
+          path: osx_artifacts
+      - name: Mount build from macos-latest runner on Apple Silicon runner
+        if: ${{ matrix.runs_on  == 'apple-silicon-m1' }}
+        run: hdiutil attach osx_artifacts/macos-latest-Kivy.dmg -mountroot .
+      - name: Mount build from Apple Silicon runner on macos-latest runner
+        if: ${{ matrix.runs_on  != 'apple-silicon-m1' }}
+        run: hdiutil attach osx_artifacts/apple-silicon-m1-Kivy.dmg -mountroot .
+      - name: Copy Kivy.app to Applications
+        run: cp -R Kivy/Kivy.app /Applications/Kivy.app
+      - name: Activate Kivy.app venv and test kivy
+        run: |
+          source ci/osx_ci.sh
+          activate_app_venv_and_test_kivy

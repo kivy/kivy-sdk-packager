@@ -51,5 +51,10 @@ activate_app_venv_and_test_kivy(){
   python -c 'import kivy'
   test_path=$(KIVY_NO_CONSOLELOG=1 python -c 'import kivy.tests as tests; print(tests.__path__[0])' --config "kivy:log_level:error")
   cd "$test_path"
-  KIVY_GL_BACKEND='mock' KIVY_TEST_AUDIO=0 KIVY_NO_ARGS=1 python -m pytest --maxfail=10 --timeout=300 .
+  cat >.coveragerc <<'EOF'
+[run]
+  plugins = kivy.tools.coverage
+
+EOF
+  KIVY_GL_BACKEND='mock' KIVY_TEST_AUDIO=0 KIVY_NO_ARGS=1 python3 -m pytest --maxfail=10 --timeout=300 .
 }

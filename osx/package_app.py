@@ -5,9 +5,9 @@
 Usage:
     package-app <path_to_app> [--icon=<icon_path> --author=<copyright>\
  --appname=<appname> --source-app=<source_app> --deps=<dep_list>\
- --gardendeps=<sep_list> --bundleid=<bundle_id> --displayname=<displayname>\
+ --bundleid=<bundle_id> --displayname=<displayname>\
  --bundlename=<bundle_name> --bundleversion=<bundleversion>\
- --strip=<true_false> --with-gstreamer=<yes_no> --whitelist=<path/to/whitelist>\
+ --strip=<true_false> --whitelist=<path/to/whitelist>\
  --blacklist=<path/to/blacklist>]
     package-app -h | --help
     package-app --version
@@ -16,7 +16,7 @@ Options:
     -h  --help                      Show this screen.
     --icon=<icon_path>              Path to source icon
     --author=<copyright>            Copyright attribution
-                                    [default: © 2015 Kivy team].
+                                    [default: © 2021 Kivy team].
     --appname=<app_name>            Name of the resulting .app file.
     --source-app=<source_app>       Path to the Kivy.app to use as base
                                     [default: Kivy.app].
@@ -33,8 +33,6 @@ Options:
     --strip=<True_False>            Greatly reduce app size, by removing a
                                     lot of unneeded files. [default: True].
     --deps=<deplist>                Dependencies list.
-    --gardendeps=<deplist>          Garden Dependencies list.
-    --with-gstreamer=<yes|no>       Include GStreamer framework. [default: yes]
     --whitelist=<path/to/whitelist> file to use as include list when copying app
     --blacklist=<path/to/blacklist> file to use as exclude list when copying app
 '''
@@ -42,22 +40,11 @@ Options:
 __version__ = '0.1'
 __author__ = 'the kivy team'
 
-from docopt import docopt
-try:
-    import sh
-except ImportError:
-    print('Please install sh `pip install sh --user`')
-from os.path import exists, abspath, dirname, join
-from subprocess import check_call
-from os import walk, unlink
-from compileall import compile_dir
 from os.path import exists
-from subprocess import check_call
-
-try:
-    input = raw_input
-except NameError:
-    pass
+import subprocess
+import plistlib
+from docopt import docopt
+import sh
 
 
 def error(message):
@@ -81,121 +68,70 @@ def bootstrap(source_app, appname):
 
 def insert_app(path_to_app, appname, blacklist=None, whitelist=None):
     # insert appname into our source_app
-    params = ['-r', path_to_app + '/', appname + '/Contents/Resources/myapp']
+    params = ['-r', path_to_app + '/', appname + '/Contents/Resources/yourapp']
     if whitelist:
         params.append('--include-from={}'.format(whitelist))
     if blacklist:
         params.append('--exclude-from={}'.format(blacklist))
     sh.rsync(*params)
 
-def cleanup(appname, strip, gstreamer=True):
+
+def relocate(appname):
+    print("relocating app")
+    subprocess.call(["sh", "-x", "relocate.sh" , f"./{appname}"])
+
+def cleanup(appname, strip):
     if not strip:
         return
     print("stripping app")
-    from subprocess import call
-    call(["sh", "-x", "cleanup_app.sh" , "./"+appname])
-    if gstreamer == 'no':
-        sh.rm('-rf', '{}/Contents/Frameworks/GStreamer.framework'.format(appname))
-
+    subprocess.call(["sh", "-x", "cleanup-app.sh" , f"./{appname}"])
     print("Stripping complete")
+
 
 def fill_meta(appname, arguments):
     print('Editing info.plist')
-    bundleversion = arguments.get('--bundleversion')
-    import plistlib
     info_plist = appname+'/Contents/info.plist'
-    rootObject = plistlib.readPlist(info_plist)
-    rootObject['NSHumanReadableCopyright'] = arguments.get('--author').decode('utf-8')
+    with open(info_plist, 'rb') as f:
+        rootObject = plistlib.load(f)
+    rootObject['NSHumanReadableCopyright'] = arguments.get('--author')
     rootObject['Bundle display name'] = arguments.get('--displayname')
     rootObject['Bundle identifier'] = arguments.get('--bundleid')
     rootObject['Bundle name'] = arguments.get('--bundlename')
     rootObject['Bundle version'] = arguments.get('--bundleversion')
-    plistlib.writePlist(rootObject, info_plist)
+    with open(info_plist, 'wb') as f:
+        plistlib.dump(rootObject, f)
+
 
 def setup_icon(path_to_app, path_to_icon):
     # check icon file
-    from subprocess import check_output
     if path_to_icon.startswith('http'):
         print('Downloading ' + path_to_icon)
-        check_output(['curl', '-O', '-L', path_to_icon])
+        subprocess.check_output(['curl', '-O', '-L', path_to_icon])
         path_to_icon = path_to_icon.split('/')[-1]
     if not exists(path_to_icon):
         return
-    height = check_output(['sips', '-g', 'pixelHeight', path_to_icon])[-5:]
-    width = check_output(['sips', '-g', 'pixelHeight', path_to_icon])[-5:]
+    height = subprocess.check_output(['sips', '-g', 'pixelHeight', path_to_icon])[-5:]
+    width = subprocess.check_output(['sips', '-g', 'pixelHeight', path_to_icon])[-5:]
     if height != width:
         print('The height and width of the image must be same')
         import sys
         sys.exit()
 
     # icon file is Finder
-    sh.command('sips', '-s', 'format', 'icns', path_to_icon, '--out',
+    sh.command('sips', '-z', '256', '256', path_to_icon, '--out', 'resicon.png')
+    sh.command('sips', '-s', 'format', 'icns', 'resicon.png', '--out',
         path_to_app + "/Contents/Resources/appIcon.icns")
     print('Icon set to {}'.format(path_to_icon))
 
-def compile_app(appname):
-    #check python Versions
-    print('Compiling app...')
-    py3 = appname + '/Contents/Frameworks/python/3.5.0/bin/python'
-    pypath = appname + '/Contents/Resources'
-    if exists(py3):
-        print('python3 detected...')
-        check_call(
-            [pypath + '/script -OO -m compileall -b ' + pypath+'/myapp'],
-            shell=True)
-        print("Remove all __pycache__")
-        check_call(
-            ['/usr/bin/find -E {} -regex "(.*)\.py" -print0 |/usr/bin/grep -v __init__| /usr/bin/xargs -0 /bin/rm'.format(pypath+'/yourapp')],
-             shell=True)
-        check_call(
-            ['/usr/bin/find -E {}/Contents/ -name "__pycache__" -print0 | /usr/bin/xargs -0 /bin/rm -rf'.format(appname)],
-            shell=True)
-    else:
-        print('using system python...')
-        check_call(
-            [pypath + '/script -OO -m compileall ' + pypath+'/myapp'],
-            shell=True)
-        print("-- Remove all py/pyc/pyo")
-        check_call(
-            ['/usr/bin/find -E {} -regex "(.*)\.pyc" -print0 | /usr/bin/xargs -0 /bin/rm'.format(appname)],
-            shell=True)
-        check_call(
-            ['/usr/bin/find -E {} -regex "(.*)\.pyo" -print0 | /usr/bin/xargs -0 /bin/rm'.format(appname)],
-            shell=True)
-        check_call(
-            ['/usr/bin/find -E {} -regex "(.*)\.py" -print0 | /usr/bin/grep -v __init__ | /usr/bin/xargs -0 /bin/rm'.format(appname)],
-            shell=True)
-        print("-- Remove all .c")
-        check_call(
-            ['/usr/bin/find -E {} -regex "(.*)\.c" -print0 | /usr/bin/xargs -0 /bin/rm'.format(appname)],
-            shell=True)
-    sh.command('mv', pypath + '/myapp', pypath + '/yourapp')
 
 def install_deps(appname, deps):
     print('managing dependencies {}'.format(deps))
     for dep in deps.split(','):
         print('Installing {} into {}'.format(dep, appname))
-        check_call(
+        subprocess.check_call(
             (appname + '/Contents/Resources/script -m' +\
              ' pip install --upgrade --force-reinstall ' + dep),
             shell=True)
-
-
-def install_garden_deps(appname, deps):
-    print('managing garden dependencies {}'.format(deps))
-    pypath = appname + '/Contents/Resources'
-    check_call(
-        ['curl','-O', '-L',
-        'https://raw.githubusercontent.com/kivy-garden/garden/master/bin/garden'],
-        cwd=pypath+'/venv/bin')
-    check_call(pypath+'/python -m pip install --upgrade requests', shell=True)
-    for dep in deps.split(','):
-        print('Installing {} into {}'.format(dep, appname))
-        check_call(
-            ('../script '+\
-             '../venv/bin/garden' +\
-             ' install --upgrade --app ' + dep),
-            shell=True, cwd=pypath+'/myapp')
 
 
 def main(arguments):
@@ -208,9 +144,7 @@ def main(arguments):
         appname = appname + '.app'
     icon = arguments.get('--icon')
     strip = arguments.get('--strip', True)
-    gstreamer = arguments.get('--with-gstreamer', True)
     deps = arguments.get('--deps', [])
-    gardendeps = arguments.get('--gardendeps', [])
     blacklist = arguments.get('--blacklist')
     whitelist = arguments.get('--whitelist')
 
@@ -218,13 +152,11 @@ def main(arguments):
     insert_app(path_to_app, appname, blacklist=blacklist, whitelist=whitelist)
     if deps:
         install_deps(appname, deps)
-    if gardendeps:
-        install_garden_deps(appname, gardendeps)
-    compile_app(appname)
     if icon:
         setup_icon(appname, icon)
     fill_meta(appname, arguments)
-    cleanup(appname, strip, gstreamer=gstreamer)
+    relocate(appname)
+    cleanup(appname, strip)
     print("All done!")
 
 

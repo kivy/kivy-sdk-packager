@@ -5,18 +5,12 @@ set -e  # exit on error
 USAGE="Fixes the paths of scripts and removes compiled pyc/pyo files. This is required so that
 the bundle created with create-osx-bundle.sh could be moved to a different path or made into a
 dmg.
-
 The should be run every time after new packages are installed into the venv before
 a dmg is created or before the bundle is moved to a different path.
-
 Usage: relocate.sh <Path to bundle.app>
-
 Requirements::
-
     A previously created bundle using create-osx-bundle.sh
-
 For Example::
-
     ./relocate.sh MyApp.app
 "
 
@@ -30,7 +24,7 @@ APP_PATH="$(pwd)"
 popd
 
 echo "Remove path specific pyc files"
-pushd "$APP_PATH/Contents/Frameworks/Python.framework"
+pushd "$APP_PATH"
 find . -name "*.pyc" -print0 | xargs -0 rm
 find . -name "*.pyo" -print0 | xargs -0 rm
 

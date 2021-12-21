@@ -3,6 +3,8 @@ Kivy packaging for OS X
 
 This repository contains the scripts for packaging a Kivy based app into a installable dmg.
 
+**Important notice:** macOS 11 (or greater), with XCode 12.2 (or greater) is required to build a fully working universal2 ``.app`` due to https://bugs.python.org/issue42619
+
 Kivy versions supported: ``2.0.0+``. For older Kivy versions, use the corresponding stable branch.
 
 The packaged dmg contains a Python virtualenv, Kivy and its binary dependencies such as SDL2. Kivy 

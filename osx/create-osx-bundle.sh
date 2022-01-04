@@ -254,6 +254,8 @@ ln -s ../../python3/bin/python3 python
 sed -E -i '.bak' 's#^VIRTUAL_ENV=.*#VIRTUAL_ENV=$(cd $(dirname "$BASH_SOURCE"); dirname `pwd`)#' activate
 popd
 
+echo "-- Copy kivy_activate to ${APP_NAME}.app/Contents/Resources/venv/bin"
+cp "${SCRIPT_PATH}/data/kivy_activate" "${APP_NAME}.app/Contents/Resources/venv/bin"
 
 echo "-- Let's fix Frameworks signing."
 codesign -fs - "${APP_NAME}.app/Contents/Frameworks/SDL2.framework/Versions/A/SDL2"

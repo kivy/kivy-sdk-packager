@@ -47,6 +47,7 @@ install_platypus() {
 activate_app_venv_and_test_kivy(){
   pushd /Applications/Kivy.app/Contents/Resources/venv/bin
   source activate
+  source kivy_activate
   popd
   python -c 'import kivy'
   test_path=$(KIVY_NO_CONSOLELOG=1 python -c 'import kivy.tests as tests; print(tests.__path__[0])' --config "kivy:log_level:error")

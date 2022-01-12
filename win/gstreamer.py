@@ -6,17 +6,15 @@ from os import walk, listdir, remove
 from .common import *
 import glob  # also imported in common so it must be after
 
-__version__ = '0.3.2'
+__version__ = '0.3.3'
 
-gst_ver = '1.18.4'
+gst_ver = '1.18.5'
 
-try:
-    glob_escape = glob.escape
-except AttributeError:  # python 2
-    glob_escape = lambda x: x
+glob_escape = glob.escape
 
 
-def get_gstreamer(cache, build_path, arch, package, output, download_only=False):
+def get_gstreamer(
+        cache, build_path, arch, package, output, download_only=False):
     data = []
     bitness = 'x86_64' if arch == 'x64' else 'x86'
     compiler = 'msvc'
@@ -159,17 +157,20 @@ def get_gstreamer(cache, build_path, arch, package, output, download_only=False)
 
             for filename in filenames:
                 data.append((
-                    join(root, filename), join('gstreamer', d, dirpath, filename),
+                    join(root, filename),
+                    join('gstreamer', d, dirpath, filename),
                     join('share', package, d, dirpath), False))
 
                 if filename in ('libintl-8.dll', 'libglib-2.0-0.dll'):
-                    data.append((join(root, filename), filename, 'Scripts', True))
+                    data.append(
+                        (join(root, filename), filename, 'Scripts', True))
 
     l_imports = 'from os import environ'
     l_code = '''
 if dep_bins and isdir(dep_bins[0]):
     if environ.get('GST_PLUGIN_PATH'):
-        environ['GST_PLUGIN_PATH'] = '{};{}'.format(environ['GST_PLUGIN_PATH'], dep_bins[0])
+        environ['GST_PLUGIN_PATH'] = '{};{}'.format(environ['GST_PLUGIN_PATH'],\
+dep_bins[0])
     else:
         environ['GST_PLUGIN_PATH'] = dep_bins[0]
 
@@ -177,8 +178,9 @@ if dep_bins and isdir(dep_bins[0]):
         environ['GST_REGISTRY'] = join(dirname(dep_bins[0]), 'registry.bin')
 '''
 
-    make_package(join(build_path, 'project'), package, data, __version__, output,
-                 'LGPL', (l_imports, l_code))
+    make_package(
+        join(build_path, 'project'), package, data, __version__, output,
+        'LGPL', (l_imports, l_code))
 
 
 if __name__ == '__main__':

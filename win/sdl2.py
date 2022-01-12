@@ -1,12 +1,11 @@
-from __future__ import absolute_import, print_function
 from os import walk
 from .common import *
 
-__version__ = '0.4.3'
+__version__ = '0.4.4'
 
-sdl2_ver = '2.0.16'
+sdl2_ver = '2.0.20'
 sdl2_mixer_ver = '2.0.4'
-sdl2_ttf_ver = '2.0.15'
+sdl2_ttf_ver = '2.0.18'
 sdl2_image_ver = '2.0.5'
 
 
@@ -15,11 +14,17 @@ def get_sdl2(cache, build_path, arch, package, output, download_only=False):
 
     paths = []
     for name, ver in (
-        ('https://www.libsdl.org/release/SDL2-devel-{}-VC.zip',
+        ('https://github.com/libsdl-org/SDL/releases/download/'
+         'release-{0}/SDL2-devel-{0}-VC.zip',
          sdl2_ver),
-        ('https://www.libsdl.org/projects/SDL_mixer/release/SDL2_mixer-devel-{}-VC.zip',
+        ('https://www.libsdl.org/projects/SDL_mixer/release/'
+         'SDL2_mixer-devel-{}-VC.zip',
          sdl2_mixer_ver),
-        ('http://www.libsdl.org/projects/SDL_image/release/SDL2_image-devel-{}-VC.zip',
+        ('https://github.com/libsdl-org/SDL_ttf/releases/download/'
+         'release-{0}/SDL2_ttf-devel-{0}-VC.zip',
+         sdl2_ttf_ver),
+        ('http://www.libsdl.org/projects/SDL_image/release/'
+         'SDL2_image-devel-{}-VC.zip',
          sdl2_image_ver)):
         url = name.format(ver)
         fname = url.split('/')[-1]
@@ -27,11 +32,6 @@ def get_sdl2(cache, build_path, arch, package, output, download_only=False):
 
     if download_only:
         return
-
-    copy2(
-        join(cache, 'SDL2_ttf-devel-main-VC.zip'),
-        join(build_path, 'SDL2_ttf-devel-main-VC.zip'))
-    paths.append(join(build_path, 'SDL2_ttf-devel-main-VC.zip'))
 
     for local_url in paths:
         exec_binary(
@@ -56,12 +56,9 @@ def get_sdl2(cache, build_path, arch, package, output, download_only=False):
                 elif d == 'lib':
                     base = 'libs'
                 elif d == 'include':
-                    if 'harfbuzz' not in dirpath:
-                        # sdl2 h files are in the root include, but need to be
-                        # placed under sdl2 directory
-                        base = join(d, 'SDL2')
-                    else:
-                        base = d
+                    # sdl2 h files are in the root include, but need to be
+                    # placed under sdl2 directory
+                    base = join(d, 'SDL2')
                 else:
                     assert False
 

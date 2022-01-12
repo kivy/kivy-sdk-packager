@@ -46,8 +46,6 @@ function Upload-windows-wheels-to-server($ip) {
 function Test-kivy() {
     $env:GST_REGISTRY="~/registry.bin"
     $env:KIVY_GL_BACKEND="angle_sdl2"
-    # workaround for https://github.com/pyinstaller/pyinstaller/issues/4265 until next release
-    python -m pip install https://github.com/pyinstaller/pyinstaller/archive/develop.zip
 
     python -m pip config set install.find-links "$(pwd)\dist"
 
@@ -69,7 +67,7 @@ function Test-kivy() {
 function Get-angle-deps() {
     Invoke-WebRequest -Uri "https://storage.googleapis.com/chrome-infra/depot_tools.zip" -OutFile depot_tools.zip
     7z x depot_tools.zip -odepot_tools
-    git clone https://github.com/google/angle.git angle_src
+    git clone -b "chromium/4758" --single-branch https://github.com/google/angle.git angle_src
 }
 
 function Build-angle() {
@@ -99,123 +97,4 @@ function Build-angle() {
     mkdir angle_dlls\Release_x86
     cp angle_src\out\Release_x64\*.dll angle_dlls\Release_x64
     cp angle_src\out\Release_x86\*.dll angle_dlls\Release_x86
-}
-
-function Prepare-ttf($arch) {
-    # currently there's a binary incompatibility between gst and harfbuzz compiled here for x86. So
-    # don't include that for x86
-    if ($arch -eq "x64") {
-        Prepare-ttf-x64 -arch $arch
-    } else {
-        Prepare-ttf-x86 -arch $arch
-    }
-}
-
-function Prepare-ttf-x64($arch) {
-    python -m pip install --upgrade meson ninja fonttools
-
-    $root="harfbuzz-2.8.0"
-    $harf_path="$(pwd)\$root"
-
-    # get and compile harfbuzz
-    Invoke-WebRequest -Uri "https://github.com/harfbuzz/harfbuzz/releases/download/2.8.0/$root.tar.xz" -OutFile "$root.tar.xz"
-    C:\"Program Files"\7-Zip\7z.exe x "$root.tar.xz"
-    C:\"Program Files"\7-Zip\7z.exe x "$root.tar"
-    cd "$root"
-
-    # This dir contains a pkg-config which meson will happily use and later fail, so remove it
-    $env:path = ($env:path.Split(';') | Where-Object { $_ -ne 'C:\Strawberry\perl\bin' }) -join ';'
-
-    meson setup build --wrap-mode=default --buildtype=release -Dglib=disabled -Dgobject=disabled -Dcairo=disabled `
--Dfreetype=enabled -Dgdi=enabled -Ddirectwrite=enabled -Dicu=disabled
-    meson compile -C build
-    cd ..
-
-    # get sdl2
-    cp "$env:KIVY_BUILD_CACHE\SDL2-devel-*-VC.zip" .
-    C:\"Program Files"\7-Zip\7z.exe x "SDL2-devel-*-VC.zip"
-    cd "SDL2-*"
-    $sdl2="$(pwd)"
-    cd ..
-
-    # get sdl_ttf
-    Invoke-WebRequest -Uri "https://github.com/libsdl-org/SDL_ttf/archive/refs/heads/main.zip" -OutFile "SDL_ttf-main.zip"
-    C:\"Program Files"\7-Zip\7z.exe x "SDL_ttf-main.zip"
-
-    # now build it
-    $env:UseEnv="true"
-    $env:INCLUDE="$env:INCLUDE;$sdl2\include;$harf_path\src"
-    $env:LIB="$env:LIB;$sdl2\lib\$arch;$harf_path\build\src"
-    $env:CL="/DTTF_USE_HARFBUZZ#1"
-
-    if ($arch -eq "x64") {
-        $ttf_arch="x64"
-    } else {
-        $ttf_arch="Win32"
-    }
-
-    cd .\SDL_ttf-main\VisualC\
-    devenv .\SDL_ttf.sln /Upgrade
-    (Get-Content .\SDL_ttf.vcxproj).replace(";%(AdditionalDependencies)",";harfbuzz.lib;%(AdditionalDependencies)") | Set-Content .\SDL_ttf.vcxproj
-    devenv /UseEnv .\SDL_ttf.sln  /Build "Release|$ttf_arch"
-    cd "..\..\"
-
-    mkdir "result"
-    mkdir "result\SDL2_ttf-main"
-    mkdir "result\SDL2_ttf-main\include"
-    mkdir "result\SDL2_ttf-main\include\harfbuzz"
-    mkdir "result\SDL2_ttf-main\lib"
-    mkdir "result\SDL2_ttf-main\lib\$arch"
-
-    cp ".\SDL_ttf-main\VisualC\$ttf_arch\Release\*.dll" "result\SDL2_ttf-main\lib\$arch"
-    cp ".\SDL_ttf-main\VisualC\$ttf_arch\Release\*.lib" "result\SDL2_ttf-main\lib\$arch"
-    cp ".\SDL_ttf-main\VisualC\$ttf_arch\Release\LICENSE*.txt" "result\SDL2_ttf-main\lib\$arch"
-    cp ".\SDL_ttf-main\*.h" "result\SDL2_ttf-main\include"
-
-    cp "$harf_path\build\src\*.dll" "result\SDL2_ttf-main\lib\$arch"
-    cp "$harf_path\build\src\*.lib" "result\SDL2_ttf-main\lib\$arch"
-    cp "$harf_path\build\subprojects\*\*.dll" "result\SDL2_ttf-main\lib\$arch"
-    cp "$harf_path\build\subprojects\*\*\*.dll" "result\SDL2_ttf-main\lib\$arch"
-    cp "$harf_path\build\subprojects\*\*\*.dll" "result\SDL2_ttf-main\lib\$arch"
-    cp "$harf_path\src\*.h" "result\SDL2_ttf-main\include\harfbuzz"
-
-    Compress-Archive -LiteralPath "result\SDL2_ttf-main" -DestinationPath "SDL2_ttf-devel-main-VC.zip"
-    cp "SDL2_ttf-devel-main-VC.zip" "$env:KIVY_BUILD_CACHE"
-}
-
-function Prepare-ttf-x86($arch) {
-    # get sdl2
-    cp "$env:KIVY_BUILD_CACHE\SDL2-devel-*-VC.zip" .
-    C:\"Program Files"\7-Zip\7z.exe x "SDL2-devel-*-VC.zip"
-    cd "SDL2-*"
-    $sdl2="$(pwd)"
-    cd ..
-
-    # get sdl_ttf
-    Invoke-WebRequest -Uri "https://github.com/libsdl-org/SDL_ttf/archive/refs/heads/main.zip" -OutFile "SDL_ttf-main.zip"
-    C:\"Program Files"\7-Zip\7z.exe x "SDL_ttf-main.zip"
-
-    # now build it
-    $env:UseEnv="true"
-    $env:INCLUDE="$env:INCLUDE;$sdl2\include"
-    $env:LIB="$env:LIB;$sdl2\lib\$arch"
-
-    cd .\SDL_ttf-main\VisualC\
-    devenv .\SDL_ttf.sln /Upgrade
-    devenv /UseEnv .\SDL_ttf.sln  /Build "Release|Win32"
-    cd "..\..\"
-
-    mkdir "result"
-    mkdir "result\SDL2_ttf-main"
-    mkdir "result\SDL2_ttf-main\include"
-    mkdir "result\SDL2_ttf-main\lib"
-    mkdir "result\SDL2_ttf-main\lib\$arch"
-
-    cp ".\SDL_ttf-main\VisualC\Win32\Release\*.dll" "result\SDL2_ttf-main\lib\$arch"
-    cp ".\SDL_ttf-main\VisualC\Win32\Release\*.lib" "result\SDL2_ttf-main\lib\$arch"
-    cp ".\SDL_ttf-main\VisualC\Win32\Release\LICENSE*.txt" "result\SDL2_ttf-main\lib\$arch"
-    cp ".\SDL_ttf-main\*.h" "result\SDL2_ttf-main\include"
-
-    Compress-Archive -LiteralPath "result\SDL2_ttf-main" -DestinationPath "SDL2_ttf-devel-main-VC.zip"
-    cp "SDL2_ttf-devel-main-VC.zip" "$env:KIVY_BUILD_CACHE"
 }

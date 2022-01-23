@@ -18,6 +18,7 @@ override_dh_auto_build:
 	echo "Skipping any builds - doing them on install..."
 
 override_dh_installdocs:
+	rm -rf pypackages || true;
 	$(MAKE) clean;
 	mkdir pypackages;
 	python3 -m pip list;
@@ -30,6 +31,7 @@ override_dh_installdocs:
 override_dh_auto_install:
 	echo "PYTHONPATH is $$PYTHONPATH"
 	for PYX in $(shell py3versions -r); do \
+	    rm -rf pypackages || true; \
 	    $(MAKE) clean; \
 	    mkdir pypackages; \
 	    $$PYX -m pip list; \

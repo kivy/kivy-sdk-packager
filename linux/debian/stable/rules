@@ -18,15 +18,9 @@ override_dh_auto_build:
 	echo "Skipping any builds - doing them on install..."
 
 override_dh_installdocs:
-	rm -rf pypackages setuptools/setuptools.egg-info || true;
 	$(MAKE) clean;
 	mkdir pypackages;
-	ls && cd setuptools && ls && python3 bootstrap.py && cd ..;
 	python3 -m pip list;
-	python3 -m pip install $(CURDIR)/setuptools -t $(CURDIR)/pypackages --no-deps --upgrade || true;
-	python3 -m pip install $(CURDIR)/pip -t $(CURDIR)/pypackages --no-deps --upgrade || true;
-	python3 -m pip install $(CURDIR)/wheel -t $(CURDIR)/pypackages --no-deps --upgrade || true;
-	python3 -m pip install $(CURDIR)/packaging -t $(CURDIR)/pypackages --no-deps --upgrade || true;
 	python3 -m pip install $(CURDIR)/cython -t $(CURDIR)/pypackages --no-deps --upgrade || true;
 	python3 -m pip list;
 	$(MAKE) PYTHON=python3 force;
@@ -36,15 +30,9 @@ override_dh_installdocs:
 override_dh_auto_install:
 	echo "PYTHONPATH is $$PYTHONPATH"
 	for PYX in $(shell py3versions -r); do \
-	    rm -rf pypackages setuptools/setuptools.egg-info || true; \
 	    $(MAKE) clean; \
-	    mkdir pypackages && cd setuptools; \
-	    $$PYX bootstrap.py && cd ..; \
+	    mkdir pypackages; \
 	    $$PYX -m pip list; \
-	    $$PYX -m pip install $(CURDIR)/setuptools -t $(CURDIR)/pypackages --no-deps --upgrade; \
-	    $$PYX -m pip install $(CURDIR)/pip -t $(CURDIR)/pypackages --no-deps --upgrade; \
-	    $$PYX -m pip install $(CURDIR)/wheel -t $(CURDIR)/pypackages --no-deps --upgrade; \
-	    $$PYX -m pip install $(CURDIR)/packaging -t $(CURDIR)/pypackages --no-deps --upgrade; \
 	    $$PYX -m pip install $(CURDIR)/cython -t $(CURDIR)/pypackages --no-deps --upgrade; \
 	    $$PYX -m pip list; \
 	    $(MAKE) install PYTHON=$$PYX INSTALL_ROOT=$(CURDIR)/debian/tmp INSTALL_PREFIX=/usr INSTALL_LAYOUT=deb; \

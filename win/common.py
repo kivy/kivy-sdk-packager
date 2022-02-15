@@ -199,6 +199,7 @@ kivy when it imports this package.
 import sys
 import os
 from os.path import join, isdir, dirname
+import site
 
 __all__ = ('dep_bins', )
 
@@ -211,14 +212,13 @@ dep_bins = []
 Can be used e.g. with pyinstaller to ensure it copies all the binaries.
 """
 
-_root = sys.prefix
-dep_bins = [join(_root, 'share', '{}', 'bin')]
-if isdir(dep_bins[0]):
-    os.environ["PATH"] = dep_bins[0] + os.pathsep + os.environ["PATH"]
-    if hasattr(os, 'add_dll_directory'):
-        os.add_dll_directory(dep_bins[0])
-else:
-    dep_bins = []
+for d in [sys.prefix, site.USER_BASE]:
+    p = join(d, 'share', '{}', 'bin')
+    if isdir(p):
+        os.environ["PATH"] = p + os.pathsep + os.environ["PATH"]
+        if hasattr(os, 'add_dll_directory'):
+            os.add_dll_directory(p)
+        dep_bins.append(p)
 
 {}
 '''

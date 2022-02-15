@@ -2,7 +2,7 @@ from __future__ import absolute_import, print_function
 from .common import *
 from zipfile import ZipFile
 
-__version__ = '0.3.0'
+__version__ = '0.3.1'
 
 glew_ver = '2.2.0'
 

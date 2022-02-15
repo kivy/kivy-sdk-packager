@@ -6,8 +6,10 @@ on:
       - master
       - windows_ci
     paths:
+      - 'win/common.py'
       - 'win/angle.py'
       - '.github/workflows/windows_angle_wheels.yml'
+      - 'ci/windows_ci.ps1'
 
 env:
   SERVER_IP: '159.203.106.198'

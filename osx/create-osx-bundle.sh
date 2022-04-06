@@ -141,7 +141,7 @@ xcodebuild ONLY_ACTIVE_ARCH=NO -project Xcode/SDL/SDL.xcodeproj -target Framewor
 popd
 
 echo "-- Copy SDL2.framework to ${APP_NAME}.app/Contents/Frameworks"
-cp -r SDL/Xcode/SDL/build/Release/SDL2.framework "${APP_NAME}.app/Contents/Frameworks"
+cp -R SDL/Xcode/SDL/build/Release/SDL2.framework "${APP_NAME}.app/Contents/Frameworks"
 
 echo "-- Build SDL2_mixer (Universal)"
 tar -xvf "${SDL_MIXER_VERSION}.tar.gz"
@@ -154,7 +154,7 @@ xcodebuild ONLY_ACTIVE_ARCH=NO \
 popd
 
 echo "-- Copy SDL2_mixer.framework to ${APP_NAME}.app/Contents/Frameworks"
-cp -r SDL_mixer/Xcode/build/Release/SDL2_mixer.framework "${APP_NAME}.app/Contents/Frameworks"
+cp -R SDL_mixer/Xcode/build/Release/SDL2_mixer.framework "${APP_NAME}.app/Contents/Frameworks"
 
 echo "-- Build SDL2_image (Universal)"
 tar -xvf "${SDL_IMAGE_VERSION}.tar.gz"
@@ -167,7 +167,7 @@ xcodebuild ONLY_ACTIVE_ARCH=NO \
 popd
 
 echo "-- Copy SDL2_image.framework to ${APP_NAME}.app/Contents/Frameworks"
-cp -r SDL_image/Xcode/build/Release/SDL2_image.framework "${APP_NAME}.app/Contents/Frameworks"
+cp -R SDL_image/Xcode/build/Release/SDL2_image.framework "${APP_NAME}.app/Contents/Frameworks"
 
 echo "-- Build SDL2_ttf (Universal)"
 tar -xvf "${SDL_TTF_VERSION}.tar.gz"
@@ -180,7 +180,7 @@ xcodebuild ONLY_ACTIVE_ARCH=NO \
 popd
 
 echo "-- Copy SDL2_ttf.framework to ${APP_NAME}.app/Contents/Frameworks"
-cp -r SDL_ttf/Xcode/build/Release/SDL2_ttf.framework "${APP_NAME}.app/Contents/Frameworks"
+cp -R SDL_ttf/Xcode/build/Release/SDL2_ttf.framework "${APP_NAME}.app/Contents/Frameworks"
 
 echo "-- Build OpenSSL (x86_64)"
 tar -xvf "openssl-${OPENSSL_VERSION}.tar.gz"
@@ -202,7 +202,7 @@ popd
 
 echo "-- Merge OpenSSL libs to a fat library and copy include folder"
 mkdir openssl
-cp -r "openssl-${OPENSSL_VERSION}_x86_64/include" "openssl/include"
+cp -R "openssl-${OPENSSL_VERSION}_x86_64/include" "openssl/include"
 mkdir openssl/lib
 lipo "openssl-${OPENSSL_VERSION}_x86_64/libcrypto.a" "openssl-${OPENSSL_VERSION}_arm64/libcrypto.a" -create -output "openssl/lib/libcrypto.a"
 lipo "openssl-${OPENSSL_VERSION}_x86_64/libssl.a" "openssl-${OPENSSL_VERSION}_arm64/libssl.a" -create -output "openssl/lib/libssl.a"

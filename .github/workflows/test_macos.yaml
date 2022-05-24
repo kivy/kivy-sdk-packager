@@ -12,17 +12,13 @@ on:
 
 jobs:
   build_dmg:
-    defaults:
-      run:
-        shell: ${{ matrix.run_wrapper || 'bash --noprofile --norc -eo pipefail {0}' }}
-    runs-on: ${{ matrix.runs_on || 'macos-11' }}
+    runs-on: ${{ matrix.runs_on }}
     strategy:
       matrix:
         include:
           - runs_on: macos-11
             python: 3.9
           - runs_on: apple-silicon-m1
-            run_wrapper: arch -arm64 bash --noprofile --norc -eo pipefail {0}
             python: 3.9.7
     name: macOS build dmg ( ${{ matrix.runs_on }} )
     steps:
@@ -74,16 +70,10 @@ jobs:
 
   test_dmg:
     needs: build_dmg
-    defaults:
-      run:
-        shell: ${{ matrix.run_wrapper || 'bash --noprofile --norc -eo pipefail {0}' }}
-    runs-on: ${{ matrix.runs_on || 'macos-11' }}
+    runs-on: ${{ matrix.runs_on }}
     strategy:
       matrix:
-        include:
-          - runs_on: macos-11
-          - runs_on: apple-silicon-m1
-            run_wrapper: arch -arm64 bash --noprofile --norc -eo pipefail {0}
+        runs_on: [macos-11, apple-silicon-m1]
     name: macOS test dmg ( ${{ matrix.runs_on }} )
     steps:
       - uses: actions/checkout@v2

@@ -78,6 +78,21 @@ echo "Using Python version $PYVER"
 echo "Build $APP_NAME version $APP_VERSION org $APP_ORG by $AUTHOR"
 echo "App will launch with $APP_SCRIPT using icon $ICON_PATH"
 
+git clone "https://github.com/sveinbjornt/Platypus"
+
+pushd Platypus
+git checkout $PLATYPUS
+export MACOSX_DEPLOYMENT_TARGET=10.9
+./build_release.sh
+popd
+
+mkdir -p /usr/local/bin
+mkdir -p /usr/local/share/platypus
+cp Platypus/products/platypus_clt /usr/local/bin/platypus
+cp Platypus/products/ScriptExec.app/Contents/MacOS/ScriptExec /usr/local/share/platypus/ScriptExec
+cp -a Platypus/products/Platypus.app/Contents/Resources/MainMenu.nib /usr/local/share/platypus/MainMenu.nib
+chmod -R 755 /usr/local/share/platypus
+
 PLATYPUS=/usr/local/bin/platypus
 if [ ! -f "$PLATYPUS" ]; then
     echo "Could not find platypus at $PLATYPUS"

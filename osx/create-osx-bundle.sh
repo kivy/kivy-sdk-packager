@@ -83,7 +83,7 @@ git clone "https://github.com/sveinbjornt/Platypus"
 pushd Platypus
 git checkout $PLATYPUS
 export MACOSX_DEPLOYMENT_TARGET=10.9
-./build_release.sh
+CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO ./build_release.sh
 popd
 
 mkdir -p /usr/local/bin

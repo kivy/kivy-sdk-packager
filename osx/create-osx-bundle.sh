@@ -82,10 +82,10 @@ git clone "https://github.com/akshayaurora/Platypus"
 
 mkdir -p /usr/local/bin
 mkdir -p /usr/local/share/platypus
-cp Platypus/Products/platypus_clt /usr/local/bin/platypus
-cp Platypus/Products/ScriptExec.app/Contents/MacOS/ScriptExec /usr/local/share/platypus/ScriptExec
-cp -a Platypus/products/Platypus.app/Contents/Resources/MainMenu.nib /usr/local/share/platypus/MainMenu.nib
-chmod -R 755 /usr/local/share/platypus
+sudo cp Platypus/Products/platypus_clt /usr/local/bin/platypus
+sudo cp Platypus/Products/ScriptExec.app/Contents/MacOS/ScriptExec /usr/local/share/platypus/ScriptExec
+sudo cp -a Platypus/products/Platypus.app/Contents/Resources/MainMenu.nib /usr/local/share/platypus/MainMenu.nib
+sudo chmod -R 755 /usr/local/share/platypus
 
 PLATYPUS=/usr/local/bin/platypus
 if [ ! -f "$PLATYPUS" ]; then

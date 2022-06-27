@@ -30,19 +30,22 @@ arm64_set_path_and_python_version(){
 }
 
 install_platypus() {
-  download_cache_curl "platypus5.3.zip" "osx-cache" "https://github.com/sveinbjornt/Platypus/releases/download/5.3"
+  git clone "https://github.com/akshayaurora/Platypus"
 
-  unzip "platypus5.3.zip"
-  gunzip Platypus.app/Contents/Resources/platypus_clt.gz
-  gunzip Platypus.app/Contents/Resources/ScriptExec.gz
+  pushd Platypus
+  make build_unsigned
+  codesign -fs - products/platypus_clt
+  codesign -fs - --deep products/Platypus.app
+  codesign -fs - --deep products/ScriptExec.app
+  popd
 
-  sudo mkdir -p /usr/local/bin
-  sudo mkdir -p /usr/local/share/platypus
-  sudo cp Platypus.app/Contents/Resources/platypus_clt /usr/local/bin/platypus
-  sudo cp Platypus.app/Contents/Resources/ScriptExec /usr/local/share/platypus/ScriptExec
-  sudo cp -a Platypus.app/Contents/Resources/MainMenu.nib /usr/local/share/platypus/MainMenu.nib
+  mkdir -p /usr/local/bin
+  mkdir -p /usr/local/share/platypus
+  sudo cp Platypus/products/platypus_clt /usr/local/bin/platypus
+  sudo cp Platypus/products/ScriptExec.app/Contents/MacOS/ScriptExec /usr/local/share/platypus/ScriptExec
+  sudo cp -a Platypus/products/Platypus.app/Contents/Resources/MainMenu.nib /usr/local/share/platypus/MainMenu.nib
   sudo chmod -R 755 /usr/local/share/platypus
-}
+ }
 
 activate_app_venv_and_test_kivy(){
   pushd /Applications/Kivy.app/Contents/Resources/venv/bin

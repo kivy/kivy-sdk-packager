@@ -30,10 +30,9 @@ arm64_set_path_and_python_version(){
 }
 
 install_platypus() {
-  git clone "https://github.com/sveinbjornt/Platypus"
+  git clone "https://github.com/akshayaurora/Platypus"
 
   pushd Platypus
-  make build_unsigned
   codesign -fs - products/platypus_clt
   codesign -fs - --deep products/Platypus.app
   codesign -fs - --deep products/ScriptExec.app

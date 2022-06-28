@@ -268,4 +268,6 @@ echo "-- Launch relocate.sh to relocate deps"
 
 popd
 
+for lib in `find build -type f -name \*.so -o -name \*.dylib`; do codesign --verify "$lib" 2>/dev/null || (echo Resigning "$lib"; cp "$lib" "$lib".tmp && mv "$lib".tmp "$lib" && codesign -fs - "$lib"); done
+
 echo "-- Done !"

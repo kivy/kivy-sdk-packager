@@ -38,8 +38,8 @@ install_platypus() {
   codesign -fs - --deep products/ScriptExec.app
   popd
 
-  mkdir -p /usr/local/bin
-  mkdir -p /usr/local/share/platypus
+  sudo mkdir -p /usr/local/bin
+  sudo mkdir -p /usr/local/share/platypus
   sudo cp Platypus/products/platypus_clt /usr/local/bin/platypus
   sudo cp Platypus/products/ScriptExec.app/Contents/MacOS/ScriptExec /usr/local/share/platypus/ScriptExec
   sudo cp -a Platypus/products/Platypus.app/Contents/Resources/MainMenu.nib /usr/local/share/platypus/MainMenu.nib

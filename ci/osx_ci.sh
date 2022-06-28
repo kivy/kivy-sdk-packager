@@ -30,7 +30,7 @@ arm64_set_path_and_python_version(){
 }
 
 install_platypus() {
-  git clone "https://github.com/akshayaurora/Platypus"
+  git clone "https://github.com/sveinbjornt/Platypus"
 
   pushd Platypus
   make build_unsigned

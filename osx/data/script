@@ -14,7 +14,10 @@ source activate
 # setup the environment to not mess with the system
 export DYLD_FALLBACK_LIBRARY_PATH="${SCRIPT_PATH}/../lib:$DYLD_FALLBACK_LIBRARY_PATH"
 export LD_PRELOAD_PATH="${SCRIPT_PATH}/../lib"
-export KIVY_HOME="${SCRIPT_PATH}/.kivy"
+BUNDLE_ID=$(osascript -e 'id of app "../../../../"')
+# We are not allowed to edit anything within the .app for security reasons.
+export KIVY_HOME="~/Library/Application Support/$BUNDLE_ID"
+
 
 # if an app is available, use it
 if [ -f "${SCRIPT_PATH}/yourapp" ] || [ -h "${SCRIPT_PATH}/yourapp" ]; then

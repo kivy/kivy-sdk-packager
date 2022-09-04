@@ -1,12 +1,12 @@
 from os import walk
 from .common import *
 
-__version__ = '0.4.5'
+__version__ = '0.4.6'
 
-sdl2_ver = '2.0.20'
-sdl2_mixer_ver = '2.0.4'
-sdl2_ttf_ver = '2.0.18'
-sdl2_image_ver = '2.0.5'
+sdl2_ver = '2.24.0'
+sdl2_mixer_ver = '2.6.2'
+sdl2_ttf_ver = '2.20.1'
+sdl2_image_ver = '2.6.2'
 
 
 def get_sdl2(cache, build_path, arch, package, output, download_only=False):

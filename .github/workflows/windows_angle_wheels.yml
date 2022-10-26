@@ -20,7 +20,7 @@ env:
 
 jobs:
   prepare_angle:
-    runs-on: windows-latest
+    runs-on: windows-2019
     env:
       DEPOT_TOOLS_WIN_TOOLCHAIN: 0
     steps:
@@ -45,7 +45,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python: [ '3.7', '3.8', '3.9', '3.10' ]
+        python: [ '3.7', '3.8', '3.9', '3.10', '3.11' ]
         arch: ['x64', 'x86']
     env:
       PACKAGE_ARCH: ${{ matrix.arch }}

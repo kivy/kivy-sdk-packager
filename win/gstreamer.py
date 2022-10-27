@@ -6,9 +6,9 @@ from os import walk, listdir, remove
 from .common import *
 import glob  # also imported in common so it must be after
 
-__version__ = '0.3.4'
+__version__ = '0.4.0'
 
-gst_ver = '1.20.0'
+gst_ver = '1.21.1'
 
 glob_escape = glob.escape
 

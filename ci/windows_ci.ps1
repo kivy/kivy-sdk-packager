@@ -30,7 +30,7 @@ function Download-Packages() {
 
 
 function Create-Packages() {
-    python -m pip install pip wheel setuptools --upgrade
+    python -m pip install pip wheel<0.38.0 setuptools --upgrade
     python -m "win.$env:PACKAGE_TARGET" build_path "$(pwd)\$env:KIVY_BUILD_DIR" arch $env:PACKAGE_ARCH package $env:PACKAGE_TARGET output "$(pwd)\dist" cache "$(pwd)\$env:KIVY_BUILD_CACHE"
     dir "$(pwd)\dist"
     rm "$(pwd)\dist\*tar.gz"

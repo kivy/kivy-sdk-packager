@@ -53,6 +53,7 @@ while [[ "$#" -gt 0 ]]; do
     -o | --org) APP_ORG="$2" ;;
     -i | --icon) ICON_PATH="$2" ;;
     -s | --script) APP_SCRIPT="$2" ;;
+    -b | --build) APP_BUILD="$2" ;;
     *)
         echo "Unknown parameter passed: $1"
         echo "$USAGE"
@@ -62,6 +63,7 @@ while [[ "$#" -gt 0 ]]; do
     shift
     shift
 done
+
 
 # get kivy path or url
 if [ -d "$KIVY_PATH" ]; then
@@ -95,6 +97,8 @@ if [ -h "${SCRIPT_PATH}" ]; then
 fi
 
 SCRIPT_PATH=$($PYTHON -c "import os; print(os.path.realpath(os.path.dirname('$SCRIPT_PATH')))")
+DEFAULT_BUILD="$SCRIPT_PATH/build/$APP_NAME.app"
+: "${APP_BUILD:=$DEFAULT_BUILD}"
 
 echo "-- Clean previous build (if any) and move to build folder"
 rm -rf build
@@ -110,7 +114,7 @@ $PLATYPUS -DBR -y \
     -I "$APP_ORG" \
     -X "*" \
     "$APP_SCRIPT" \
-    "$SCRIPT_PATH/build/$APP_NAME.app"
+    "$APP_BUILD"
 
 # Platypus? sets non-blocking mode. That was leading to an error during openssl or python3 build.
 $PYTHON -c "import fcntl; fcntl.fcntl(1, fcntl.F_SETFL, 0)"

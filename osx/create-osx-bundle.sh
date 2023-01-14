@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env zsh
 set -x # verbose
 set -e # exit on error
 
@@ -84,8 +84,6 @@ fi
 
 echo "Using Kivy $KIVY_PATH"
 echo "Using Python version $PYVER"
-echo "Build $APP_NAME version $APP_VERSION org $APP_ORG by $AUTHOR"
-echo "App will launch with $APP_SCRIPT using icon $ICON_PATH"
 
 
 echo "-- Check configuration"
@@ -121,6 +119,8 @@ mkdir -p $BUILD_DIR
 mkdir -p $APP_FRAME
 
 echo "-- Create initial $APP_NAME.app package"
+echo "Build $APP_NAME version $APP_VERSION org $APP_ORG by $AUTHOR"
+echo "App will launch with $APP_SCRIPT using icon $ICON_PATH"
 $PLATYPUS -DBR -y \
     -i "$ICON_PATH" \
     -a "$APP_NAME" \
@@ -133,6 +133,7 @@ $PLATYPUS -DBR -y \
     "$APP_DIR"
     
 echo "-- Finished $PLATYPUS"
+ls -R "${APP_DIR}/Contents"
 
 # Platypus? sets non-blocking mode. That was leading to an error during openssl or python3 build.
 $PYTHON -c "import fcntl; fcntl.fcntl(1, fcntl.F_SETFL, 0)"
@@ -150,7 +151,7 @@ curl -L -O "https://github.com/libsdl-org/SDL_image/archive/${SDL_IMAGE_VERSION}
 curl -L -O "https://github.com/libsdl-org/SDL_ttf/archive/refs/tags/${SDL_TTF_VERSION}.tar.gz"
 
 echo "-- Build SDL2 (Universal)"
-tar -xvf "${SDL_VERSION}.tar.gz"
+tar -xf "${SDL_VERSION}.tar.gz"
 mv "SDL-${SDL_VERSION}" "SDL"
 pushd "SDL"
 xcodebuild ONLY_ACTIVE_ARCH=NO -project Xcode/SDL/SDL.xcodeproj -target Framework -configuration Release
@@ -163,7 +164,7 @@ cp -R $SDL_REL "$HOME/Library/Frameworks/"
 
 
 echo "-- Build SDL2_mixer (Universal)"
-tar -xvf "${SDL_MIXER_VERSION}.tar.gz"
+tar -xf "${SDL_MIXER_VERSION}.tar.gz"
 mv "SDL_mixer-${SDL_MIXER_VERSION}" "SDL_mixer"
 pushd "SDL_mixer"
 xcodebuild ONLY_ACTIVE_ARCH=NO \
@@ -176,7 +177,7 @@ echo "-- Copy SDL2_mixer.framework to ${APP_NAME}.app/Contents/Frameworks"
 cp -R SDL_mixer/Xcode/build/Release/SDL2_mixer.framework "${APP_FRAME}"
 
 echo "-- Build SDL2_image (Universal)"
-tar -xvf "${SDL_IMAGE_VERSION}.tar.gz"
+tar -xf "${SDL_IMAGE_VERSION}.tar.gz"
 mv "SDL_image-${SDL_IMAGE_VERSION}" "SDL_image"
 pushd "SDL_image"
 xcodebuild ONLY_ACTIVE_ARCH=NO \
@@ -189,12 +190,12 @@ echo "-- Copy SDL2_image.framework to ${APP_NAME}.app/Contents/Frameworks"
 cp -R SDL_image/Xcode/build/Release/SDL2_image.framework "${APP_FRAME}"
 
 echo "-- Build SDL2_ttf (Universal)"
-tar -xvf "${SDL_TTF_VERSION}.tar.gz"
+tar -xf "${SDL_TTF_VERSION}.tar.gz"
 mv "SDL_ttf-${SDL_TTF_VERSION}" "SDL_ttf"
 pushd "SDL_ttf"
 xcodebuild ONLY_ACTIVE_ARCH=NO \
         "HEADER_SEARCH_PATHS=\$HEADER_SEARCH_PATHS ${SDL_HEAD} ${APP_SDLH}" \
-        "FRAMEWORK_SEARCH_PATHS=\$FRAMEWORK_SEARCH_PATHS "${APP_FRAME}" \
+        "FRAMEWORK_SEARCH_PATHS=\$FRAMEWORK_SEARCH_PATHS ${APP_FRAME}" \
         -project Xcode/SDL_ttf.xcodeproj -target Framework -configuration Release
 popd
 
@@ -202,7 +203,7 @@ echo "-- Copy SDL2_ttf.framework to ${APP_NAME}.app/Contents/Frameworks"
 cp -R SDL_ttf/Xcode/build/Release/SDL2_ttf.framework "${APP_FRAME}"
 
 echo "-- Build OpenSSL - x86_64"
-tar -xvf "openssl-${OPENSSL_VERSION}.tar.gz"
+tar -xf "openssl-${OPENSSL_VERSION}.tar.gz"
 mv "openssl-${OPENSSL_VERSION}" "openssl-${OPENSSL_VERSION}_x86_64"
 pushd "openssl-${OPENSSL_VERSION}_x86_64"
 ./Configure darwin64-x86_64-cc
@@ -211,7 +212,7 @@ make build_libs
 popd
 
 echo "-- Build OpenSSL - arm64"
-tar -xvf "openssl-${OPENSSL_VERSION}.tar.gz"
+tar -xf "openssl-${OPENSSL_VERSION}.tar.gz"
 mv "openssl-${OPENSSL_VERSION}" "openssl-${OPENSSL_VERSION}_arm64"
 pushd "openssl-${OPENSSL_VERSION}_arm64"
 ./Configure darwin64-arm64-cc
@@ -229,7 +230,7 @@ lipo "openssl-${OPENSSL_VERSION}_x86_64/libssl.a" "openssl-${OPENSSL_VERSION}_ar
 echo "-- Build python from scratch"
 KIVY_APP_PYTHON_PREFIX="${APP_FRAME}/Resources/python3"
 KIVY_APP_PYTHON_BIN="${KIVY_APP_PYTHON_PREFIX}/bin/python3"
-tar -xvf "Python-${PYVER}.tgz"
+tar -xf "Python-${PYVER}.tgz"
 pushd "Python-${PYVER}"
 ./configure --prefix=$KIVY_APP_PYTHON_PREFIX --enable-universalsdk --disable-test-modules --with-universal-archs=universal2 --with-openssl=../openssl
 make

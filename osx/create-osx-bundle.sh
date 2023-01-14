@@ -111,6 +111,9 @@ DEFAULT_BUILD="$SCRIPT_PATH/build"
 : "${BUILD_DIR:=$DEFAULT_BUILD}"
 APP_DIR="${BUILD_DIR}/${APP_NAME}.app"
 APP_FRAME="${APP_DIR}/Contents/Frameworks"
+SDL_HEAD="${APP_FRAME}/SDL2.framework/Headers"
+APP_SDLH="${BUILD_DIR}/SDL/include"
+# /Users/quilt/Documents/GitHub/quiltsync/build/SDL/include/SDL.h
 
 echo "-- Clean previous builds (if any) and move to build folder"
 rm -rf $BUILD_DIR
@@ -136,6 +139,7 @@ $PYTHON -c "import fcntl; fcntl.fcntl(1, fcntl.F_SETFL, 0)"
 
 echo "-- Entering build folder"
 pushd  $BUILD_DIR
+pwd
 
 echo "-- Download needed files"
 curl -L -O "http://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz"
@@ -154,27 +158,30 @@ popd
 
 echo "-- Copy SDL2.framework to ${APP_NAME}.app/Contents/Frameworks"
 cp -R $SDL_REL "$APP_FRAME"
+mkdir -p $HOME/Library/Frameworks
+cp -R $SDL_REL "$HOME/Library/Frameworks/"
+
 
 echo "-- Build SDL2_mixer (Universal)"
 tar -xvf "${SDL_MIXER_VERSION}.tar.gz"
 mv "SDL_mixer-${SDL_MIXER_VERSION}" "SDL_mixer"
 pushd "SDL_mixer"
 xcodebuild ONLY_ACTIVE_ARCH=NO \
-        "HEADER_SEARCH_PATHS=\$HEADER_SEARCH_PATHS ${APP_FRAME}/SDL2.framework/Headers /usr/include/sdl" \
-        "FRAMEWORK_SEARCH_PATHS=\$FRAMEWORK_SEARCH_PATHS ${SCRIPT_PATH}/build/${APP_NAME}.app/Contents/Frameworks"\
+        "HEADER_SEARCH_PATHS=\$HEADER_SEARCH_PATHS ${SDL_HEAD} ${APP_SDLH}" \
+        "FRAMEWORK_SEARCH_PATHS=\$FRAMEWORK_SEARCH_PATHS ${APP_FRAME}"\
         -project Xcode/SDL_mixer.xcodeproj -target Framework -configuration Release
 popd
 
 echo "-- Copy SDL2_mixer.framework to ${APP_NAME}.app/Contents/Frameworks"
-cp -R $SDL_REL "${APP_NAME}.app/Contents/Frameworks"
+cp -R SDL_mixer/Xcode/build/Release/SDL2_mixer.framework "${APP_FRAME}"
 
 echo "-- Build SDL2_image (Universal)"
 tar -xvf "${SDL_IMAGE_VERSION}.tar.gz"
 mv "SDL_image-${SDL_IMAGE_VERSION}" "SDL_image"
 pushd "SDL_image"
 xcodebuild ONLY_ACTIVE_ARCH=NO \
-        "HEADER_SEARCH_PATHS=\$HEADER_SEARCH_PATHS ${APP_FRAME}/SDL2.framework/Headers /usr/include/sdl" \
-        "FRAMEWORK_SEARCH_PATHS=\$FRAMEWORK_SEARCH_PATHS ${APP_FRAME} $CFLAGS"\
+        "HEADER_SEARCH_PATHS=\$HEADER_SEARCH_PATHS ${SDL_HEAD} ${APP_SDLH}" \
+        "FRAMEWORK_SEARCH_PATHS=\$FRAMEWORK_SEARCH_PATHS ${APP_FRAME}"\
         -project Xcode/SDL_image.xcodeproj -target Framework -configuration Release
 popd
 
@@ -186,7 +193,7 @@ tar -xvf "${SDL_TTF_VERSION}.tar.gz"
 mv "SDL_ttf-${SDL_TTF_VERSION}" "SDL_ttf"
 pushd "SDL_ttf"
 xcodebuild ONLY_ACTIVE_ARCH=NO \
-        "HEADER_SEARCH_PATHS=\$HEADER_SEARCH_PATHS ${APP_FRAME}/SDL2.framework/Headers /usr/include/sdl" \
+        "HEADER_SEARCH_PATHS=\$HEADER_SEARCH_PATHS ${SDL_HEAD} ${APP_SDLH}" \
         "FRAMEWORK_SEARCH_PATHS=\$FRAMEWORK_SEARCH_PATHS "${APP_FRAME}" \
         -project Xcode/SDL_ttf.xcodeproj -target Framework -configuration Release
 popd
@@ -194,7 +201,7 @@ popd
 echo "-- Copy SDL2_ttf.framework to ${APP_NAME}.app/Contents/Frameworks"
 cp -R SDL_ttf/Xcode/build/Release/SDL2_ttf.framework "${APP_FRAME}"
 
-echo "-- Build OpenSSL (x86_64)"
+echo "-- Build OpenSSL - x86_64"
 tar -xvf "openssl-${OPENSSL_VERSION}.tar.gz"
 mv "openssl-${OPENSSL_VERSION}" "openssl-${OPENSSL_VERSION}_x86_64"
 pushd "openssl-${OPENSSL_VERSION}_x86_64"
@@ -203,7 +210,7 @@ make clean
 make build_libs
 popd
 
-echo "-- Build OpenSSL (arm64)"
+echo "-- Build OpenSSL - arm64"
 tar -xvf "openssl-${OPENSSL_VERSION}.tar.gz"
 mv "openssl-${OPENSSL_VERSION}" "openssl-${OPENSSL_VERSION}_arm64"
 pushd "openssl-${OPENSSL_VERSION}_arm64"
@@ -269,7 +276,7 @@ popd
 echo "-- Copy kivy_activate to ${APP_DIR}/Contents/Resources/venv/bin"
 cp "${SCRIPT_PATH}/data/kivy_activate" "${APP_DIR}/Contents/Resources/venv/bin"
 
-echo "-- Let's fix Frameworks signing."
+echo "-- How we fix Frameworks signing"
 codesign -fs - "${APP_FRAME}/SDL2.framework/Versions/A/SDL2"
 codesign -fs - "${APP_FRAME}/SDL2_ttf.framework/Versions/A/SDL2_ttf"
 codesign -fs - "${APP_FRAME}/SDL2_image.framework/Versions/A/SDL2_image"
@@ -280,4 +287,4 @@ echo "-- Launch relocate.sh to relocate deps"
 
 popd
 
-echo "-- Done !"
+echo "-- Done"

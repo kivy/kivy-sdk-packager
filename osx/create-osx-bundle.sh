@@ -143,12 +143,12 @@ pushd  $BUILD_DIR
 pwd
 
 echo "-- Download needed files"
-curl -L -O "http://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz"
-curl -L -O "https://www.python.org/ftp/python/${PYVER}/Python-${PYVER}.tgz"
-curl -L -O "https://github.com/libsdl-org/SDL/archive/refs/tags/${SDL_VERSION}.tar.gz"
-curl -L -O "https://github.com/libsdl-org/SDL_mixer/archive/${SDL_MIXER_VERSION}.tar.gz"
-curl -L -O "https://github.com/libsdl-org/SDL_image/archive/${SDL_IMAGE_VERSION}.tar.gz"
-curl -L -O "https://github.com/libsdl-org/SDL_ttf/archive/refs/tags/${SDL_TTF_VERSION}.tar.gz"
+../download.sh "http://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz"
+../download.sh "https://www.python.org/ftp/python/${PYVER}/Python-${PYVER}.tgz"
+../download.sh "https://github.com/libsdl-org/SDL/archive/refs/tags/${SDL_VERSION}.tar.gz"
+../download.sh "https://github.com/libsdl-org/SDL_mixer/archive/${SDL_MIXER_VERSION}.tar.gz"
+../download.sh "https://github.com/libsdl-org/SDL_image/archive/${SDL_IMAGE_VERSION}.tar.gz"
+../download.sh "https://github.com/libsdl-org/SDL_ttf/archive/refs/tags/${SDL_TTF_VERSION}.tar.gz"
 
 echo "-- Build SDL2 (Universal)"
 tar -xf "${SDL_VERSION}.tar.gz"

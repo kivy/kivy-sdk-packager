@@ -22,11 +22,11 @@ jobs:
             python: 3.9.7
     name: macOS build dmg ( ${{ matrix.runs_on }} )
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Set up Python 3.x
         # Needs to be skipped on our self-hosted runners tagged as 'apple-silicon-m1'
         if: ${{ matrix.runs_on  != 'apple-silicon-m1' }}
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python }}
       - name: Install Platypus
@@ -63,7 +63,7 @@ jobs:
           mkdir osx_artifacts
           mv osx/Kivy.dmg osx_artifacts/${{ matrix.runs_on }}-Kivy.dmg
       - name: Upload dmg as artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: KivySDKPackager
           path: osx_artifacts
@@ -76,9 +76,9 @@ jobs:
         runs_on: [macos-11, apple-silicon-m1]
     name: macOS test dmg ( ${{ matrix.runs_on }} )
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Download dmg from artifacts
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: KivySDKPackager
           path: osx_artifacts

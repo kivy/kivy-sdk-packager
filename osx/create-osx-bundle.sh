@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env zsh
 set -x # verbose
 set -e # exit on error
 
@@ -15,11 +15,18 @@ Usage: create-osx-bundle.sh [options]
     -o --org      <org, default:org.kivy.osxlauncher>     The org id used for the app.
     -i --icon     <icon, default:data/icon.icns>          A icns icon file path.
     -s --script   <app_main_script, default:data/script>  The script to run when the user clicks the app.
+    -b --build    <build_dir, default:SCRIPT/build>       Folder into which to build the app.
 
 Requirements::
     Platypus  needs to be installed. Finally, any python3 version must be available for
     initial scripting.
 "
+
+echo "-- Set MACOSX_DEPLOYMENT_TARGET"
+export SDKROOT=$(xcrun -sdk macosx --show-sdk-path)
+export MACOSX_DEPLOYMENT_TARGET=$(xcrun --show-sdk-version)
+
+echo "-- Set options from command-line arguments"
 
 KIVY_PATH="master"
 EXTRAS="base"
@@ -29,6 +36,7 @@ SDL_VERSION="release-2.0.20"
 SDL_IMAGE_VERSION="168ceb577c245c91801c1bcaf970ef31c9b4d7ba"
 SDL_MIXER_VERSION="64120a41f62310a8be9bb97116e15a95a892e39d"
 SDL_TTF_VERSION="release-2.0.18"
+SDL_REL="SDL/Xcode/SDL/build/Release/SDL2.framework"
 APP_NAME="Kivy"
 APP_VERSION="master"
 AUTHOR="Kivy Developers"
@@ -53,6 +61,7 @@ while [[ "$#" -gt 0 ]]; do
     -o | --org) APP_ORG="$2" ;;
     -i | --icon) ICON_PATH="$2" ;;
     -s | --script) APP_SCRIPT="$2" ;;
+    -b | --build) BUILD_DIR="$2" ;;
     *)
         echo "Unknown parameter passed: $1"
         echo "$USAGE"
@@ -75,8 +84,9 @@ fi
 
 echo "Using Kivy $KIVY_PATH"
 echo "Using Python version $PYVER"
-echo "Build $APP_NAME version $APP_VERSION org $APP_ORG by $AUTHOR"
-echo "App will launch with $APP_SCRIPT using icon $ICON_PATH"
+
+
+echo "-- Check configuration"
 
 PLATYPUS=/usr/local/bin/platypus
 if [ ! -f "$PLATYPUS" ]; then
@@ -95,12 +105,22 @@ if [ -h "${SCRIPT_PATH}" ]; then
 fi
 
 SCRIPT_PATH=$($PYTHON -c "import os; print(os.path.realpath(os.path.dirname('$SCRIPT_PATH')))")
+DEFAULT_BUILD="$SCRIPT_PATH/build"
+: "${BUILD_DIR:=$DEFAULT_BUILD}"
+APP_DIR="${BUILD_DIR}/${APP_NAME}.app"
+APP_FRAME="${APP_DIR}/Contents/Frameworks"
+SDL_HEAD="${APP_FRAME}/SDL2.framework/Headers"
+APP_SDLH="${BUILD_DIR}/SDL/include"
+# /Users/quilt/Documents/GitHub/quiltsync/build/SDL/include/SDL.h
 
-echo "-- Clean previous build (if any) and move to build folder"
-rm -rf build
-mkdir build
+echo "-- Clean previous builds (if any) and move to build folder"
+rm -rf $BUILD_DIR
+mkdir -p $BUILD_DIR
+mkdir -p $APP_FRAME
 
 echo "-- Create initial $APP_NAME.app package"
+echo "Build $APP_NAME version $APP_VERSION org $APP_ORG by $AUTHOR"
+echo "App will launch with $APP_SCRIPT using icon $ICON_PATH"
 $PLATYPUS -DBR -y \
     -i "$ICON_PATH" \
     -a "$APP_NAME" \
@@ -110,80 +130,80 @@ $PLATYPUS -DBR -y \
     -I "$APP_ORG" \
     -X "*" \
     "$APP_SCRIPT" \
-    "$SCRIPT_PATH/build/$APP_NAME.app"
+    "$APP_DIR"
+    
+echo "-- Finished $PLATYPUS"
+ls -R "${APP_DIR}/Contents"
 
 # Platypus? sets non-blocking mode. That was leading to an error during openssl or python3 build.
 $PYTHON -c "import fcntl; fcntl.fcntl(1, fcntl.F_SETFL, 0)"
 
 echo "-- Entering build folder"
-pushd build
-
-echo "-- Create $APP_NAME.app/Contents/Frameworks directory"
-mkdir -p "$APP_NAME.app/Contents/Frameworks"
+pushd  $BUILD_DIR
+pwd
 
 echo "-- Download needed files"
-curl -L -O "http://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz"
-curl -L -O "https://www.python.org/ftp/python/${PYVER}/Python-${PYVER}.tgz"
-curl -L -O "https://github.com/libsdl-org/SDL/archive/refs/tags/${SDL_VERSION}.tar.gz"
-curl -L -O "https://github.com/libsdl-org/SDL_mixer/archive/${SDL_MIXER_VERSION}.tar.gz"
-curl -L -O "https://github.com/libsdl-org/SDL_image/archive/${SDL_IMAGE_VERSION}.tar.gz"
-curl -L -O "https://github.com/libsdl-org/SDL_ttf/archive/refs/tags/${SDL_TTF_VERSION}.tar.gz"
-
-echo "-- Set MACOSX_DEPLOYMENT_TARGET=10.9"
-export SDKROOT=$(xcrun -sdk macosx --show-sdk-path)
-export MACOSX_DEPLOYMENT_TARGET=10.9
+../download.sh "http://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz"
+../download.sh "https://www.python.org/ftp/python/${PYVER}/Python-${PYVER}.tgz"
+../download.sh "https://github.com/libsdl-org/SDL/archive/refs/tags/${SDL_VERSION}.tar.gz"
+../download.sh "https://github.com/libsdl-org/SDL_mixer/archive/${SDL_MIXER_VERSION}.tar.gz"
+../download.sh "https://github.com/libsdl-org/SDL_image/archive/${SDL_IMAGE_VERSION}.tar.gz"
+../download.sh "https://github.com/libsdl-org/SDL_ttf/archive/refs/tags/${SDL_TTF_VERSION}.tar.gz"
 
 echo "-- Build SDL2 (Universal)"
-tar -xvf "${SDL_VERSION}.tar.gz"
+tar -xf "${SDL_VERSION}.tar.gz"
 mv "SDL-${SDL_VERSION}" "SDL"
 pushd "SDL"
 xcodebuild ONLY_ACTIVE_ARCH=NO -project Xcode/SDL/SDL.xcodeproj -target Framework -configuration Release
 popd
 
 echo "-- Copy SDL2.framework to ${APP_NAME}.app/Contents/Frameworks"
-cp -R SDL/Xcode/SDL/build/Release/SDL2.framework "${APP_NAME}.app/Contents/Frameworks"
+cp -R $SDL_REL "$APP_FRAME"
+mkdir -p $HOME/Library/Frameworks
+cp -R $SDL_REL "$HOME/Library/Frameworks/"
+
 
 echo "-- Build SDL2_mixer (Universal)"
-tar -xvf "${SDL_MIXER_VERSION}.tar.gz"
+tar -xf "${SDL_MIXER_VERSION}.tar.gz"
 mv "SDL_mixer-${SDL_MIXER_VERSION}" "SDL_mixer"
 pushd "SDL_mixer"
 xcodebuild ONLY_ACTIVE_ARCH=NO \
-        "HEADER_SEARCH_PATHS=\$HEADER_SEARCH_PATHS ${SCRIPT_PATH}/build/${APP_NAME}.app/Contents/Frameworks/SDL2.framework/Headers" \
-        "FRAMEWORK_SEARCH_PATHS=\$FRAMEWORK_SEARCH_PATHS ${SCRIPT_PATH}/build/${APP_NAME}.app/Contents/Frameworks" \
+        "HEADER_SEARCH_PATHS=\$HEADER_SEARCH_PATHS ${SDL_HEAD} ${APP_SDLH}" \
+        "FRAMEWORK_SEARCH_PATHS=\$FRAMEWORK_SEARCH_PATHS ${APP_FRAME}"\
         -project Xcode/SDL_mixer.xcodeproj -target Framework -configuration Release
 popd
 
 echo "-- Copy SDL2_mixer.framework to ${APP_NAME}.app/Contents/Frameworks"
-cp -R SDL_mixer/Xcode/build/Release/SDL2_mixer.framework "${APP_NAME}.app/Contents/Frameworks"
+cp -R SDL_mixer/Xcode/build/Release/SDL2_mixer.framework "${APP_FRAME}"
 
 echo "-- Build SDL2_image (Universal)"
-tar -xvf "${SDL_IMAGE_VERSION}.tar.gz"
+tar -xf "${SDL_IMAGE_VERSION}.tar.gz"
 mv "SDL_image-${SDL_IMAGE_VERSION}" "SDL_image"
 pushd "SDL_image"
 xcodebuild ONLY_ACTIVE_ARCH=NO \
-        "HEADER_SEARCH_PATHS=\$HEADER_SEARCH_PATHS ${SCRIPT_PATH}/build/${APP_NAME}.app/Contents/Frameworks/SDL2.framework/Headers" \
-        "FRAMEWORK_SEARCH_PATHS=\$FRAMEWORK_SEARCH_PATHS ${SCRIPT_PATH}/build/${APP_NAME}.app/Contents/Frameworks" \
+        "HEADER_SEARCH_PATHS=\$HEADER_SEARCH_PATHS ${SDL_HEAD} ${APP_SDLH}" \
+        "FRAMEWORK_SEARCH_PATHS=\$FRAMEWORK_SEARCH_PATHS ${APP_FRAME}"\
         -project Xcode/SDL_image.xcodeproj -target Framework -configuration Release
 popd
 
 echo "-- Copy SDL2_image.framework to ${APP_NAME}.app/Contents/Frameworks"
-cp -R SDL_image/Xcode/build/Release/SDL2_image.framework "${APP_NAME}.app/Contents/Frameworks"
+cp -R SDL_image/Xcode/build/Release/SDL2_image.framework "${APP_FRAME}"
 
 echo "-- Build SDL2_ttf (Universal)"
-tar -xvf "${SDL_TTF_VERSION}.tar.gz"
+tar -xf "${SDL_TTF_VERSION}.tar.gz"
 mv "SDL_ttf-${SDL_TTF_VERSION}" "SDL_ttf"
 pushd "SDL_ttf"
 xcodebuild ONLY_ACTIVE_ARCH=NO \
-        "HEADER_SEARCH_PATHS=\$HEADER_SEARCH_PATHS ${SCRIPT_PATH}/build/${APP_NAME}.app/Contents/Frameworks/SDL2.framework/Headers" \
-        "FRAMEWORK_SEARCH_PATHS=\$FRAMEWORK_SEARCH_PATHS ${SCRIPT_PATH}/build/${APP_NAME}.app/Contents/Frameworks" \
+        "HEADER_SEARCH_PATHS=\$HEADER_SEARCH_PATHS ${SDL_HEAD} ${APP_SDLH}" \
+        "FRAMEWORK_SEARCH_PATHS=\$FRAMEWORK_SEARCH_PATHS ${APP_FRAME}" \
         -project Xcode/SDL_ttf.xcodeproj -target Framework -configuration Release
 popd
 
 echo "-- Copy SDL2_ttf.framework to ${APP_NAME}.app/Contents/Frameworks"
-cp -R SDL_ttf/Xcode/build/Release/SDL2_ttf.framework "${APP_NAME}.app/Contents/Frameworks"
+cp -R SDL_ttf/Xcode/build/Release/SDL2_ttf.framework "${APP_FRAME}"
 
-echo "-- Build OpenSSL (x86_64)"
-tar -xvf "openssl-${OPENSSL_VERSION}.tar.gz"
+echo "-- Build OpenSSL - x86_64"
+tar -xf "openssl-${OPENSSL_VERSION}.tar.gz"
 mv "openssl-${OPENSSL_VERSION}" "openssl-${OPENSSL_VERSION}_x86_64"
 pushd "openssl-${OPENSSL_VERSION}_x86_64"
 ./Configure darwin64-x86_64-cc
@@ -191,8 +211,8 @@ make clean
 make build_libs
 popd
 
-echo "-- Build OpenSSL (arm64)"
-tar -xvf "openssl-${OPENSSL_VERSION}.tar.gz"
+echo "-- Build OpenSSL - arm64"
+tar -xf "openssl-${OPENSSL_VERSION}.tar.gz"
 mv "openssl-${OPENSSL_VERSION}" "openssl-${OPENSSL_VERSION}_arm64"
 pushd "openssl-${OPENSSL_VERSION}_arm64"
 ./Configure darwin64-arm64-cc
@@ -208,9 +228,9 @@ lipo "openssl-${OPENSSL_VERSION}_x86_64/libcrypto.a" "openssl-${OPENSSL_VERSION}
 lipo "openssl-${OPENSSL_VERSION}_x86_64/libssl.a" "openssl-${OPENSSL_VERSION}_arm64/libssl.a" -create -output "openssl/lib/libssl.a"
 
 echo "-- Build python from scratch"
-KIVY_APP_PYTHON_PREFIX="${SCRIPT_PATH}/build/${APP_NAME}.app/Contents/Resources/python3"
+KIVY_APP_PYTHON_PREFIX="${APP_FRAME}/Resources/python3"
 KIVY_APP_PYTHON_BIN="${KIVY_APP_PYTHON_PREFIX}/bin/python3"
-tar -xvf "Python-${PYVER}.tgz"
+tar -xf "Python-${PYVER}.tgz"
 pushd "Python-${PYVER}"
 ./configure --prefix=$KIVY_APP_PYTHON_PREFIX --enable-universalsdk --disable-test-modules --with-universal-archs=universal2 --with-openssl=../openssl
 make
@@ -218,7 +238,7 @@ make install
 popd
 
 echo "-- Create a virtualenv in ${APP_NAME}.app/Contents/Resources"
-pushd "$APP_NAME.app/Contents/Resources/"
+pushd "${APP_DIR}/Contents/Resources/"
 $KIVY_APP_PYTHON_BIN -m pip install --upgrade pip virtualenv --user
 $KIVY_APP_PYTHON_BIN -m virtualenv venv
 
@@ -227,7 +247,7 @@ source venv/bin/activate
 popd
 
 echo "-- Build kivy from scratch"
-export KIVY_SDL2_FRAMEWORKS_SEARCH_PATH="${SCRIPT_PATH}/build/${APP_NAME}.app/Contents/Frameworks"
+export KIVY_SDL2_FRAMEWORKS_SEARCH_PATH="${APP_FRAME}"
 python3 -m pip install Cython
 if [ -d "$KIVY_PATH" ]; then
     python3 -m pip install "${KIVY_PATH}[${EXTRAS}]"
@@ -236,7 +256,7 @@ else
 fi
 
 echo "-- Relocate SDL2 frameworks"
-pushd $APP_NAME.app
+pushd $APP_DIR
 python3 -m pip install git+https://github.com/tito/osxrelocator
 osxrelocator -r . @rpath/SDL2.framework/Versions/A/SDL2 @executable_path/../../../../Contents/Frameworks/SDL2.framework/Versions/A/SDL2
 osxrelocator -r . @rpath/SDL2_ttf.framework/Versions/A/SDL2_ttf @executable_path/../../../../Contents/Frameworks/SDL2_ttf.framework/Versions/A/SDL2_ttf
@@ -248,24 +268,24 @@ echo "-- Deactivate virtualenv, is time to relocate things"
 deactivate
 
 echo "-- Relocate virtualenv"
-pushd "$APP_NAME.app/Contents/Resources/venv/bin"
+pushd "$APP_DIR/Contents/Resources/venv/bin"
 rm python
 ln -s ../../python3/bin/python3 python
 sed -E -i '.bak' 's#^VIRTUAL_ENV=.*#VIRTUAL_ENV=$(cd $(dirname "$BASH_SOURCE"); dirname `pwd`)#' activate
 popd
 
-echo "-- Copy kivy_activate to ${APP_NAME}.app/Contents/Resources/venv/bin"
-cp "${SCRIPT_PATH}/data/kivy_activate" "${APP_NAME}.app/Contents/Resources/venv/bin"
+echo "-- Copy kivy_activate to ${APP_DIR}/Contents/Resources/venv/bin"
+cp "${SCRIPT_PATH}/data/kivy_activate" "${APP_DIR}/Contents/Resources/venv/bin"
 
-echo "-- Let's fix Frameworks signing."
-codesign -fs - "${APP_NAME}.app/Contents/Frameworks/SDL2.framework/Versions/A/SDL2"
-codesign -fs - "${APP_NAME}.app/Contents/Frameworks/SDL2_ttf.framework/Versions/A/SDL2_ttf"
-codesign -fs - "${APP_NAME}.app/Contents/Frameworks/SDL2_image.framework/Versions/A/SDL2_image"
-codesign -fs - "${APP_NAME}.app/Contents/Frameworks/SDL2_mixer.framework/Versions/A/SDL2_mixer"
+echo "-- How we fix Frameworks signing"
+codesign -fs - "${APP_FRAME}/SDL2.framework/Versions/A/SDL2"
+codesign -fs - "${APP_FRAME}/SDL2_ttf.framework/Versions/A/SDL2_ttf"
+codesign -fs - "${APP_FRAME}/SDL2_image.framework/Versions/A/SDL2_image"
+codesign -fs - "${APP_FRAME}/SDL2_mixer.framework/Versions/A/SDL2_mixer"
 
 echo "-- Launch relocate.sh to relocate deps"
-../relocate.sh "$APP_NAME.app"
+../relocate.sh "$APP_DIR"
 
 popd
 
-echo "-- Done !"
+echo "-- Done"

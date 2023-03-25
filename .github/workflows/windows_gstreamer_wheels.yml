@@ -79,7 +79,7 @@ jobs:
         . .\ci\windows_ci.ps1
         Create-Packages
     - name: Upload wheels as artifact
-      uses: actions/upload-artifact@3
+      uses: actions/upload-artifact@v3
       with:
         name: gstreamer_wheels
         path: dist

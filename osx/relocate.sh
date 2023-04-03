@@ -28,6 +28,11 @@ pushd "$APP_PATH"
 find . -name "*.pyc" -print0 | xargs -0 rm
 find . -name "*.pyo" -print0 | xargs -0 rm
 
+echo "Remove pyvenv.cfg content"
+pushd "$APP_PATH/Contents/Resources/venv"
+echo "" > pyvenv.cfg
+popd
+
 echo "Making scripts relative"
 pushd "$APP_PATH/Contents/Resources/venv/bin"
 

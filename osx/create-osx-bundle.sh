@@ -23,12 +23,8 @@ Requirements::
 
 KIVY_PATH="master"
 EXTRAS="base"
-PYVER="3.9.9"
-OPENSSL_VERSION="1.1.1l"
-SDL_VERSION="release-2.0.20"
-SDL_IMAGE_VERSION="168ceb577c245c91801c1bcaf970ef31c9b4d7ba"
-SDL_MIXER_VERSION="64120a41f62310a8be9bb97116e15a95a892e39d"
-SDL_TTF_VERSION="release-2.0.18"
+PYVER="3.11.2"
+OPENSSL_VERSION="1.1.1t"
 APP_NAME="Kivy"
 APP_VERSION="master"
 AUTHOR="Kivy Developers"
@@ -116,71 +112,23 @@ $PLATYPUS -DBR -y \
 $PYTHON -c "import fcntl; fcntl.fcntl(1, fcntl.F_SETFL, 0)"
 
 echo "-- Entering build folder"
-pushd build
-
-echo "-- Create $APP_NAME.app/Contents/Frameworks directory"
-mkdir -p "$APP_NAME.app/Contents/Frameworks"
+BUILD_FOLDER=$(pwd)/build
+pushd $BUILD_FOLDER
 
 echo "-- Download needed files"
 curl -L -O "http://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz"
 curl -L -O "https://www.python.org/ftp/python/${PYVER}/Python-${PYVER}.tgz"
-curl -L -O "https://github.com/libsdl-org/SDL/archive/refs/tags/${SDL_VERSION}.tar.gz"
-curl -L -O "https://github.com/libsdl-org/SDL_mixer/archive/${SDL_MIXER_VERSION}.tar.gz"
-curl -L -O "https://github.com/libsdl-org/SDL_image/archive/${SDL_IMAGE_VERSION}.tar.gz"
-curl -L -O "https://github.com/libsdl-org/SDL_ttf/archive/refs/tags/${SDL_TTF_VERSION}.tar.gz"
+
+echo "-- Copy the Kivy dependencies build script, or download it (from master) if not available"
+if [ -f "$KIVY_PATH/tools/build_macos_dependencies.sh" ]; then
+    cp "$KIVY_PATH/tools/build_macos_dependencies.sh" .
+else
+    curl -L -O "https://raw.githubusercontent.com/kivy/kivy/master/tools/build_macos_dependencies.sh"
+fi
 
 echo "-- Set MACOSX_DEPLOYMENT_TARGET=10.9"
 export SDKROOT=$(xcrun -sdk macosx --show-sdk-path)
 export MACOSX_DEPLOYMENT_TARGET=10.9
-
-echo "-- Build SDL2 (Universal)"
-tar -xvf "${SDL_VERSION}.tar.gz"
-mv "SDL-${SDL_VERSION}" "SDL"
-pushd "SDL"
-xcodebuild ONLY_ACTIVE_ARCH=NO -project Xcode/SDL/SDL.xcodeproj -target Framework -configuration Release
-popd
-
-echo "-- Copy SDL2.framework to ${APP_NAME}.app/Contents/Frameworks"
-cp -R SDL/Xcode/SDL/build/Release/SDL2.framework "${APP_NAME}.app/Contents/Frameworks"
-
-echo "-- Build SDL2_mixer (Universal)"
-tar -xvf "${SDL_MIXER_VERSION}.tar.gz"
-mv "SDL_mixer-${SDL_MIXER_VERSION}" "SDL_mixer"
-pushd "SDL_mixer"
-xcodebuild ONLY_ACTIVE_ARCH=NO \
-        "HEADER_SEARCH_PATHS=\$HEADER_SEARCH_PATHS ${SCRIPT_PATH}/build/${APP_NAME}.app/Contents/Frameworks/SDL2.framework/Headers" \
-        "FRAMEWORK_SEARCH_PATHS=\$FRAMEWORK_SEARCH_PATHS ${SCRIPT_PATH}/build/${APP_NAME}.app/Contents/Frameworks" \
-        -project Xcode/SDL_mixer.xcodeproj -target Framework -configuration Release
-popd
-
-echo "-- Copy SDL2_mixer.framework to ${APP_NAME}.app/Contents/Frameworks"
-cp -R SDL_mixer/Xcode/build/Release/SDL2_mixer.framework "${APP_NAME}.app/Contents/Frameworks"
-
-echo "-- Build SDL2_image (Universal)"
-tar -xvf "${SDL_IMAGE_VERSION}.tar.gz"
-mv "SDL_image-${SDL_IMAGE_VERSION}" "SDL_image"
-pushd "SDL_image"
-xcodebuild ONLY_ACTIVE_ARCH=NO \
-        "HEADER_SEARCH_PATHS=\$HEADER_SEARCH_PATHS ${SCRIPT_PATH}/build/${APP_NAME}.app/Contents/Frameworks/SDL2.framework/Headers" \
-        "FRAMEWORK_SEARCH_PATHS=\$FRAMEWORK_SEARCH_PATHS ${SCRIPT_PATH}/build/${APP_NAME}.app/Contents/Frameworks" \
-        -project Xcode/SDL_image.xcodeproj -target Framework -configuration Release
-popd
-
-echo "-- Copy SDL2_image.framework to ${APP_NAME}.app/Contents/Frameworks"
-cp -R SDL_image/Xcode/build/Release/SDL2_image.framework "${APP_NAME}.app/Contents/Frameworks"
-
-echo "-- Build SDL2_ttf (Universal)"
-tar -xvf "${SDL_TTF_VERSION}.tar.gz"
-mv "SDL_ttf-${SDL_TTF_VERSION}" "SDL_ttf"
-pushd "SDL_ttf"
-xcodebuild ONLY_ACTIVE_ARCH=NO \
-        "HEADER_SEARCH_PATHS=\$HEADER_SEARCH_PATHS ${SCRIPT_PATH}/build/${APP_NAME}.app/Contents/Frameworks/SDL2.framework/Headers" \
-        "FRAMEWORK_SEARCH_PATHS=\$FRAMEWORK_SEARCH_PATHS ${SCRIPT_PATH}/build/${APP_NAME}.app/Contents/Frameworks" \
-        -project Xcode/SDL_ttf.xcodeproj -target Framework -configuration Release
-popd
-
-echo "-- Copy SDL2_ttf.framework to ${APP_NAME}.app/Contents/Frameworks"
-cp -R SDL_ttf/Xcode/build/Release/SDL2_ttf.framework "${APP_NAME}.app/Contents/Frameworks"
 
 echo "-- Build OpenSSL (x86_64)"
 tar -xvf "openssl-${OPENSSL_VERSION}.tar.gz"
@@ -212,28 +160,87 @@ KIVY_APP_PYTHON_PREFIX="${SCRIPT_PATH}/build/${APP_NAME}.app/Contents/Resources/
 KIVY_APP_PYTHON_BIN="${KIVY_APP_PYTHON_PREFIX}/bin/python3"
 tar -xvf "Python-${PYVER}.tgz"
 pushd "Python-${PYVER}"
-./configure --prefix=$KIVY_APP_PYTHON_PREFIX --enable-universalsdk --disable-test-modules --with-universal-archs=universal2 --with-openssl=../openssl
+PKG_CONFIG="" ./configure --prefix=$KIVY_APP_PYTHON_PREFIX --enable-universalsdk --disable-test-modules --with-universal-archs=universal2 --with-openssl=../openssl
 make
 make install
 popd
 
+echo "-- Build Kivy dependencies via build_macos_dependencies.sh"
+chmod +x build_macos_dependencies.sh
+./build_macos_dependencies.sh
+
 echo "-- Create a virtualenv in ${APP_NAME}.app/Contents/Resources"
 pushd "$APP_NAME.app/Contents/Resources/"
 $KIVY_APP_PYTHON_BIN -m pip install --upgrade pip virtualenv --user
-$KIVY_APP_PYTHON_BIN -m virtualenv venv
+$KIVY_APP_PYTHON_BIN -m venv venv
 
 echo "-- Activate the just created virtualenv"
 source venv/bin/activate
 popd
 
-echo "-- Build kivy from scratch"
-export KIVY_SDL2_FRAMEWORKS_SEARCH_PATH="${SCRIPT_PATH}/build/${APP_NAME}.app/Contents/Frameworks"
-python3 -m pip install Cython
+echo "-- Ensure KIVY_DEPS_ROOT is set to the dependencies folder"
+export KIVY_DEPS_ROOT=$(pwd)/kivy-dependencies
+
+echo "-- Write (or load, and add Kivy) the requirements.in file"
 if [ -d "$KIVY_PATH" ]; then
-    python3 -m pip install "${KIVY_PATH}[${EXTRAS}]"
+    KIVY_REQ_LINE="${KIVY_PATH}[${EXTRAS}]"
 else
-    python3 -m pip install "kivy[${EXTRAS}] @ $KIVY_PATH"
+    KIVY_REQ_LINE="kivy[${EXTRAS}] @ $KIVY_PATH"
 fi
+echo $KIVY_REQ_LINE > kivy-app-requirements.in
+
+echo "-- Compile the requirements.txt file via pip-compile, so we have a full list of dependencies"
+# This step is needed as the --platform option during pip install requires --no-deps
+pip install pip-tools
+pip-compile kivy-app-requirements.in --no-annotate --no-header -o kivy-app-requirements.txt
+
+echo "-- Install the requirements via pip"
+
+
+# This will install macosx_10_9_universal2 and none wheels from PyPI, if available.
+# If not, it will install the source distribution and try to build it locally.
+
+SITE_PACKAGES_DIR=$(python -c "import site; print(site.getsitepackages()[0])")
+
+# check if pillow is in kivy-app-requirements.txt file, if so, install it
+if grep -q "pillow" kivy-app-requirements.txt; then
+    echo "-- Install Pillow via pip (needs to be done separately as it requires specific --global-option flags) and additional dependencies"
+
+    pushd $BUILD_FOLDER
+
+    echo "-- Download needed dependencies (libjpeg, zlib)"
+    curl -L -O "http://www.ijg.org/files/jpegsrc.v9d.tar.gz"
+    curl -L -O "https://zlib.net/zlib-1.2.13.tar.gz"
+
+    echo "-- Build libjpeg (universal2)"
+    tar -xvf "jpegsrc.v9d.tar.gz"
+    pushd jpeg-9d
+    CFLAGS="-arch x86_64 -arch arm64" ./configure --enable-shared=no --enable-static=yes --prefix=$BUILD_FOLDER/jpeg-9d/build
+    make clean
+    make install
+    popd
+
+    echo "-- Build zlib (universal2)"
+    tar -xvf "zlib-1.2.13.tar.gz"
+    pushd zlib-1.2.13
+    CFLAGS="-arch x86_64 -arch arm64" ./configure  --prefix=$BUILD_FOLDER/zlib-1.2.13/build --static
+    make clean
+    make install
+    popd
+
+    popd
+
+    echo "-- Build Pillow (universal2)"
+    CFLAGS="-I$BUILD_FOLDER/jpeg-9d/build/include -I$BUILD_FOLDER/zlib-1.2.13/build/include" \
+    LDFLAGS="-L$BUILD_FOLDER/jpeg-9d/build/lib -L$BUILD_FOLDER/zlib-1.2.13/build/lib" \
+    PKG_CONFIG="" \
+    pip install --platform macosx_10_9_universal2 --no-deps --target $SITE_PACKAGES_DIR Pillow --global-option="build_ext" --global-option="--disable-platform-guessing"
+
+    echo "-- Remove Pillow from kivy-app-requirements.txt file"
+    sed -i '' '/pillow/d' kivy-app-requirements.txt
+fi
+
+pip install --platform macosx_10_9_universal2 --no-deps --target $SITE_PACKAGES_DIR -r kivy-app-requirements.txt
 
 echo "-- Relocate SDL2 frameworks"
 pushd $APP_NAME.app
@@ -249,13 +256,19 @@ deactivate
 
 echo "-- Relocate virtualenv"
 pushd "$APP_NAME.app/Contents/Resources/venv/bin"
+rm python3
 rm python
-ln -s ../../python3/bin/python3 python
+ln -s ../../python3/bin/python3 python3
+ln -s python3 python
 sed -E -i '.bak' 's#^VIRTUAL_ENV=.*#VIRTUAL_ENV=$(cd $(dirname "$BASH_SOURCE"); dirname `pwd`)#' activate
 popd
 
 echo "-- Copy kivy_activate to ${APP_NAME}.app/Contents/Resources/venv/bin"
 cp "${SCRIPT_PATH}/data/kivy_activate" "${APP_NAME}.app/Contents/Resources/venv/bin"
+
+
+echo "-- Copy Kivy dependencies into $APP_NAME.app/Contents/Frameworks directory"
+cp -R "$KIVY_DEPS_ROOT/dist/frameworks/." "$APP_NAME.app/Contents/Frameworks"
 
 echo "-- Let's fix Frameworks signing."
 codesign -fs - "${APP_NAME}.app/Contents/Frameworks/SDL2.framework/Versions/A/SDL2"

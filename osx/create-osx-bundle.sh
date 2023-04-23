@@ -126,9 +126,9 @@ else
     curl -L -O "https://raw.githubusercontent.com/kivy/kivy/master/tools/build_macos_dependencies.sh"
 fi
 
-echo "-- Set MACOSX_DEPLOYMENT_TARGET=10.9"
+echo "-- Set MACOSX_DEPLOYMENT_TARGET=10.13"
 export SDKROOT=$(xcrun -sdk macosx --show-sdk-path)
-export MACOSX_DEPLOYMENT_TARGET=10.9
+export MACOSX_DEPLOYMENT_TARGET=10.13
 
 echo "-- Build OpenSSL (x86_64)"
 tar -xvf "openssl-${OPENSSL_VERSION}.tar.gz"

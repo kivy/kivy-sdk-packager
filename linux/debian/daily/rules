@@ -23,6 +23,7 @@ override_dh_installdocs:
 	mkdir pypackages;
 	python3 -m pip list;
 	python3 -m pip install $(CURDIR)/cython -t $(CURDIR)/pypackages --no-deps --upgrade || true;
+	patch doc/sources/conf.py < kivy-ppa-patches/disable-sphinxcontrib-jquery.patch;
 	python3 -m pip list;
 	$(MAKE) PYTHON=python3 force;
 	cd doc && PYTHONPATH=..:$PYTHONPATH make html;

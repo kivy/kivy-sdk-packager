@@ -1,3 +1,9 @@
+kivy (2.2.0-0) stable; urgency=medium
+
+  * update to new release
+
+ -- Mirko Galimberti <me@mirkogalimberti.com>  Sat, 20 May 2023 14:34:00 +0200
+
 kivy (2.1.0-0) stable; urgency=medium
 
   * update to new release

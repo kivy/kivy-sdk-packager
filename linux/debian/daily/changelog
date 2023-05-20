@@ -1,3 +1,9 @@
+kivy (2.3.0-dev) UNRELEASED; urgency=medium
+
+  * update to new release
+
+ -- Mirko Galimberti <me@mirkogalimberti.com>  Sat, 20 May 2022 14:35:00 +0200
+
 kivy (2.2.0-dev) UNRELEASED; urgency=medium
 
   * update to new release

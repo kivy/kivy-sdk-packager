@@ -1,9 +1,9 @@
 from os import walk
 from .common import *
 
-__version__ = '0.6.0'
+__version__ = '0.7.0'
 
-sdl2_ver = '2.26.4'
+sdl2_ver = '2.28.5'
 sdl2_mixer_ver = '2.6.3'
 sdl2_ttf_ver = '2.20.2'
 sdl2_image_ver = '2.6.3'

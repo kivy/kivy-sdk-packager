@@ -66,6 +66,11 @@ def get_sdl2(cache, build_path, arch, package, output, download_only=False):
                 if dirpath and dirpath[0] == sep:
                     dirpath = dirpath[1:]
 
+                if dirpath == "optional":
+                    # SDL_* optional libraries should stay in the same
+                    # directory as the main library
+                    dirpath = ""
+
                 for filename in filenames:
                     is_dev = d != 'bin'
                     if d == 'lib':

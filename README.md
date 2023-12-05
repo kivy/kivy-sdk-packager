@@ -40,7 +40,7 @@ Kivy SDKs for macOS are built as Disk Image (DMG) files.
 
 These can be built on the developer's machine. 
 
-> [!NOTE]: 
+> [!NOTE]
 > A Kivy.app build on one macOS version will typically not work on earlier
 > macOS versions. You need to build Kivy SDKs for macOS on the oldest machine 
 > you wish to support.

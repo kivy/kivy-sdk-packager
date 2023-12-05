@@ -32,7 +32,7 @@ specifications (recipes) provided here.
 | Stable Build | [Launchpad PPA packages](https://code.launchpad.net/~kivy-team/+archive/ubuntu/kivy/+packages)       | [Launchpad recipes](https://code.launchpad.net/~kivy-team/+archive/ubuntu/kivy/+packages)       |
 | Daily Build  | [Launchpad PPA packages](https://code.launchpad.net/~kivy-team/+archive/ubuntu/kivy-daily/+packages) | [Launchpad recipes](https://code.launchpad.net/~kivy-team/+archive/ubuntu/kivy-daily/+packages) |
 
-[Kivy SDK for Linux README](linux/README.md)
+[Kivy SDK for Linux README](linux/debian/README.md)
 
 ## macOS
 

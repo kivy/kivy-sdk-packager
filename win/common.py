@@ -181,7 +181,7 @@ data = [
 setup(
     name='{}',
     version='{}',
-    author='Kivy Crew',
+    author='Kivy Team and other contributors',
     author_email='kivy-dev@googlegroups.com',
     description='Repackaged binary dependency of Kivy.',
     url='http://kivy.org/',

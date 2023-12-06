@@ -27,13 +27,13 @@ jobs:
     env:
       PACKAGE_ARCH: ${{ matrix.arch }}
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v4
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: 3.x
       - name: Cache deps
-        uses: actions/cache@v1
+        uses: actions/cache@v3
         with:
           path: kivy_build_cache
           key: cache-packages-gstreamer-${{ matrix.arch }}-${{ hashFiles('win/gstreamer.py') }}
@@ -52,19 +52,19 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python: [ '3.7', '3.8', '3.9', '3.10', '3.11' ]
+        python: [ '3.7', '3.8', '3.9', '3.10', '3.11', '3.12' ]
         arch: ['x64', 'x86']
     env:
       PACKAGE_ARCH: ${{ matrix.arch }}
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v4
     - name: Set up Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python }}
         architecture: ${{ matrix.arch }}
     - name: Cache deps
-      uses: actions/cache@v1
+      uses: actions/cache@v3
       with:
         path: kivy_build_cache
         key: cache-packages-gstreamer-${{ matrix.arch }}-${{ hashFiles('win/gstreamer.py') }}
@@ -79,7 +79,7 @@ jobs:
         . .\ci\windows_ci.ps1
         Create-Packages
     - name: Upload wheels as artifact
-      uses: actions/upload-artifact@master
+      uses: actions/upload-artifact@v3
       with:
         name: gstreamer_wheels
         path: dist

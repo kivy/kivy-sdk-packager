@@ -1,12 +1,12 @@
 from os import walk
 from .common import *
 
-__version__ = '0.6.0'
+__version__ = '0.7.0'
 
-sdl2_ver = '2.26.4'
+sdl2_ver = '2.28.5'
 sdl2_mixer_ver = '2.6.3'
 sdl2_ttf_ver = '2.20.2'
-sdl2_image_ver = '2.6.3'
+sdl2_image_ver = '2.8.0'
 
 
 def get_sdl2(cache, build_path, arch, package, output, download_only=False):
@@ -65,6 +65,11 @@ def get_sdl2(cache, build_path, arch, package, output, download_only=False):
                 dirpath = dirpath.replace(src, '')
                 if dirpath and dirpath[0] == sep:
                     dirpath = dirpath[1:]
+
+                if dirpath == "optional":
+                    # SDL_* optional libraries should stay in the same
+                    # directory as the main library
+                    dirpath = ""
 
                 for filename in filenames:
                     is_dev = d != 'bin'

@@ -24,7 +24,7 @@ jobs:
     env:
       DEPOT_TOOLS_WIN_TOOLCHAIN: 0
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v4
       - name: Get dependecies
         run: |
           . .\ci\windows_ci.ps1
@@ -33,7 +33,7 @@ jobs:
         run: |
           . .\ci\windows_ci.ps1
           Build-angle
-      - uses: actions/upload-artifact@v1
+      - uses: actions/upload-artifact@v3
         with:
           name: angle_dlls
           path: angle_dlls
@@ -45,14 +45,14 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python: [ '3.7', '3.8', '3.9', '3.10', '3.11' ]
+        python: [ '3.7', '3.8', '3.9', '3.10', '3.11', '3.12' ]
         arch: ['x64', 'x86']
     env:
       PACKAGE_ARCH: ${{ matrix.arch }}
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v4
     - name: Set up Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python }}
         architecture: ${{ matrix.arch }}
@@ -60,7 +60,7 @@ jobs:
       run: |
         . .\ci\windows_ci.ps1
         Prepre-env
-    - uses: actions/download-artifact@v1
+    - uses: actions/download-artifact@v3
       with:
         name: angle_dlls
     - name: Build package
@@ -68,7 +68,7 @@ jobs:
         . .\ci\windows_ci.ps1
         Create-Packages
     - name: Upload wheels as artifact
-      uses: actions/upload-artifact@master
+      uses: actions/upload-artifact@v3
       with:
         name: angle_wheels
         path: dist

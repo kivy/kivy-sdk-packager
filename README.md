@@ -1,42 +1,55 @@
-Kivy SDK Packager
+kivy-sdk-packager
 =================
 
-Kivy Software Development Kit (Kivy SDK) is an installable package of all the 
-basic dependencies needed to run [Kivy framework](https://kivy.org) apps.
+`kivy-sdk-packager` is a collection of tools and scripts to build binaries 
+needed by [Kivy framework](https://kivy.org) apps for different platforms.
 
-Installing them as a single package may save time.
+>[!NOTE]
+> The name has become a misnomer as the project has evolved; it is no longer
+> about Software Development Kits.
 
-The Kivy SDK Packager (kivy-sdk-packager) repository contains
-the definitions of the SDK for each of three different platforms, and the tools 
-to build and distribute them.
+The tools are intended to be run in automated build environments, including
+Continuos Integration (CI) and Continuous Delivery (CD) tools.
 
-This repository contains scripts for Kivy SDK generation on Windows, macOS and
-Linux.
+Each platform targeted by the Kivy framework has its own needs. Hence, the 
+scripts for each platform are quite different in scope. This repository 
+contains scripts Windows, macOS and Linux.
 
-Kivy SDK Packager is managed by the [Kivy Team](https://kivy.org/about.html).
+For most platforms, this repository contains behind-the-scenes scripts. There is
+no need for developers of Kivy apps to be aware of them.
+
+macOS developers may want to use the scripts here for packaging, but it is 
+recommended that they use [Buildozer](https://buildozer.readthedocs.io/)
+instead. It encapsulates the use of `kivy-sdk-packager`.
+
+You can find a detailed README.md document inside every platform folder.
+They explain what the provided files do, what artefacts are produce, and what
+steps are required for each new release.
+
+kivy-sdk-packager is managed by the [Kivy Team](https://kivy.org/about.html).
 
 [![Backers on Open Collective](https://opencollective.com/kivy/backers/badge.svg)](#backers)
 [![Sponsors on Open Collective](https://opencollective.com/kivy/sponsors/badge.svg)](#sponsors)
-[![GitHub contributors](https://img.shields.io/github/contributors-anon/kivy/kivy-sdk-packager)](https://github.com/kivy/kivy-sdk-manager/graphs/contributors)
+[![GitHub contributors](https://img.shields.io/github/contributors-anon/kivy/kivy-sdk-packager)](https://github.com/kivy/kivy-sdk-packager/graphs/contributors)
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](code_of_conduct.md)
 
 ## Linux (Debian)
 
-Kivy SDKs for Linux are distributed as 
+Binaries Linux are distributed as 
 [Personal Package Archives](https://launchpad.net/ubuntu/+ppas) (PPA) files.
-They are built and hosted by [Launchpad](https://launchpad.net/) to the
+They are built by Canonical and hosted on [Launchpad](https://launchpad.net/) to the
 specifications (recipes) provided here.
 
-| Version      | SDK Binary                                                                                           | Source                                                                                          |
+| Version      | Binary                                                                                           | Source                                                                                          |
 |--------------|------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------|
 | Stable Build | [Launchpad PPA packages](https://code.launchpad.net/~kivy-team/+archive/ubuntu/kivy/+packages)       | [Launchpad recipes](https://code.launchpad.net/~kivy-team/+archive/ubuntu/kivy/+packages)       |
 | Daily Build  | [Launchpad PPA packages](https://code.launchpad.net/~kivy-team/+archive/ubuntu/kivy-daily/+packages) | [Launchpad recipes](https://code.launchpad.net/~kivy-team/+archive/ubuntu/kivy-daily/+packages) |
 
-[Kivy SDK for Linux README](linux/debian/README.md)
+More information: [Linux README](linux/debian/README.md)
 
 ## macOS
 
-Kivy SDKs for macOS are built as Disk Image (DMG) files.
+Binaries for macOS are built as Disk Image (.DMG) or App (.APP) files.
 
 These can be built on the developer's machine. 
 
@@ -45,21 +58,23 @@ These can be built on the developer's machine.
 > macOS versions. You need to build Kivy SDKs for macOS on the oldest machine 
 > you wish to support.
 
-[Buildozer](https://buildozer.readthedocs.io) builds and uses Kivy SDKs to 
-package macOS apps.
+[Buildozer](https://buildozer.readthedocs.io) encapsulates the use of 
+kivy-sdk-packager so the Kivy app developer does not need to be concerned with
+it.
 
 [![macOS Tests](https://github.com/kivy/kivy-sdk-packager/actions/workflows/test_macos.yaml/badge.svg)](https://github.com/kivy/kivy-sdk-packager/actions/workflows/test_macos.yaml)
 
-[Kivy SDK for macOS README](osx/README.md)
+More information: [macOS README](osx/README.md)
 
 ## Windows
 
-Kivy SDK for Windows are built as wheels that can be installed via 
+Binaries for Windows are built as wheels that can be installed via 
 [pip](https://pypi.org/project/pip/). They are uploaded and hosted on the 
 [Python Package Index](https://pypi.org/) (PyPI).
 
-Four variants are released, based on four different 
-[OpenGL ES](https://en.wikipedia.org/wiki/OpenGL_ES) implementations:
+Four variants are released - they contain support for different  
+[OpenGL ES](https://en.wikipedia.org/wiki/OpenGL_ES) implementations and other
+libraries:
 
 | Version                                                                 | PyPI Name                                                            |
 |-------------------------------------------------------------------------|----------------------------------------------------------------------|
@@ -68,34 +83,33 @@ Four variants are released, based on four different
 | [Gstreamer](https://gstreamer.freedesktop.org/)                         | [kivy-deps.gstreamer](https://pypi.org/project/kivy-deps.gstreamer/) |
 | [SDL2](https://www.libsdl.org/)                                         | [kivy-deps.sdl2](https://pypi.org/project/kivy-deps.sdl2/)           |
 
-
-
 [![Windows Angle wheels](https://github.com/kivy/kivy-sdk-packager/actions/workflows/windows_angle_wheels.yml/badge.svg)](https://github.com/kivy/kivy-sdk-packager/actions/workflows/windows_angle_wheels.yml)
 [![Windows Glew wheels](https://github.com/kivy/kivy-sdk-packager/actions/workflows/windows_glew_wheels.yml/badge.svg)](https://github.com/kivy/kivy-sdk-packager/actions/workflows/windows_glew_wheels.yml)
 [![Windows Gstreamer wheels](https://github.com/kivy/kivy-sdk-packager/actions/workflows/windows_gstreamer_wheels.yml/badge.svg)](https://github.com/kivy/kivy-sdk-packager/actions/workflows/windows_gstreamer_wheels.yml)
 [![Windows SDL2 wheels](https://github.com/kivy/kivy-sdk-packager/actions/workflows/windows_sdl2_wheels.yml/badge.svg)](https://github.com/kivy/kivy-sdk-packager/actions/workflows/windows_sdl2_wheels.yml)
 
-[Kivy SDK for Windows README](win/README.md)
+More information: [Windows README](win/README.md)
 
 ## License
 
-Kivy SDK Packager is [MIT licensed](LICENSE), actively developed by a great
+kivy-sdk-packager is [MIT licensed](LICENSE), actively developed by a great
 community and is supported by many projects managed by the 
 [Kivy Organization](https://www.kivy.org/about.html).
 
 ## Support
 
-Are you having trouble using Kivy SDK Packager or any of its related projects in the Kivy
-ecosystem?
+Are you having trouble using kivy-sdk-packager or any of its related projects in
+the Kivy ecosystem?
 Is there an error you don’t understand? Are you trying to figure out how to use 
 it? We have volunteers who can help!
 
 The best channels to contact us for support are listed in the latest 
-[Contact Us](https://github.com/kivy/kivy-sdk-packager/blob/master/CONTACT.md) document.
+[Contact Us](https://github.com/kivy/kivy-sdk-packager/blob/master/CONTACT.md) 
+document.
 
 ## Contributing
 
-Kivy SDK Packager is part of the [Kivy](https://kivy.org) ecosystem - a large group of
+kivy-sdk-packager is part of the [Kivy](https://kivy.org) ecosystem - a large group of
 products used by many thousands of developers for free, but it
 is built entirely by the contributions of volunteers. We welcome (and rely on) 
 users who want to give back to the community by contributing to the project.

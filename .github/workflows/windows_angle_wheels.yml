@@ -20,7 +20,7 @@ env:
 
 jobs:
   prepare_angle:
-    runs-on: windows-2019
+    runs-on: windows-latest
     env:
       DEPOT_TOOLS_WIN_TOOLCHAIN: 0
     steps:

@@ -63,6 +63,7 @@ jobs:
     - uses: actions/download-artifact@v3
       with:
         name: angle_dlls
+        path: angle_dlls
     - name: Build package
       run: |
         . .\ci\windows_ci.ps1

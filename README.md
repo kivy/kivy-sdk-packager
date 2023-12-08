@@ -23,7 +23,7 @@ recommended that they use [Buildozer](https://buildozer.readthedocs.io/)
 instead. It encapsulates the use of `kivy-sdk-packager`.
 
 You can find a detailed README.md document inside every platform folder.
-They explain what the provided files do, what artefacts are produce, and what
+They explain what the provided files do, what artefacts are produced, and what
 steps are required for each new release.
 
 kivy-sdk-packager is managed by the [Kivy Team](https://kivy.org/about.html).
@@ -35,7 +35,7 @@ kivy-sdk-packager is managed by the [Kivy Team](https://kivy.org/about.html).
 
 ## Linux (Debian)
 
-Binaries Linux are distributed as 
+Binaries for Linux are distributed as 
 [Personal Package Archives](https://launchpad.net/ubuntu/+ppas) (PPA) files.
 They are built by Canonical and hosted on [Launchpad](https://launchpad.net/) to the
 specifications (recipes) provided here.
@@ -53,10 +53,6 @@ Binaries for macOS are built as Disk Image (.DMG) or App (.APP) files.
 
 These can be built on the developer's machine. 
 
-> [!NOTE]
-> A Kivy.app build on one macOS version will typically not work on earlier
-> macOS versions. You need to build Kivy SDKs for macOS on the oldest machine 
-> you wish to support.
 
 [Buildozer](https://buildozer.readthedocs.io) encapsulates the use of 
 kivy-sdk-packager so the Kivy app developer does not need to be concerned with

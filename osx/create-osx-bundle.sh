@@ -2,25 +2,6 @@
 set -x # verbose
 set -e # exit on error
 
-USAGE="Creates a Kivy bundle that can be used to build your app into a dmg. See documentation.
-
-Usage: create-osx-bundle.sh [options]
-
-    -k --kivy     <Kivy version or path, default:master>  The local path to Kivy source or a git tag/branch/commit.
-    -e --extras   <Kivy extras selection, default:base>   The extras selection (base, full, dev ...).
-    -p --python   <Python version, default:3.9.9>         The Python version to use.
-    -n --name     <App name, default:Kivy>                The name of the app.
-    -v --version  <App version, default:master>           The version of the app.
-    -a --author   <Author, default:Kivy Developers>       The author name.
-    -o --org      <org, default:org.kivy.osxlauncher>     The org id used for the app.
-    -i --icon     <icon, default:data/icon.icns>          A icns icon file path.
-    -s --script   <app_main_script, default:data/script>  The script to run when the user clicks the app.
-
-Requirements::
-    Platypus  needs to be installed. Finally, any python3 version must be available for
-    initial scripting.
-"
-
 KIVY_PATH="master"
 EXTRAS="base"
 PYVER="3.11.2"
@@ -31,6 +12,25 @@ AUTHOR="Kivy Developers"
 APP_ORG="org.kivy.osxlauncher"
 ICON_PATH="data/icon.icns"
 APP_SCRIPT="data/script"
+
+USAGE="Creates a Kivy bundle that can be used to build your app into a dmg. See documentation.
+
+Usage: create-osx-bundle.sh [options]
+
+    -k --kivy     <Kivy version or path, default:${KIVY_PATH}>  The local path to Kivy source or a git tag/branch/commit.
+    -e --extras   <Kivy extras selection, default:${EXTRAS}>   The extras selection (base, full, dev ...).
+    -p --python   <Python version, default:${PYVER}>        The Python version to use.
+    -n --name     <App name, default:${APP_NAME}>                The name of the app.
+    -v --version  <App version, default:${APP_VERSION}>           The version of the app.
+    -a --author   <Author, default:${AUTHOR}>       The author name.
+    -o --org      <org, default:${APP_ORG}>     The org id used for the app.
+    -i --icon     <icon, default:${ICON_PATH}>          A icns icon file path.
+    -s --script   <app_main_script, default:${APP_SCRIPT}>  The script to run when the user clicks the app.
+
+Requirements::
+    Platypus  needs to be installed. Finally, any python3 version must be available for
+    initial scripting.
+"
 
 while [[ "$#" -gt 0 ]]; do
     # empty arg?
@@ -126,9 +126,9 @@ else
     curl -L -O "https://raw.githubusercontent.com/kivy/kivy/master/tools/build_macos_dependencies.sh"
 fi
 
-echo "-- Set MACOSX_DEPLOYMENT_TARGET=10.9"
+echo "-- Set MACOSX_DEPLOYMENT_TARGET=11.0"
 export SDKROOT=$(xcrun -sdk macosx --show-sdk-path)
-export MACOSX_DEPLOYMENT_TARGET=10.9
+export MACOSX_DEPLOYMENT_TARGET=11.0
 
 echo "-- Build OpenSSL (x86_64)"
 tar -xvf "openssl-${OPENSSL_VERSION}.tar.gz"
@@ -169,15 +169,6 @@ echo "-- Build Kivy dependencies via build_macos_dependencies.sh"
 chmod +x build_macos_dependencies.sh
 ./build_macos_dependencies.sh
 
-echo "-- Create a virtualenv in ${APP_NAME}.app/Contents/Resources"
-pushd "$APP_NAME.app/Contents/Resources/"
-$KIVY_APP_PYTHON_BIN -m pip install --upgrade pip virtualenv --user
-$KIVY_APP_PYTHON_BIN -m venv venv
-
-echo "-- Activate the just created virtualenv"
-source venv/bin/activate
-popd
-
 echo "-- Ensure KIVY_DEPS_ROOT is set to the dependencies folder"
 export KIVY_DEPS_ROOT=$(pwd)/kivy-dependencies
 
@@ -194,56 +185,27 @@ echo "-- Compile the requirements.txt file via pip-compile, so we have a full li
 pip install pip-tools
 pip-compile kivy-app-requirements.in --no-annotate --no-header -o kivy-app-requirements.txt
 
+echo "-- Call prepare-wheels.py to download (and fuse) all the wheels and source distributions"
+pip install -r ../requirements.txt
+WHEELS_FOLDER=$(pwd)/wheels
+$PYTHON ../prepare-wheels.py --requirements-file kivy-app-requirements.txt --python-version $PYVER --deployment-target $MACOSX_DEPLOYMENT_TARGET --output-folder $WHEELS_FOLDER
+
+echo "-- Create a virtualenv in ${APP_NAME}.app/Contents/Resources"
+pushd "$APP_NAME.app/Contents/Resources/"
+$KIVY_APP_PYTHON_BIN -m pip install --upgrade pip virtualenv --user
+$KIVY_APP_PYTHON_BIN -m venv venv
+
+echo "-- Activate the just created virtualenv"
+source venv/bin/activate
+popd
+
 echo "-- Install the requirements via pip"
-
-
-# This will install macosx_10_9_universal2 and none wheels from PyPI, if available.
-# If not, it will install the source distribution and try to build it locally.
-
 SITE_PACKAGES_DIR=$(python -c "import site; print(site.getsitepackages()[0])")
 
-# check if pillow is in kivy-app-requirements.txt file, if so, install it
-if grep -q "pillow" kivy-app-requirements.txt; then
-    echo "-- Install Pillow via pip (needs to be done separately as it requires specific --global-option flags) and additional dependencies"
+pip install --platform macosx_11_0_universal2 --find-links=$WHEELS_FOLDER --no-deps --target $SITE_PACKAGES_DIR -r kivy-app-requirements.txt
 
-    pushd $BUILD_FOLDER
-
-    echo "-- Download needed dependencies (libjpeg, zlib)"
-    curl -L -O "http://www.ijg.org/files/jpegsrc.v9d.tar.gz"
-    curl -L -O "https://zlib.net/zlib-1.2.13.tar.gz"
-
-    echo "-- Build libjpeg (universal2)"
-    tar -xvf "jpegsrc.v9d.tar.gz"
-    pushd jpeg-9d
-    CFLAGS="-arch x86_64 -arch arm64" ./configure --enable-shared=no --enable-static=yes --prefix=$BUILD_FOLDER/jpeg-9d/build
-    make clean
-    make install
-    popd
-
-    echo "-- Build zlib (universal2)"
-    tar -xvf "zlib-1.2.13.tar.gz"
-    pushd zlib-1.2.13
-    CFLAGS="-arch x86_64 -arch arm64" ./configure  --prefix=$BUILD_FOLDER/zlib-1.2.13/build --static
-    make clean
-    make install
-    popd
-
-    popd
-
-    echo "-- Build Pillow (universal2)"
-    CFLAGS="-I$BUILD_FOLDER/jpeg-9d/build/include -I$BUILD_FOLDER/zlib-1.2.13/build/include" \
-    LDFLAGS="-L$BUILD_FOLDER/jpeg-9d/build/lib -L$BUILD_FOLDER/zlib-1.2.13/build/lib" \
-    PKG_CONFIG="" \
-    pip install --platform macosx_10_9_universal2 --no-deps --target $SITE_PACKAGES_DIR Pillow --global-option="build_ext" --global-option="--disable-platform-guessing"
-
-    echo "-- Remove Pillow from kivy-app-requirements.txt file"
-    sed -i '' '/pillow/d' kivy-app-requirements.txt
-fi
-
-pip install --platform macosx_10_9_universal2 --no-deps --target $SITE_PACKAGES_DIR -r kivy-app-requirements.txt
-
-echo "-- Relocate SDL2 frameworks"
-pushd $APP_NAME.app
+echo "-- Relocate SDL2 frameworks on Kivy installation folder"
+pushd $SITE_PACKAGES_DIR/kivy
 python3 -m pip install git+https://github.com/tito/osxrelocator
 osxrelocator -r . @rpath/SDL2.framework/Versions/A/SDL2 @executable_path/../../../../Contents/Frameworks/SDL2.framework/Versions/A/SDL2
 osxrelocator -r . @rpath/SDL2_ttf.framework/Versions/A/SDL2_ttf @executable_path/../../../../Contents/Frameworks/SDL2_ttf.framework/Versions/A/SDL2_ttf
@@ -270,7 +232,12 @@ cp "${SCRIPT_PATH}/data/kivy_activate" "${APP_NAME}.app/Contents/Resources/venv/
 echo "-- Copy Kivy dependencies into $APP_NAME.app/Contents/Frameworks directory"
 cp -R "$KIVY_DEPS_ROOT/dist/frameworks/." "$APP_NAME.app/Contents/Frameworks"
 
+
+echo "-- Change png.framework path in SDL2_ttf"
+install_name_tool -change @rpath/png.framework/Versions/1.6.40/png @loader_path/../../../../Frameworks/png.framework/Versions/1.6.40/png "$APP_NAME.app/Contents/Frameworks/SDL2_ttf.framework/Versions/A/SDL2_ttf"
+
 echo "-- Let's fix Frameworks signing."
+codesign -fs - "${APP_NAME}.app/Contents/Frameworks/png.framework/Versions/1.6.40/png"
 codesign -fs - "${APP_NAME}.app/Contents/Frameworks/SDL2.framework/Versions/A/SDL2"
 codesign -fs - "${APP_NAME}.app/Contents/Frameworks/SDL2_ttf.framework/Versions/A/SDL2_ttf"
 codesign -fs - "${APP_NAME}.app/Contents/Frameworks/SDL2_image.framework/Versions/A/SDL2_image"

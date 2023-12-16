@@ -198,9 +198,15 @@ with open(args.requirements_file, encoding="utf-8") as f:
 
     for _line in _requirements_lines:
         # Ensure is a valid requirement
-        if parse_requirement(_line) is None:
-            logging.warning(
-                "Invalid requirement line: %s.", _line
+        try:
+            if parse_requirement(_line) is None:
+                logging.warning("Invalid requirement line: %s.", _line)
+                continue
+        except SyntaxError as e:
+            logging.warning("Invalid requirement line: %s. Error: %s", _line, e)
+            logging.info(
+                "This is not necessarily a problem. This could happen \
+                if the requirement is a URL or a local path."
             )
             continue
         requirements.append(

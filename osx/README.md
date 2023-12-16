@@ -1,15 +1,18 @@
-Kivy packaging for OS X
-=======================
+Kivy packaging for macOS
+========================
 
 This repository contains the scripts for packaging a Kivy based app into a installable dmg.
 
 **Important notice:** macOS 11 (or greater), with XCode 12.2 (or greater) is required to build a fully working universal2 ``.app`` due to https://bugs.python.org/issue42619
 
-Kivy versions supported: ``2.0.0+``. For older Kivy versions, use the corresponding stable branch.
+Kivy versions supported: ``2.2.0+``. For older Kivy versions, use the corresponding stable branch.
 
-The packaged dmg contains a Python virtualenv, Kivy and its binary dependencies such as SDL2. Kivy 
-provides an existing dmg containing the virtualenv and Kivy pre-installed that can be used
-as a base into which your app can be installed and packaged again as a dmg. Below are the steps:
+The packaged ``.app`` contains a Python virtualenv with ``kivy`` and its dependencies pre-installed.
+
+SDL2 frameworks are included in the app bundle, and the Kivy installation is configured to use them.
+
+Kivy, on every release, provides a ``Kivy.app`` that can be used as a base for your app, so you don't need to build it from scratch.
+Below are the steps to use the ``Kivy.app`` as a base for your app, or to build your app from scratch.
 
 * Get the Kivy sdk repo with e.g.
   ``git clone https://github.com/kivy/kivy-sdk-packager.git`` and ``cd`` into
@@ -19,7 +22,8 @@ as a base into which your app can be installed and packaged again as a dmg. Belo
 
         ./create-osx-bundle.sh -n MyApp -k ...
 
-    See in ``create-osx-bundle.sh`` for all the configuration options.
+    For all the configuration options, you can run ``./create-osx-bundle.sh -h``.
+
     This will build from scratch all the requirements (openssl, SDL2, SDL2_image, SDL2_mixer, SDL2_ttf, python3).
     A ``build`` directory is created to contain the``MyApp.app`` directory, where ``MyApp`` is the app's name.
   * To use the existing Kivy app bundle:
@@ -46,7 +50,7 @@ as a base into which your app can be installed and packaged again as a dmg. Belo
         source kivy_activate
         popd
 
-    On the default mac shell you **must** be in the bin directory containing ``activate`` to be
+    On the default macOS shell (zsh) you **must** be in the bin directory containing ``activate`` to be
     able to ``activate`` the virtualenv. ``kivy_activate`` is only necessary if you'll run
     Kivy in the environment - it sets up the Kivy home, and other Kivy environment
     variables.
@@ -64,13 +68,19 @@ as a base into which your app can be installed and packaged again as a dmg. Belo
               @executable_path/Contents/Frameworks/MyFramework.framework/Versions/A/MyFramework
 
       This should be customized for each framework. See the ``create-osx-bundle.sh`` script for examples.
-  * Install your dependencies with e.g. ``pip``::
+  * By using the ``prepare-wheels.py`` helper, download and prepare wheels before installing them.
+    This script will download the wheels, accordingly to your ``MACOSX_DEPLOYMENT_TARGET`` and merge them into a single ``universal2`` wheel if one is not available from PyPI.
 
-        python -m pip install ...
+    If no compatible wheel is available, the script will download the source distribution.
 
-  * Install your app::
+    To see all the available options, and usage instructions, run::
 
-        python -m pip install myapp
+        python prepare-wheels.py -h
+
+    Since this tool is rapidly evolving, and the process to install the downloaded 
+    wheels is done via ``pip``, consider looking at ``create-osx-bundle.sh`` for examples on how to use the downloaded artifacts.
+
+    :warning: Never install dependencies via ``pip`` from the virtual environment, without using the ``prepare-wheels.py`` helper, as it will install the architecture-specific wheels, and not the ``universal2`` ones.
 
   * Deactivate the virtualenv by running ``deactivate`` in the shell.
 * Reduce app size (optional):
@@ -124,7 +134,13 @@ A complete example using ``Kivy.app`` with a entry_point pointing to your app as
 
     git clone https://github.com/user/myapp.git
     git clone https://github.com/kivy/kivy-sdk-packager.git
+
+    python3 -m venv venv
+    source venv/bin/activate
+
     cd kivy-sdk-packager/osx
+
+    pip install -r requirements.txt
 
     curl -O -L https://xxx/Kivy-xxx.dmg
     hdiutil attach Kivy-xxx.dmg -mountroot .
@@ -134,12 +150,17 @@ A complete example using ``Kivy.app`` with a entry_point pointing to your app as
     ./fix-bundle-metadata.sh MyApp.app -n MyApp -v "0.1.1" -a "Name" -o \
         "org.myorg.myapp" -i "../../myapp/doc/source/images/myapp_icon.png"
 
+    # Prepare a my-app-requirements.txt file with your app's dependencies (even indirect ones)
+    # and run the following command to prepare the distributions to later be installed in the
+    # virtualenv.
+    python prepare-wheels.py --requirements-file my-app-requirements.txt --output-folder my-app-wheels
+
     pushd MyApp.app/Contents/Resources/venv/bin
     source activate
     popd
 
-    python -m pip install --upgrade pyobjus plyer ...
-    python -m pip install ../../myapp/
+    SITE_PACKAGES_DIR=$(python -c "import site; print(site.getsitepackages()[0])")
+    pip install --platform macosx_11_0_universal2 --find-links=./my-app-wheels --no-deps --target $SITE_PACKAGES_DIR -r my-app-requirements.txt
 
     # Reduce app size
     ./cleanup-app.sh MyApp.app
@@ -156,58 +177,12 @@ A complete example using ``Kivy.app`` with a entry_point pointing to your app as
 Example create app from scratch
 -------------------------------
 
-A complete example creating a bundle and building a dmg without using the prepared Kivy.app.
-Also using a entry_point pointing to your app as described above
-(notice the metadata and download URLs need to be replaced with actual metadata and URLs).
-The dependencies versions and url should be updated as needed. Note that gstreamer is not
-included::
+``create-osx-bundle.sh`` can be used to create a app bundle from scratch. It will download and
+build all the dependencies, and create a app bundle with a virtualenv with the dependencies
+installed.
 
-    # configure kivy
-    export CC=clang
-    export CXX=clang
-    export FFLAGS='-ff2c'
-    export USE_SDL2=1
-
-    # get the dependencies
-    export PLATYPUS=5.3
-
-    curl -O -L "http://www.sveinbjorn.org/files/software/platypus/platypus$PLATYPUS.zip"
-
-    unzip platypus$PLATYPUS.zip
-    gunzip Platypus.app/Contents/Resources/platypus_clt.gz
-    gunzip Platypus.app/Contents/Resources/ScriptExec.gz
-    mkdir -p /usr/local/bin
-    mkdir -p /usr/local/share/platypus
-    cp Platypus.app/Contents/Resources/platypus_clt /usr/local/bin/platypus
-    cp Platypus.app/Contents/Resources/ScriptExec /usr/local/share/platypus/ScriptExec
-    cp -a Platypus.app/Contents/Resources/MainMenu.nib /usr/local/share/platypus/MainMenu.nib
-    chmod -R 755 /usr/local/share/platypus
-
-    # create app
-    git clone https://github.com/user/myapp.git
-    git clone https://github.com/kivy/kivy-sdk-packager.git
-    cd kivy-sdk-packager/osx
-
-    ./create-osx-bundle.sh -k master -n MyApp -v "0.1.1" -a "Name" -o \
-        "org.myorg.myapp" -i "../../myapp/doc/source/images/myapp_icon.png" -g 0
-
-    pushd build/MyApp.app/Contents/Resources/venv/bin
-    source activate
-    popd
-
-    python -m pip install --upgrade pyobjus plyer ...
-    python -m pip install ../../../myapp/
-
-    # reduce app size
-    ./cleanup-app.sh MyApp.app
-
-    # the link needs to be created relative to the yourapp path, so go to that directory
-    pushd build/MyApp.app/Contents/Resources/
-    ln -s ./venv/bin/myapp yourapp
-    popd
-
-    ./relocate.sh build/MyApp.app
-    ./create-osx-dmg.sh build/MyApp.app MyApp
+You can later use the same steps as above to install your app and its dependencies, and create a
+dmg.
 
 
 Dev note:: Buildozer uses this repository for its OS X packaging process.

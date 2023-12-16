@@ -15,55 +15,47 @@ jobs:
     runs-on: ${{ matrix.runs_on }}
     strategy:
       matrix:
-        include:
-          - runs_on: macos-11
-            python: 3.9
-          - runs_on: apple-silicon-m1
-            python: 3.9.7
+        runs_on: ['macos-latest', 'apple-silicon-m1']
     name: macOS build dmg ( ${{ matrix.runs_on }} )
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Set up Python 3.x
-        # Needs to be skipped on our self-hosted runners tagged as 'apple-silicon-m1'
-        if: ${{ matrix.runs_on  != 'apple-silicon-m1' }}
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
-          python-version: ${{ matrix.python }}
+          python-version: 3.x
       - name: Install Platypus
         run: |
           source ci/osx_ci.sh
-          arm64_set_path_and_python_version ${{ matrix.python }}
           install_platypus
+      - name: Install build dependencies
+        run: |
+          brew install pkg-config cmake ninja
       - name: Create macOS App Bundle with extras [dev]
         run: |
           source ci/osx_ci.sh
-          arm64_set_path_and_python_version ${{ matrix.python }}
           cd osx
           ./create-osx-bundle.sh -e "dev"
       - name: Test Fix bundle metadata
         run: |
           source ci/osx_ci.sh
-          arm64_set_path_and_python_version ${{ matrix.python }}
           cd osx
           ./fix-bundle-metadata.sh build/Kivy.app -v "1.2.3"
           ./fix-bundle-metadata.sh build/Kivy.app -v "master"
       - name: Test Relocation
         run: |
           source ci/osx_ci.sh
-          arm64_set_path_and_python_version ${{ matrix.python }}
           cd osx
           ./relocate.sh build/Kivy.app
       - name: Test dmg creation and store it in osx_artifacts
         run: |
           source ci/osx_ci.sh
-          arm64_set_path_and_python_version ${{ matrix.python }}
           cd osx
           ./create-osx-dmg.sh build/Kivy.app Kivy
           cd ..
           mkdir osx_artifacts
           mv osx/Kivy.dmg osx_artifacts/${{ matrix.runs_on }}-Kivy.dmg
       - name: Upload dmg as artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: KivySDKPackager
           path: osx_artifacts
@@ -73,19 +65,19 @@ jobs:
     runs-on: ${{ matrix.runs_on }}
     strategy:
       matrix:
-        runs_on: [macos-11, apple-silicon-m1]
+        runs_on: ['macos-latest', 'apple-silicon-m1']
     name: macOS test dmg ( ${{ matrix.runs_on }} )
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Download dmg from artifacts
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: KivySDKPackager
           path: osx_artifacts
-      - name: Mount build from macos-11 runner on Apple Silicon runner
+      - name: Mount build from macos-latest runner on apple-silicon-m1 runner
         if: ${{ matrix.runs_on  == 'apple-silicon-m1' }}
-        run: hdiutil attach osx_artifacts/macos-11-Kivy.dmg -mountroot .
-      - name: Mount build from Apple Silicon runner on macos-11 runner
+        run: hdiutil attach osx_artifacts/macos-latest-Kivy.dmg -mountroot .
+      - name: Mount build from apple-silicon-m1n runner on macos-latest runner
         if: ${{ matrix.runs_on  != 'apple-silicon-m1' }}
         run: hdiutil attach osx_artifacts/apple-silicon-m1-Kivy.dmg -mountroot .
       - name: Copy Kivy.app to Applications

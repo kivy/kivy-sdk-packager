@@ -15,7 +15,9 @@ jobs:
     runs-on: ${{ matrix.runs_on }}
     strategy:
       matrix:
-        runs_on: ['macos-latest', 'apple-silicon-m1']
+        # macos-latest (ATM macos-14) runs on Apple Silicon,
+        # macos-13 runs on Intel
+        runs_on: [macos-latest, macos-13]
     name: macOS build dmg ( ${{ matrix.runs_on }} )
     steps:
       - uses: actions/checkout@v4
@@ -65,7 +67,9 @@ jobs:
     runs-on: ${{ matrix.runs_on }}
     strategy:
       matrix:
-        runs_on: ['macos-latest', 'apple-silicon-m1']
+        # macos-latest (ATM macos-14) runs on Apple Silicon,
+        # macos-13 runs on Intel
+        runs_on: [macos-latest, macos-13]
     name: macOS test dmg ( ${{ matrix.runs_on }} )
     steps:
       - uses: actions/checkout@v4
@@ -74,12 +78,12 @@ jobs:
         with:
           name: KivySDKPackager
           path: osx_artifacts
-      - name: Mount build from macos-latest runner on apple-silicon-m1 runner
-        if: ${{ matrix.runs_on  == 'apple-silicon-m1' }}
+      - name: Mount build from macos-latest runner on macos-13 runner
+        if: ${{ matrix.runs_on  == 'macos-13' }}
         run: hdiutil attach osx_artifacts/macos-latest-Kivy.dmg -mountroot .
-      - name: Mount build from apple-silicon-m1n runner on macos-latest runner
-        if: ${{ matrix.runs_on  != 'apple-silicon-m1' }}
-        run: hdiutil attach osx_artifacts/apple-silicon-m1-Kivy.dmg -mountroot .
+      - name: Mount build from macos-13 runner on macos-latest runner
+        if: ${{ matrix.runs_on  != 'macos-latest' }}
+        run: hdiutil attach osx_artifacts/macos-13-Kivy.dmg -mountroot .
       - name: Copy Kivy.app to Applications
         run: cp -R Kivy/Kivy.app /Applications/Kivy.app
       - name: Activate Kivy.app venv and test kivy

@@ -20,7 +20,7 @@ env:
   PYTHONPATH: .
 
 jobs:
-  prepare_build:
+  prepare_sdl3_build:
     runs-on: windows-latest
     strategy:
       matrix:
@@ -39,7 +39,7 @@ jobs:
 
   windows_wheels:
     runs-on: windows-latest
-    needs: prepare_build
+    needs: prepare_sdl3_build
     strategy:
       fail-fast: false
       matrix:
@@ -54,14 +54,14 @@ jobs:
       with:
         python-version: ${{ matrix.python }}
         architecture: ${{ matrix.arch }}
-    - uses: actions/download-artifact@v4
-      with:
-        name: sdl3_build_${{ matrix.arch }}
-        path: kivy_build
     - name: Prepare Environment
       run: |
         . .\ci\windows_ci.ps1
         Prepre-env
+    - uses: actions/download-artifact@v4
+      with:
+        name: sdl3_build_${{ matrix.arch }}
+        path: kivy_build
     - name: Build package
       run: |
         . .\ci\windows_ci.ps1

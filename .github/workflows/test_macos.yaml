@@ -57,7 +57,7 @@ jobs:
           mkdir osx_artifacts
           mv osx/Kivy.dmg osx_artifacts/${{ matrix.runs_on }}-Kivy.dmg
       - name: Upload dmg as artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: KivySDKPackager
           path: osx_artifacts
@@ -74,7 +74,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Download dmg from artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: KivySDKPackager
           path: osx_artifacts

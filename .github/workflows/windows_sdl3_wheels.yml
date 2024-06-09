@@ -1,0 +1,97 @@
+name: SDL3 wheels
+
+on:
+  push:
+    branches:
+      - master
+      - windows_ci
+    paths:
+      - 'win/common.py'
+      - 'win/sdl3.py'
+      - 'win/build_sdl3.ps1'
+      - 'ci/windows_ci.ps1'
+      - '.github/workflows/windows_sdl3_wheels.yml'
+
+env:
+  SERVER_IP: '159.203.106.198'
+  KIVY_BUILD_DIR: kivy_build
+  KIVY_BUILD_CACHE: kivy_build_cache
+  PACKAGE_TARGET: sdl3
+  PYTHONPATH: .
+
+jobs:
+  prepare_sdl3_build:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        arch: ['x64']
+    env:
+      PACKAGE_ARCH: ${{ matrix.arch }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build SDL3 for arch ${{ matrix.arch }}
+        run: |
+          ./win/build_sdl3.ps1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sdl3_build_${{ matrix.arch }}
+          path: kivy-dependencies/dist
+
+  windows_wheels:
+    runs-on: windows-latest
+    needs: prepare_sdl3_build
+    strategy:
+      fail-fast: false
+      matrix:
+        python: [ '3.8', '3.9', '3.10', '3.11' , '3.12' ]
+        arch: ['x64']
+    env:
+      PACKAGE_ARCH: ${{ matrix.arch }}
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python }}
+        architecture: ${{ matrix.arch }}
+    - name: Prepare Environment
+      run: |
+        . .\ci\windows_ci.ps1
+        Prepre-env
+    - uses: actions/download-artifact@v4
+      with:
+        name: sdl3_build_${{ matrix.arch }}
+        path: kivy_build
+    - name: Build package
+      run: |
+        . .\ci\windows_ci.ps1
+        Create-Packages
+    - name: Upload wheels as artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: sdl3_wheel_${{ matrix.arch }}_${{ matrix.python }}
+        path: dist
+    - name: Install MSYS2
+      if: contains(github.event.head_commit.message, '[publish sdl3 win]')
+      run: choco install msys2
+    - name: Upload wheels to server
+      if: contains(github.event.head_commit.message, '[publish sdl3 win]')
+      env:
+        UBUNTU_UPLOAD_KEY: ${{ secrets.UBUNTU_UPLOAD_KEY }}
+        MSYSTEM: MINGW64
+        CHERE_INVOKING: 1
+      run: |
+        . .\ci\windows_ci.ps1
+        Upload-windows-wheels-to-server -ip "$env:SERVER_IP"
+    - name: Publish to PyPI
+      if: contains(github.event.head_commit.message, '[publish sdl3 win]')
+      env:
+        TWINE_USERNAME: "__token__"
+        TWINE_PASSWORD: ${{ secrets.pypi_password }}
+      run: |
+        twine upload --non-interactive dist/*
+    - name: Test package
+      run: |
+        . .\ci\windows_ci.ps1
+        Test-kivy
+

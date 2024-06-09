@@ -71,4 +71,27 @@ jobs:
       with:
         name: sdl3_wheel_${{ matrix.arch }}_${{ matrix.python }}
         path: dist
+    - name: Install MSYS2
+      if: contains(github.event.head_commit.message, '[publish sdl3 win]')
+      run: choco install msys2
+    - name: Upload wheels to server
+      if: contains(github.event.head_commit.message, '[publish sdl3 win]')
+      env:
+        UBUNTU_UPLOAD_KEY: ${{ secrets.UBUNTU_UPLOAD_KEY }}
+        MSYSTEM: MINGW64
+        CHERE_INVOKING: 1
+      run: |
+        . .\ci\windows_ci.ps1
+        Upload-windows-wheels-to-server -ip "$env:SERVER_IP"
+    - name: Publish to PyPI
+      if: contains(github.event.head_commit.message, '[publish sdl3 win]')
+      env:
+        TWINE_USERNAME: "__token__"
+        TWINE_PASSWORD: ${{ secrets.pypi_password }}
+      run: |
+        twine upload --non-interactive dist/*
+    - name: Test package
+      run: |
+        . .\ci\windows_ci.ps1
+        Test-kivy
 

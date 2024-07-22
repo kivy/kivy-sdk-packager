@@ -13,6 +13,7 @@ ABS_SCRIPT_PATH=$(cd "${SCRIPT_PATH}" && pwd)
 pushd "${SCRIPT_PATH}/venv/bin"
 # must be in current directory
 source activate
+popd
 
 # setup the environment to not mess with the system
 export DYLD_FALLBACK_LIBRARY_PATH="${SCRIPT_PATH}/../lib:$DYLD_FALLBACK_LIBRARY_PATH"

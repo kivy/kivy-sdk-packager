@@ -58,7 +58,7 @@ jobs:
       run: |
         . .\ci\windows_ci.ps1
         Prepre-env
-    - uses: actions/download-artifact@v4
+    - uses: actions/download-artifact@v4.1.7
       with:
         name: sdl3_build_${{ matrix.arch }}
         path: kivy_build

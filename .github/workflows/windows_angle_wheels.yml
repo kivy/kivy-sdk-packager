@@ -60,7 +60,7 @@ jobs:
       run: |
         . .\ci\windows_ci.ps1
         Prepre-env
-    - uses: actions/download-artifact@v3
+    - uses: actions/download-artifact@v4.1.7
       with:
         name: angle_dlls
         path: angle_dlls

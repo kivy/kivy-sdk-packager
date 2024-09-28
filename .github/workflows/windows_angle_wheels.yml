@@ -25,6 +25,9 @@ jobs:
       DEPOT_TOOLS_WIN_TOOLCHAIN: 0
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: 3.x
       - name: Get dependecies
         run: |
           . .\ci\windows_ci.ps1

@@ -72,7 +72,6 @@ function Get-angle-deps() {
 
 function Build-angle() {
     $env:PATH="$(pwd)\depot_tools;$env:PATH"
-    $env:PATH="$(python -c "import os; print(';'.join([p for p in os.environ['PATH'].split(';') if 'Python' not in p and 'python' not in p and 'Chocolatey' not in p]))")"
     cd angle_src
 
     gclient

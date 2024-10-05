@@ -36,7 +36,7 @@ def sha1OfFile(filename):
     sha = hashlib.sha1()
     with open(filename, 'rb') as f:
         while True:
-            block = f.read(2 ** 10) # Magic number: one-megabyte blocks.
+            block = f.read(2 ** 10)  # Magic number: one-megabyte blocks.
             if not block:
                 break
             sha.update(block)

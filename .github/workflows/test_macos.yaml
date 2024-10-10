@@ -76,8 +76,9 @@ jobs:
       - name: Download dmg from artifacts
         uses: actions/download-artifact@v4.1.8
         with:
-          name: KivySDKPackager
           path: osx_artifacts
+          pattern: KivySDKPackager-*
+          merge-multiple: true
       - name: Mount build from macos-latest runner on macos-13 runner
         if: ${{ matrix.runs_on  == 'macos-13' }}
         run: hdiutil attach osx_artifacts/macos-latest-Kivy.dmg -mountroot .

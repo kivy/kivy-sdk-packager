@@ -65,8 +65,9 @@ jobs:
         Prepre-env
     - uses: actions/download-artifact@v4.1.7
       with:
-        name: angle_dlls-${{ matrix.runs-on }}
-        path: angle_dlls-${{ matrix.runs-on }}
+        path: angle_dlls
+        pattern: angle_dlls-*
+        merge-multiple: true
     - name: Build package
       run: |
         . .\ci\windows_ci.ps1

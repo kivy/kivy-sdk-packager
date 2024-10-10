@@ -39,7 +39,8 @@ jobs:
       - uses: actions/upload-artifact@v4.4.2
         with:
           name: angle_dlls-${{ matrix.runs-on }}
-          path: angle_dlls-${{ matrix.runs-on }}
+          path: angle_dlls
+          overwrite: true
 
 
   windows_wheels:
@@ -77,6 +78,7 @@ jobs:
       with:
         name: angle_wheels-${{ matrix.runs-on }}
         path: dist
+        overwrite: true
     - name: Install MSYS2
       run: choco install msys2
     - name: Upload wheels to server

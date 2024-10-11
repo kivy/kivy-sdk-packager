@@ -61,7 +61,7 @@ jobs:
         with:
           name: KivySDKPackager-${{ matrix.runs-on }}
           path: osx_artifacts
-          overwrite: True
+          # overwrite: True
 
   test_dmg:
     needs: build_dmg

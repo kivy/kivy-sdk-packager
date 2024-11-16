@@ -31,6 +31,7 @@ override_dh_installdocs:
 
 override_dh_auto_install:
 	echo "PYTHONPATH is $$PYTHONPATH"
+	patch pyproject.toml < use-relaxed-build-time-reqs-versions.patch
 	for PYX in $(shell py3versions -r); do \
 	    rm -rf pypackages || true; \
 	    $(MAKE) clean; \

@@ -20,7 +20,8 @@ override_dh_auto_build:
 	
 	# Build the HTML documentation
 	# Set PYTHONPATH to include the installed package's dist-packages directory
-	cd doc && PYTHONPATH=$$(cd $(TMP_INSTALL_DIR)/python3.*/dist-packages && pwd):$$PYTHONPATH make html
+
+	cd doc && PYTHONPATH=$$(find $(TMP_INSTALL_DIR) -type d -name dist-packages -print):$$PYTHONPATH make html
 	
 	# Clean up the temporary installation directory
 	rm -rf $(TMP_INSTALL_DIR)

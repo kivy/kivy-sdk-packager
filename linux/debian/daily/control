@@ -3,7 +3,7 @@ Section: python
 Priority: optional
 Maintainer: Thomas-Karl Pietrowski <thopiekar@googlemail.com>
 Uploaders: Kivy Launchpad-Team <ubuntu@kivy.org>
-Build-Depends: debhelper (>= 7.0.50~), dh-python, pkg-config, git,
+Build-Depends: debhelper (>= 11~), dh-python, pkg-config, git,
 # Python development files - metapackages for python3
  python3-deadsnakes-all-dev | python3-all-dev (>= 3.3),
 # Cython3

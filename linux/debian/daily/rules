@@ -8,7 +8,6 @@ export KIVY_NO_CONFIG=1
 	dh $@ --with python3 --buildsystem=pybuild
 
 override_dh_installdocs:
-	make clean;
 	patch doc/sources/conf.py < kivy-ppa-patches/disable-sphinxcontrib-jquery.patch;
 	cd doc && make html;
 	dh_installdocs

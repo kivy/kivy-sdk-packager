@@ -3,47 +3,50 @@ Section: python
 Priority: optional
 Maintainer: Thomas-Karl Pietrowski <thopiekar@googlemail.com>
 Uploaders: Kivy Launchpad-Team <ubuntu@kivy.org>
-Build-Depends: debhelper (>= 11~), dh-python, pkg-config, git,
-# Python development files - metapackages for python3
- python3-deadsnakes-all-dev | python3-all-dev (>= 3.3),
-# Cython3
- cython3,
-# wget to download pip
- wget, curl,
-# code unittest
- python3-nose,
-# pip for cython
- python3-pip,
-# wheel for cython
- python3-wheel,
-# setuptools
- python3-setuptools,
-# measuring code coverage during during test execution
- python3-coverage,
-# Mesa OpenGL / -ES development files
- libgl1-mesa-dev, libgles2-mesa-dev,
-# SDL(1) dependencies
- libsdl-image1.2-dev, libsdl-ttf2.0-dev,
-# SDL2 dependencies
- libsdl2-dev, libsdl2-image-dev, libsdl2-mixer-dev, libsdl2-ttf-dev,
-# SDL MPEG Player development files
- libsmpeg-dev,
-# libav development files
- libswscale-dev, libavformat-dev, libavcodec-dev,
-# gstreamer1.0 dependencies
- libgstreamer1.0-dev,
-# x11 headers for optional x11 provider
- libx11-dev,
-# mtdev
- libmtdev-dev,
-# documentation generator
- python3-sphinx,
-# X Window Virtual Framebuffer
- xvfb,
-# LaTex
- texlive-latex-base, texlive-latex-recommended, texlive-latex-extra, texlive-fonts-extra, texlive-fonts-recommended,
-# Raises an ImportError if not installed
- python3-pygments,
+Build-Depends: debhelper-compat (= 13),
+               dh-python,
+               pkg-config,
+               git,
+               # Python development files - metapackages for python3
+               python3-deadsnakes-all-dev | python3-all-dev (>= 3.3),
+               # Cython3
+               cython3,
+               # wget to download pip
+               wget, curl,
+               # code unittest
+               python3-nose,
+               # pip for cython
+               python3-pip,
+               # wheel for cython
+               python3-wheel,
+               # setuptools
+               python3-setuptools,
+               # measuring code coverage during during test execution
+               python3-coverage,
+               # Mesa OpenGL / -ES development files
+               libgl1-mesa-dev, libgles2-mesa-dev,
+               # SDL(1) dependencies
+               libsdl-image1.2-dev, libsdl-ttf2.0-dev,
+               # SDL2 dependencies
+               libsdl2-dev, libsdl2-image-dev, libsdl2-mixer-dev, libsdl2-ttf-dev,
+               # SDL MPEG Player development files
+               libsmpeg-dev,
+               # libav development files
+               libswscale-dev, libavformat-dev, libavcodec-dev,
+               # gstreamer1.0 dependencies
+               libgstreamer1.0-dev,
+               # x11 headers for optional x11 provider
+               libx11-dev,
+               # mtdev
+               libmtdev-dev,
+               # documentation generator
+               python3-sphinx,
+               # X Window Virtual Framebuffer
+               xvfb,
+               # LaTex
+               texlive-latex-base, texlive-latex-recommended, texlive-latex-extra, texlive-fonts-extra, texlive-fonts-recommended,
+               # Raises an ImportError if not installed
+               python3-pygments,
 Standards-Version: 3.9.1
 Homepage: http://kivy.org/
 Vcs-Git:  https://github.com/kivy/kivy.git
@@ -85,6 +88,7 @@ Conflicts:
  kivy-doc-html,
 Depends:
  ${misc:Depends},
+ ${sphinxdoc:Depends},
  ${shlibs:Depends},
  ${python:Depends},
 Description: Kivy - Multimedia / Multitouch framework - documentation (html)

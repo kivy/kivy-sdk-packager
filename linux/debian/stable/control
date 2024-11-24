@@ -3,7 +3,7 @@ Section: python
 Priority: optional
 Maintainer: Thomas-Karl Pietrowski <thopiekar@googlemail.com>
 Uploaders: Kivy Launchpad-Team <ubuntu@kivy.org>
-Build-Depends: debhelper (>= 7.0.50~), dh-python, pkg-config, git,
+Build-Depends: debhelper-compat (= 13), dh-python, pkg-config, git,
 # Python development files - metapackages for python3
  python3-deadsnakes-all-dev | python3-all-dev (>= 3.3),
 # Cython3
@@ -44,6 +44,8 @@ Build-Depends: debhelper (>= 7.0.50~), dh-python, pkg-config, git,
  texlive-latex-base, texlive-latex-recommended, texlive-latex-extra, texlive-fonts-extra, texlive-fonts-recommended,
 # Raises an ImportError if not installed
  python3-pygments,
+# Raises an ImportError if not installed
+ python3-filetype,
 Standards-Version: 3.9.1
 Homepage: http://kivy.org/
 Vcs-Git:  https://github.com/kivy/kivy.git
@@ -85,6 +87,7 @@ Conflicts:
  kivy-doc-html,
 Depends:
  ${misc:Depends},
+ ${sphinxdoc:Depends},
  ${shlibs:Depends},
  ${python:Depends},
 Description: Kivy - Multimedia / Multitouch framework - documentation (html)
@@ -155,6 +158,7 @@ Depends: ${misc:Depends},
          ${python:Depends},
          python3-docutils,
          python3-pygments,
+         python3-filetype,
          xclip | xsel,
          libsdl2-2.0-0,
          libsdl2-image-2.0-0,

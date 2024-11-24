@@ -9,8 +9,12 @@ export KIVY_NO_CONFIG=1
 
 override_dh_auto_build:
 	dh_auto_build
-	patch doc/sources/conf.py < kivy-ppa-patches/disable-sphinxcontrib-jquery.patch;
-	cd doc && make html
+
+	DESTDIR=$(CURDIR)/debian/tmp
+	dh_auto_install --destdir=$(DESTDIR)
+	cd doc && PYTHONPATH=$(DESTDIR)/usr/lib/python3/dist-packages:$PYTHONPATH make html;
+	rm -rf $(DESTDIR)
+
 
 override_dh_auto_test:
 	#xvfb-run -s "+extension GLX" dh_auto_test

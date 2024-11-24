@@ -8,7 +8,15 @@ export KIVY_NO_CONFIG=1
 	dh $@ --with python3 --buildsystem=pybuild
 
 override_dh_installdocs:
+	rm -rf pypackages || true;
+	$(MAKE) clean;
+	mkdir pypackages;
+	python3 -m pip list;
+	python3 -m pip install $(CURDIR)/cython -t $(CURDIR)/pypackages --no-deps --upgrade || true;
 	patch doc/sources/conf.py < kivy-ppa-patches/disable-sphinxcontrib-jquery.patch;
+	python3 -m pip list;
+	$(MAKE) PYTHON=python3 force;
+	cd doc && PYTHONPATH=..:$PYTHONPATH make html;
 	dh_installdocs
 
 override_dh_auto_test:

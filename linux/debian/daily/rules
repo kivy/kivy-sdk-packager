@@ -11,6 +11,9 @@ export TMP_INSTALL_DIR=$(CURDIR)/tmp-debian-install
 override_dh_auto_build:
 	# Build the package
 	dh_auto_build
+
+	# Patch the documentation configuration to disable the sphinxcontrib-jquery extension
+	patch doc/sources/conf.py < kivy-ppa-patches/disable-sphinxcontrib-jquery.patch;
 	
 	# Create a temporary installation directory
 	mkdir -p $(TMP_INSTALL_DIR)

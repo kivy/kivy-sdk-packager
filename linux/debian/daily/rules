@@ -9,10 +9,20 @@ export TMP_INSTALL_DIR=$(CURDIR)/tmp-debian-install
 	dh $@ --with python3,sphinxdoc --buildsystem=pybuild
 
 override_dh_auto_build:
+	# Build the package
 	dh_auto_build
+	
+	# Create a temporary installation directory
 	mkdir -p $(TMP_INSTALL_DIR)
+	
+	# Perform the installation step into the temporary directory
 	dh_auto_install --destdir=$(TMP_INSTALL_DIR)
-	cd doc && PYTHONPATH=$(TMP_INSTALL_DIR)/usr/lib/python3/dist-packages:$PYTHONPATH make html;
+	
+	# Build the HTML documentation
+	# Set PYTHONPATH to include the installed package's dist-packages directory
+	cd doc && PYTHONPATH=$$(cd $(TMP_INSTALL_DIR)/python3.*/dist-packages && pwd):$$PYTHONPATH make html
+	
+	# Clean up the temporary installation directory
 	rm -rf $(TMP_INSTALL_DIR)
 
 

@@ -2,6 +2,7 @@
 
 export PYBUILD_NAME=kivy
 export KIVY_NO_CONFIG=1
+export TMP_INSTALL_DIR=$(CURDIR)/tmp-debian-install
 
 
 %:
@@ -9,12 +10,10 @@ export KIVY_NO_CONFIG=1
 
 override_dh_auto_build:
 	dh_auto_build
-
-	export DESTDIR=$(CURDIR)/tmp-debian-install
-	mkdir -p $(DESTDIR)
-	dh_auto_install --destdir=$(DESTDIR)
-	cd doc && PYTHONPATH=$(DESTDIR)/usr/lib/python3/dist-packages:$PYTHONPATH make html;
-	rm -rf $(DESTDIR)
+	mkdir -p $(TMP_INSTALL_DIR)
+	dh_auto_install --destdir=$(TMP_INSTALL_DIR)
+	cd doc && PYTHONPATH=$(TMP_INSTALL_DIR)/usr/lib/python3/dist-packages:$PYTHONPATH make html;
+	rm -rf $(TMP_INSTALL_DIR)
 
 
 override_dh_auto_test:

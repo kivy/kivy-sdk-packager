@@ -10,7 +10,8 @@ export KIVY_NO_CONFIG=1
 override_dh_auto_build:
 	dh_auto_build
 
-	DESTDIR=$(CURDIR)/debian/tmp
+	export DESTDIR=$(CURDIR)/tmp-debian-install
+	mkdir -p $(DESTDIR)
 	dh_auto_install --destdir=$(DESTDIR)
 	cd doc && PYTHONPATH=$(DESTDIR)/usr/lib/python3/dist-packages:$PYTHONPATH make html;
 	rm -rf $(DESTDIR)

@@ -1,51 +1,35 @@
 #!/usr/bin/make -f
-# -*- makefile -*-
-# Sample debian/rules that uses debhelper.
-# This file was originally written by Joey Hess and Craig Small.
-# As a special exception, when this file is copied by dh-make into a
-# dh-make output file, you may use that output file without restriction.
-# This special exception was added by Craig Small in version 0.37 of dh-make.
 
-# Uncomment this to turn on verbose mode.
-export DH_VERBOSE=1
+export PYBUILD_NAME=kivy
 export KIVY_NO_CONFIG=1
-export PYTHONPATH=$(CURDIR)/pypackages:$PYTHONPATH
+export TMP_INSTALL_DIR=$(CURDIR)/tmp-debian-install
+
 
 %:
-	dh $@ --with python3
+	dh $@ --with python3 --buildsystem=pybuild
 
 override_dh_auto_build:
-	echo "Skipping any builds - doing them on install..."
+	# Build the package
+	dh_auto_build
 
-override_dh_installdocs:
-	rm -rf pypackages || true;
-	$(MAKE) clean;
-	mkdir pypackages;
-	python3 -m pip list;
-	python3 -m pip install $(CURDIR)/cython -t $(CURDIR)/pypackages --no-deps --upgrade || true;
+	# Patch the documentation configuration to disable the sphinxcontrib-jquery extension
 	patch doc/sources/conf.py < kivy-ppa-patches/disable-sphinxcontrib-jquery.patch;
-	python3 -m pip list;
-	$(MAKE) PYTHON=python3 force;
-	cd doc && PYTHONPATH=..:$PYTHONPATH make html;
-	dh_installdocs
+	
+	# Create a temporary installation directory
+	mkdir -p $(TMP_INSTALL_DIR)
+	
+	# Perform the installation step into the temporary directory
+	dh_auto_install --destdir=$(TMP_INSTALL_DIR)
+	
+	# Build the HTML documentation
+	# Set PYTHONPATH to include the installed package's dist-packages directory
 
-override_dh_auto_install:
-	echo "PYTHONPATH is $$PYTHONPATH"
-	patch pyproject.toml < kivy-ppa-patches/use-relaxed-build-time-reqs-versions.patch
-	for PYX in $(shell py3versions -r); do \
-	    rm -rf pypackages || true; \
-	    $(MAKE) clean; \
-	    mkdir pypackages; \
-	    $$PYX -m pip list; \
-	    $$PYX -m pip install $(CURDIR)/cython -t $(CURDIR)/pypackages --no-deps --upgrade; \
-	    $$PYX -m pip list; \
-	    $(MAKE) install PYTHON=$$PYX INSTALL_ROOT=$(CURDIR)/debian/tmp INSTALL_PREFIX=/usr INSTALL_LAYOUT=deb; \
-	    $(MAKE) install PYTHON=$$PYX-dbg INSTALL_ROOT=$(CURDIR)/debian/tmp-dbg INSTALL_PREFIX=/usr INSTALL_LAYOUT=deb || true; \
-	done
+	cd doc && PYTHONPATH=$$(find $(TMP_INSTALL_DIR) -type d -name dist-packages -print):$$PYTHONPATH make html
+	
+	# Clean up the temporary installation directory
+	rm -rf $(TMP_INSTALL_DIR)
+
 
 override_dh_auto_test:
 	#xvfb-run -s "+extension GLX" dh_auto_test
 	echo "! TESTS ARE TEMPORARY DISABLED !"
-
-override_dh_missing:
-	dh_missing --fail-missing --sourcedir debian/tmp

@@ -1,7 +1,0 @@
-# moved to kivy-garden/garden
-# usr/bin/garden
-
-# Tools
-usr/lib/python3/dist-packages/kivy/tools
-# Tests
-usr/lib/python3/dist-packages/kivy/tests

@@ -80,7 +80,7 @@ jobs:
     - name: Upload wheels as artifact
       uses: actions/upload-artifact@v4.4.2
       with:
-        name: sdl2_wheels
+        name: sdl2_wheels-${{ matrix.python }}-${{ matrix.arch }}
         path: dist
     - name: Install MSYS2
       if: contains(github.event.head_commit.message, '[publish sdl2 win]')

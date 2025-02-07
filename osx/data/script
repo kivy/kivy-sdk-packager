@@ -10,9 +10,7 @@ SCRIPT_PATH="$(dirname ${SCRIPT_PATH})"
 ABS_SCRIPT_PATH=$(cd "${SCRIPT_PATH}" && pwd)
 
 # activate the virtualenv
-pushd "${SCRIPT_PATH}/venv/bin"
-# must be in current directory
-source activate
+source "${SCRIPT_PATH}/venv/bin/activate"
 
 # setup the environment to not mess with the system
 export DYLD_FALLBACK_LIBRARY_PATH="${SCRIPT_PATH}/../lib:$DYLD_FALLBACK_LIBRARY_PATH"

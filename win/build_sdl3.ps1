@@ -63,12 +63,12 @@ New-Item -ItemType Directory -Path kivy-dependencies/build
 New-Item -ItemType Directory -Path kivy-dependencies/dist
 
 # windows SDL3
-$WINDOWS__SDL3__VERSION = "3.2.4"
+$WINDOWS__SDL3__VERSION = "3.2.10"
 $WINDOWS__SDL3__URL="https://github.com/libsdl-org/SDL/releases/download/release-$WINDOWS__SDL3__VERSION/SDL3-$WINDOWS__SDL3__VERSION.tar.gz"
 $WINDOWS__SDL3__FOLDER="SDL3-$WINDOWS__SDL3__VERSION"
 
 # windows SDL3_image
-$WINDOWS__SDL3_IMAGE__VERSION="3.2.0"
+$WINDOWS__SDL3_IMAGE__VERSION="3.2.4"
 $WINDOWS__SDL3_IMAGE__URL="https://github.com/libsdl-org/SDL_image/releases/download/release-$WINDOWS__SDL3_IMAGE__VERSION/SDL3_image-$WINDOWS__SDL3_IMAGE__VERSION.tar.gz"
 $WINDOWS__SDL3_IMAGE__FOLDER="SDL3_image-$WINDOWS__SDL3_IMAGE__VERSION"
 
@@ -77,8 +77,9 @@ $WINDOWS__SDL3_MIXER__URL="https://github.com/libsdl-org/SDL_mixer/archive/refs/
 $WINDOWS__SDL3_MIXER__FOLDER="SDL_mixer-main"
 
 # windows SDL3_ttf
-$WINDOWS__SDL3_TTF__URL="https://github.com/libsdl-org/SDL_ttf/archive/refs/heads/main.tar.gz"
-$WINDOWS__SDL3_TTF__FOLDER="SDL_ttf-main"
+$WINDOWS__SDL3_TTF__VERSION = "3.2.2"
+$WINDOWS__SDL3_TTF__URL="https://github.com/libsdl-org/SDL_ttf/releases/download/release-$WINDOWS__SDL3_TTF__VERSION/SDL3_ttf-$WINDOWS__SDL3_TTF__VERSION.tar.gz"
+$WINDOWS__SDL3_TTF__FOLDER="SDL3_ttf-$WINDOWS__SDL3_TTF__VERSION"
 
 # Download the dependencies
 Write-Host "Downloading the dependencies..."
@@ -86,7 +87,7 @@ Write-Host "-- SDL3, url: $WINDOWS__SDL3__URL"
 Invoke-WebRequest -Uri $WINDOWS__SDL3__URL -OutFile "kivy-dependencies/download/SDL3-$WINDOWS__SDL3__VERSION.tar.gz"
 Invoke-WebRequest -Uri $WINDOWS__SDL3_IMAGE__URL -OutFile "kivy-dependencies/download/SDL3_image-$WINDOWS__SDL3_IMAGE__VERSION.tar.gz"
 Invoke-WebRequest -Uri $WINDOWS__SDL3_MIXER__URL -OutFile "kivy-dependencies/download/SDL_mixer-main.tar.gz"
-Invoke-WebRequest -Uri $WINDOWS__SDL3_TTF__URL -OutFile "kivy-dependencies/download/SDL_ttf-main.tar.gz"
+Invoke-WebRequest -Uri $WINDOWS__SDL3_TTF__URL -OutFile "kivy-dependencies/download/SDL3_ttf-$WINDOWS__SDL3_TTF__VERSION.tar.gz"
 
 # Save dist folder full path
 $dist_folder = (Get-Item -Path ".\kivy-dependencies\dist").FullName
@@ -98,7 +99,7 @@ Write-Host "Extracting the dependencies..."
 tar -xf "../download/SDL3-$WINDOWS__SDL3__VERSION.tar.gz"
 tar -xf "../download/SDL3_image-$WINDOWS__SDL3_IMAGE__VERSION.tar.gz"
 tar -xf "../download/SDL_mixer-main.tar.gz"
-tar -xf "../download/SDL_ttf-main.tar.gz"
+tar -xf "../download/SDL3_ttf-$WINDOWS__SDL3_TTF__VERSION.tar.gz"
 
 # Move into the SDL3 folder
 Write-Host "-- Build SDL3"

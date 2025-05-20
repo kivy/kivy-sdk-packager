@@ -73,8 +73,8 @@ $WINDOWS__SDL3_IMAGE__URL="https://github.com/libsdl-org/SDL_image/releases/down
 $WINDOWS__SDL3_IMAGE__FOLDER="SDL3_image-$WINDOWS__SDL3_IMAGE__VERSION"
 
 # windows SDL3_mixer
-$WINDOWS__SDL3_MIXER__URL="https://github.com/libsdl-org/SDL_mixer/archive/refs/heads/main.tar.gz"
-$WINDOWS__SDL3_MIXER__FOLDER="SDL_mixer-main"
+$WINDOWS__SDL3_MIXER__URL="https://github.com/libsdl-org/SDL_mixer/archive/b8017938de8b31c1962c2c8044a127519c2c1cdf.tar.gz"
+$WINDOWS__SDL3_MIXER__FOLDER="SDL_mixer-b8017938de8b31c1962c2c8044a127519c2c1cdf"
 
 # windows SDL3_ttf
 $WINDOWS__SDL3_TTF__VERSION = "3.2.2"

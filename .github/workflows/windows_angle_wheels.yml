@@ -16,6 +16,7 @@ env:
   KIVY_BUILD_DIR: angle_dlls
   KIVY_BUILD_CACHE: kivy_build_cache
   PACKAGE_TARGET: angle
+  KIVY_GL_BACKEND: angle_sdl3
   PYTHONPATH: .
 
 jobs:

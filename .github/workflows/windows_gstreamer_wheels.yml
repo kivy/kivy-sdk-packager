@@ -15,6 +15,7 @@ env:
   KIVY_BUILD_DIR: kivy_build
   KIVY_BUILD_CACHE: kivy_build_cache
   PACKAGE_TARGET: gstreamer
+  KIVY_GL_BACKEND: angle_sdl3
   PYTHONPATH: .
 
 

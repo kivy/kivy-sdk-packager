@@ -45,7 +45,6 @@ function Upload-windows-wheels-to-server($ip) {
 
 function Test-kivy() {
     $env:GST_REGISTRY="~/registry.bin"
-    $env:KIVY_GL_BACKEND="angle_sdl2"
 
     python -m pip config set install.find-links "$(pwd)\dist"
 

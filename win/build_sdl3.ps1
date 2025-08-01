@@ -63,7 +63,7 @@ New-Item -ItemType Directory -Path kivy-dependencies/build
 New-Item -ItemType Directory -Path kivy-dependencies/dist
 
 # windows SDL3
-$WINDOWS__SDL3__VERSION = "3.2.14"
+$WINDOWS__SDL3__VERSION = "3.2.18"
 $WINDOWS__SDL3__URL="https://github.com/libsdl-org/SDL/releases/download/release-$WINDOWS__SDL3__VERSION/SDL3-$WINDOWS__SDL3__VERSION.tar.gz"
 $WINDOWS__SDL3__FOLDER="SDL3-$WINDOWS__SDL3__VERSION"
 

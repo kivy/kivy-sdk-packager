@@ -73,8 +73,9 @@ $WINDOWS__SDL3_IMAGE__URL="https://github.com/libsdl-org/SDL_image/releases/down
 $WINDOWS__SDL3_IMAGE__FOLDER="SDL3_image-$WINDOWS__SDL3_IMAGE__VERSION"
 
 # windows SDL3_mixer
-$WINDOWS__SDL3_MIXER__URL="https://github.com/libsdl-org/SDL_mixer/archive/refs/heads/main.tar.gz"
-$WINDOWS__SDL3_MIXER__FOLDER="SDL_mixer-main"
+$WINDOWS__SDL3_MIXER__HASH="78a2035cf4cf95066d7d9e6208e99507376409a7"
+$WINDOWS__SDL3_MIXER__URL="https://github.com/libsdl-org/SDL_mixer/archive/$WINDOWS__SDL3_MIXER__HASH.tar.gz"
+$WINDOWS__SDL3_MIXER__FOLDER="SDL_mixer-$WINDOWS__SDL3_MIXER__HASH"
 
 # windows SDL3_ttf
 $WINDOWS__SDL3_TTF__VERSION = "3.2.2"
@@ -86,7 +87,7 @@ Write-Host "Downloading the dependencies..."
 Write-Host "-- SDL3, url: $WINDOWS__SDL3__URL"
 Invoke-WebRequest -Uri $WINDOWS__SDL3__URL -OutFile "kivy-dependencies/download/SDL3-$WINDOWS__SDL3__VERSION.tar.gz"
 Invoke-WebRequest -Uri $WINDOWS__SDL3_IMAGE__URL -OutFile "kivy-dependencies/download/SDL3_image-$WINDOWS__SDL3_IMAGE__VERSION.tar.gz"
-Invoke-WebRequest -Uri $WINDOWS__SDL3_MIXER__URL -OutFile "kivy-dependencies/download/SDL_mixer-main.tar.gz"
+Invoke-WebRequest -Uri $WINDOWS__SDL3_MIXER__URL -OutFile "kivy-dependencies/download/SDL_mixer-$WINDOWS__SDL3_MIXER__HASH.tar.gz"
 Invoke-WebRequest -Uri $WINDOWS__SDL3_TTF__URL -OutFile "kivy-dependencies/download/SDL3_ttf-$WINDOWS__SDL3_TTF__VERSION.tar.gz"
 
 # Save dist folder full path
@@ -98,7 +99,7 @@ Write-Host "Extracting the dependencies..."
 # Extract the dependencies
 tar -xf "../download/SDL3-$WINDOWS__SDL3__VERSION.tar.gz"
 tar -xf "../download/SDL3_image-$WINDOWS__SDL3_IMAGE__VERSION.tar.gz"
-tar -xf "../download/SDL_mixer-main.tar.gz"
+tar -xf "../download/SDL_mixer-$WINDOWS__SDL3_MIXER__HASH.tar.gz"
 tar -xf "../download/SDL3_ttf-$WINDOWS__SDL3_TTF__VERSION.tar.gz"
 
 # Move into the SDL3 folder

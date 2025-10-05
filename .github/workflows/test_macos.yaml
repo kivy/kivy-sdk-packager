@@ -14,13 +14,14 @@ jobs:
   build_dmg:
     runs-on: ${{ matrix.runs_on }}
     strategy:
+      fail-fast: false
       matrix:
-        # macos-latest (ATM macos-14) runs on Apple Silicon,
-        # macos-13 runs on Intel
-        runs_on: [macos-latest, macos-13]
+        # macos-latest (ATM macos-15) runs on Apple Silicon,
+        # macos-15-intel runs on Intel
+        runs_on: [macos-latest, macos-15-intel]
     name: macOS build dmg ( ${{ matrix.runs_on }} )
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Set up Python 3.x
         uses: actions/setup-python@v6
         with:
@@ -57,7 +58,7 @@ jobs:
           mkdir osx_artifacts
           mv osx/Kivy.dmg osx_artifacts/${{ matrix.runs_on }}-Kivy.dmg
       - name: Upload dmg as artifact
-        uses: actions/upload-artifact@v4.6.0
+        uses: actions/upload-artifact@v4.6.2
         with:
           name: KivySDKPackager-${{ matrix.runs-on }}
           path: osx_artifacts
@@ -67,25 +68,26 @@ jobs:
     needs: build_dmg
     runs-on: ${{ matrix.runs_on }}
     strategy:
+      fail-fast: false
       matrix:
         # macos-latest (ATM macos-14) runs on Apple Silicon,
-        # macos-13 runs on Intel
-        runs_on: [macos-latest, macos-13]
+        # macos-15-intel runs on Intel
+        runs_on: [macos-latest, macos-15-intel]
     name: macOS test dmg ( ${{ matrix.runs_on }} )
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Download dmg from artifacts
-        uses: actions/download-artifact@v4.1.8
+        uses: actions/download-artifact@v5
         with:
           path: osx_artifacts
           pattern: KivySDKPackager-*
           merge-multiple: true
-      - name: Mount build from macos-latest runner on macos-13 runner
-        if: ${{ matrix.runs_on  == 'macos-13' }}
+      - name: Mount build from macos-latest runner on macos-15-intel runner
+        if: matrix.runs_on == 'macos-15-intel'
         run: hdiutil attach osx_artifacts/macos-latest-Kivy.dmg -mountroot .
-      - name: Mount build from macos-13 runner on macos-latest runner
-        if: ${{ matrix.runs_on  != 'macos-latest' }}
-        run: hdiutil attach osx_artifacts/macos-13-Kivy.dmg -mountroot .
+      - name: Mount build from macos-15-intel runner on macos-latest runner
+        if: matrix.runs_on != 'macos-latest'
+        run: hdiutil attach osx_artifacts/macos-15-intel-Kivy.dmg -mountroot .
       - name: Copy Kivy.app to Applications
         run: cp -R Kivy/Kivy.app /Applications/Kivy.app
       - name: Activate Kivy.app venv and test kivy

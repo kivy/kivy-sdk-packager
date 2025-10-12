@@ -66,7 +66,7 @@ function Test-kivy() {
 function Get-angle-deps() {
     Invoke-WebRequest -Uri "https://storage.googleapis.com/chrome-infra/depot_tools.zip" -OutFile depot_tools.zip
     7z x depot_tools.zip -odepot_tools
-    git clone -b "chromium/6045" --single-branch https://github.com/google/angle.git angle_src
+    git clone -b "chromium/6943" --single-branch https://github.com/google/angle.git angle_src
 }
 
 function Build-angle() {

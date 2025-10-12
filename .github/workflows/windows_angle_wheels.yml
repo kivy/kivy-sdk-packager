@@ -21,7 +21,7 @@ env:
 
 jobs:
   prepare_angle:
-    runs-on: windows-latest
+    runs-on: windows-2022
     env:
       DEPOT_TOOLS_WIN_TOOLCHAIN: 0
     steps:
@@ -45,12 +45,12 @@ jobs:
 
 
   windows_wheels:
-    runs-on: windows-latest
+    runs-on: windows-2022
     needs: prepare_angle
     strategy:
       fail-fast: false
       matrix:
-        python: [ '3.9', '3.10', '3.11', '3.12', '3.13' ]
+        python: [ '3.9', '3.10', '3.11', '3.12', '3.13', '3.14' ]
         arch: ['x64']
     env:
       PACKAGE_ARCH: ${{ matrix.arch }}

@@ -1,7 +1,7 @@
 from __future__ import absolute_import, print_function
 from .common import *
 
-__version__ = "0.0.9"
+__version__ = "0.0.10"
 
 
 def get_sdl3(cache, build_path, arch, package, output, download_only=False):

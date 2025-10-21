@@ -26,7 +26,7 @@ jobs:
     env:
       DEPOT_TOOLS_WIN_TOOLCHAIN: 0
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: actions/setup-python@v6
         with:
           python-version: 3.x
@@ -57,7 +57,7 @@ jobs:
     env:
       PACKAGE_ARCH: ${{ matrix.arch }}
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
     - name: Set up Python
       uses: actions/setup-python@v6
       with:

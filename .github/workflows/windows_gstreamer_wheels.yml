@@ -80,7 +80,7 @@ jobs:
         . .\ci\windows_ci.ps1
         Create-Packages
     - name: Upload wheels as artifact
-      uses: actions/upload-artifact@v4.6.0
+      uses: actions/upload-artifact@v5.0.0
       with:
         name: gstreamer_wheels-${{ matrix.python }}-${{ matrix.arch }}
         path: dist

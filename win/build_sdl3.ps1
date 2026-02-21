@@ -63,12 +63,12 @@ New-Item -ItemType Directory -Path kivy-dependencies/build
 New-Item -ItemType Directory -Path kivy-dependencies/dist
 
 # windows SDL3
-$WINDOWS__SDL3__VERSION = "3.2.24"
+$WINDOWS__SDL3__VERSION = "3.4.2"
 $WINDOWS__SDL3__URL="https://github.com/libsdl-org/SDL/releases/download/release-$WINDOWS__SDL3__VERSION/SDL3-$WINDOWS__SDL3__VERSION.tar.gz"
 $WINDOWS__SDL3__FOLDER="SDL3-$WINDOWS__SDL3__VERSION"
 
 # windows SDL3_image
-$WINDOWS__SDL3_IMAGE__VERSION="3.2.4"
+$WINDOWS__SDL3_IMAGE__VERSION="3.4.0"
 $WINDOWS__SDL3_IMAGE__URL="https://github.com/libsdl-org/SDL_image/releases/download/release-$WINDOWS__SDL3_IMAGE__VERSION/SDL3_image-$WINDOWS__SDL3_IMAGE__VERSION.tar.gz"
 $WINDOWS__SDL3_IMAGE__FOLDER="SDL3_image-$WINDOWS__SDL3_IMAGE__VERSION"
 

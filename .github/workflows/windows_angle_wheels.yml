@@ -22,7 +22,7 @@ env:
 jobs:
   prepare_angle:
     # using windows-2022 as windows-2025 does not have the proper Windows SDK installed
-    runs-on: windows-2022
+    runs-on: windows-2025
     env:
       DEPOT_TOOLS_WIN_TOOLCHAIN: 0
     steps:
@@ -47,7 +47,7 @@ jobs:
 
   windows_wheels:
     # using windows-2022 as windows-2025 does not have the proper Windows SDK installed
-    runs-on: windows-2022
+    runs-on: windows-2025
     needs: prepare_angle
     strategy:
       fail-fast: false

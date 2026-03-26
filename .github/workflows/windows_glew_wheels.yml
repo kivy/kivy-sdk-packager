@@ -77,7 +77,7 @@ jobs:
         . .\ci\windows_ci.ps1
         Create-Packages
     - name: Upload wheels as artifact
-      uses: actions/upload-artifact@v4.6.0
+      uses: actions/upload-artifact@v4.6.2
       with:
         name: glew_wheels-${{ matrix.python }}-${{ matrix.arch }}
         path: dist

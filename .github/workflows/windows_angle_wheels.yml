@@ -1,6 +1,12 @@
 name: Angle wheels
 
 on:
+  pull_request:
+    paths:
+      - 'win/common.py'
+      - 'win/angle.py'
+      - 'ci/windows_ci.ps1'
+      - '.github/workflows/windows_angle_wheels.yml'
   push:
     branches:
       - master
@@ -8,8 +14,8 @@ on:
     paths:
       - 'win/common.py'
       - 'win/angle.py'
-      - '.github/workflows/windows_angle_wheels.yml'
       - 'ci/windows_ci.ps1'
+      - '.github/workflows/windows_angle_wheels.yml'
 
 env:
   SERVER_IP: '159.203.106.198'

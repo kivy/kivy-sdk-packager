@@ -1,6 +1,12 @@
 name: SDL2 wheels
 
 on:
+  pull_request:
+    paths:
+      - 'win/common.py'
+      - 'win/sdl2.py'
+      - 'ci/windows_ci.ps1'
+      - '.github/workflows/windows_sdl2_wheels.yml'
   push:
     branches:
       - master

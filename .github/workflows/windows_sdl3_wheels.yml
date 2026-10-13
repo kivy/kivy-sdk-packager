@@ -11,6 +11,13 @@ on:
       - 'win/build_sdl3.ps1'
       - 'ci/windows_ci.ps1'
       - '.github/workflows/windows_sdl3_wheels.yml'
+  pull_request:
+    paths:
+      - 'win/common.py'
+      - 'win/sdl3.py'
+      - 'win/build_sdl3.ps1'
+      - 'ci/windows_ci.ps1'
+      - '.github/workflows/windows_sdl3_wheels.yml'
 
 env:
   SERVER_IP: '159.203.106.198'
@@ -73,10 +80,10 @@ jobs:
         name: sdl3_wheel_${{ matrix.arch }}_${{ matrix.python }}
         path: dist
     - name: Install MSYS2
-      if: contains(github.event.head_commit.message, '[publish sdl3 win]')
+      if: github.event_name == 'push'
       run: choco install msys2
     - name: Upload wheels to server
-      if: contains(github.event.head_commit.message, '[publish sdl3 win]')
+      if: github.event_name == 'push'
       env:
         UBUNTU_UPLOAD_KEY: ${{ secrets.UBUNTU_UPLOAD_KEY }}
         MSYSTEM: MINGW64
@@ -85,7 +92,7 @@ jobs:
         . .\ci\windows_ci.ps1
         Upload-windows-wheels-to-server -ip "$env:SERVER_IP"
     - name: Publish to PyPI
-      if: contains(github.event.head_commit.message, '[publish sdl3 win]')
+      if: github.event_name == 'push'
       env:
         TWINE_USERNAME: "__token__"
         TWINE_PASSWORD: ${{ secrets.pypi_password }}

@@ -52,7 +52,7 @@ function Test-kivy() {
     # use the current kivy_deps just built, not the older version specified in the reqs
     ((get-content -Path kivy_src/pyproject.toml -Raw) -replace "kivy_deps.$env:PACKAGE_TARGET`_dev~.+;","kivy_deps.$env:PACKAGE_TARGET`_dev;") | set-content -Path kivy_src/pyproject.toml
     ((get-content -Path kivy_src/pyproject.toml -Raw) -replace "kivy_deps.$env:PACKAGE_TARGET~.+;","kivy_deps.$env:PACKAGE_TARGET;") | set-content -Path kivy_src/pyproject.toml
-    ((get-content -Path kivy_src/setup.cfg -Raw) -replace "kivy_deps.$env:PACKAGE_TARGET~.+;","kivy_deps.$env:PACKAGE_TARGET;") | set-content -Path kivy_src/setup.cfg
+
     python -m pip install "./kivy_src[full,dev]"
 
     python -c 'import kivy'

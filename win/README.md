@@ -1,6 +1,15 @@
 Windows
 =======
 
+Pull request CI
+---------------
+
+The five Windows dependency workflows run on pull requests whose changed files
+match each workflow's path filters. Each PR filter mirrors that workflow's push
+filter. Builds and Kivy integration tests report their actual results, including
+failures. Server and PyPI publication requires a publish marker in the push
+event's head commit message, so publication is skipped on pull request events.
+
 Process to make a new release
 -----------------------------
 
@@ -10,5 +19,5 @@ Process to make a new release
   * Check that the download url is still valid.
     * If there are multiple files downloaded per dependency make sure they are all valid.
   * Increment ``__version__`` so a new package will be available for pypi.
-* The Windows GitHub CI only runs for the specific deps whose files changed and for the `master` and `wndows_ci` branches. So add any changes and test by pushing to the `windows_ci` branch to see if the tests pass. Sometimes it's expected that the test will fail, e.g. a new python version doesn't have all the other deps on pypi yet.
+* The Windows GitHub CI runs for the specific deps whose path filters match on pull requests and on pushes to the `master` and `windows_ci` branches. Test changes in a pull request; pushing to `windows_ci` remains available for branch-based testing. Sometimes it's expected that the test will fail, e.g. a new python version doesn't have all the other deps on pypi yet.
 * When things work, push to master with `[publish xxx win]`, where `xxx` is e.g. `gstreamer`. Then it will also upload the new wheels to the server and pypi. Even if it fails the tests or to upload, it should still show as a build artifact to be manually uploaded to pypi and the server. `[publish xxx win]` must be listed once for each dependency in the commit message.

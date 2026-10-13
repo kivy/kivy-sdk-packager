@@ -1,6 +1,11 @@
 name: Gstreamer wheels
 
 on:
+  pull_request:
+    paths:
+      - 'win/common.py'
+      - 'win/gstreamer.py'
+      - '.github/workflows/windows_gstreamer_wheels.yml'
   push:
     branches:
       - master

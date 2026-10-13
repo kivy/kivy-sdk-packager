@@ -1,6 +1,13 @@
 name: SDL3 wheels
 
 on:
+  pull_request:
+    paths:
+      - 'win/common.py'
+      - 'win/sdl3.py'
+      - 'win/build_sdl3.ps1'
+      - 'ci/windows_ci.ps1'
+      - '.github/workflows/windows_sdl3_wheels.yml'
   push:
     branches:
       - master

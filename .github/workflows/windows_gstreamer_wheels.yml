@@ -5,6 +5,7 @@ on:
     paths:
       - 'win/common.py'
       - 'win/gstreamer.py'
+      - 'ci/windows_ci.ps1'
       - '.github/workflows/windows_gstreamer_wheels.yml'
   push:
     branches:
@@ -13,6 +14,7 @@ on:
     paths:
       - 'win/common.py'
       - 'win/gstreamer.py'
+      - 'ci/windows_ci.ps1'
       - '.github/workflows/windows_gstreamer_wheels.yml'
 
 env:

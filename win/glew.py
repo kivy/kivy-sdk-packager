@@ -9,7 +9,7 @@ glew_ver = '2.3.1'
 
 def get_glew(cache, build_path, arch, package, output, download_only=False):
     url = ('https://github.com/nigels-com/glew/releases/download/glew-'
-           f'{glew_ver}/glew-{glew_ver}.zip')
+           f'{glew_ver}/glew-{glew_ver}-win32.zip')
     local_url = download_cache(cache, url, build_path)
     if download_only:
         return

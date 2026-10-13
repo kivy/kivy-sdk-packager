@@ -2,14 +2,14 @@ from __future__ import absolute_import, print_function
 from .common import *
 from zipfile import ZipFile
 
-__version__ = '0.3.1'
+__version__ = '0.3.2'
 
-glew_ver = '2.2.0'
+glew_ver = '2.3.1'
 
 
 def get_glew(cache, build_path, arch, package, output, download_only=False):
-    url = ('http://jaist.dl.sourceforge.net/project/glew/glew/'
-           '{}/glew-{}-win32.zip'.
+    url = ('https://github.com/nigels-com/glew/releases/download/'
+           'glew-{}/glew-{}-win32.zip'.
            format(glew_ver, glew_ver))
     local_url = download_cache(cache, url, build_path)
     if download_only:

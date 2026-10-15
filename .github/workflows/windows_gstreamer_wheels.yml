@@ -41,7 +41,7 @@ jobs:
         with:
           python-version: 3.x
       - name: Cache deps
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: kivy_build_cache
           key: cache-packages-gstreamer-${{ matrix.arch }}-${{ hashFiles('win/gstreamer.py') }}
@@ -72,7 +72,7 @@ jobs:
         python-version: ${{ matrix.python }}
         architecture: ${{ matrix.arch }}
     - name: Cache deps
-      uses: actions/cache@v4
+      uses: actions/cache@v6
       with:
         path: kivy_build_cache
         key: cache-packages-gstreamer-${{ matrix.arch }}-${{ hashFiles('win/gstreamer.py') }}

@@ -40,7 +40,7 @@ jobs:
       - name: Build SDL3 for arch ${{ matrix.arch }}
         run: |
           ./win/build_sdl3.ps1
-      - uses: actions/upload-artifact@v4.6.0
+      - uses: actions/upload-artifact@v7.0.2
         with:
           name: sdl3_build_${{ matrix.arch }}
           path: kivy-dependencies/dist
@@ -66,7 +66,7 @@ jobs:
       run: |
         . .\ci\windows_ci.ps1
         Prepre-env
-    - uses: actions/download-artifact@v4.1.8
+    - uses: actions/download-artifact@v8.0.2
       with:
         name: sdl3_build_${{ matrix.arch }}
         path: kivy_build
@@ -75,7 +75,7 @@ jobs:
         . .\ci\windows_ci.ps1
         Create-Packages
     - name: Upload wheels as artifact
-      uses: actions/upload-artifact@v4.6.0
+      uses: actions/upload-artifact@v7.0.2
       with:
         name: sdl3_wheel_${{ matrix.arch }}_${{ matrix.python }}
         path: dist

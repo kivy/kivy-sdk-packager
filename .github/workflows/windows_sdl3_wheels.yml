@@ -24,12 +24,12 @@ env:
   KIVY_BUILD_DIR: kivy_build
   KIVY_BUILD_CACHE: kivy_build_cache
   PACKAGE_TARGET: sdl3
-  KIVY_GL_BACKEND: angle_sdl3
   PYTHONPATH: .
 
 jobs:
   prepare_sdl3_build:
     runs-on: windows-latest
+    timeout-minutes: 30
     strategy:
       matrix:
         arch: ['x64']
@@ -47,11 +47,12 @@ jobs:
 
   windows_wheels:
     runs-on: windows-latest
+    timeout-minutes: 30
     needs: prepare_sdl3_build
     strategy:
       fail-fast: false
       matrix:
-        python: [ '3.9', '3.10', '3.11' , '3.12', '3.13', '3.14' ]
+        python: [ '3.11', '3.12', '3.13', '3.14' ]
         arch: ['x64']
     env:
       PACKAGE_ARCH: ${{ matrix.arch }}
@@ -101,5 +102,4 @@ jobs:
     - name: Test package
       run: |
         . .\ci\windows_ci.ps1
-        Test-kivy
-
+        Test-kivy -KivyTestTarget development

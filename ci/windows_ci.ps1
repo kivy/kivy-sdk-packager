@@ -43,27 +43,84 @@ function Upload-windows-wheels-to-server($ip) {
     C:\tools\msys64\usr\bin\bash --login -c "ci/windows-server-upload.sh $ip dist 'kivy_deps.$env:PACKAGE_TARGET-*.whl' ci/win/deps/$env:PACKAGE_TARGET/"
 }
 
-function Test-kivy() {
+function Test-kivy {
+    Param(
+        [ValidateSet('stable', 'development')]
+        [string]$KivyTestTarget = 'development'
+    )
+
     $env:GST_REGISTRY="~/registry.bin"
+    $kivyRef = 'master'
+    $env:KIVY_GL_BACKEND = 'angle_sdl3'
+    $installArgs = @('-m', 'pip', 'install')
 
+    if ($KivyTestTarget -eq 'stable') {
+        $kivyRef = '2.3.1'
+        $env:KIVY_GL_BACKEND = 'angle_sdl2'
+        $constraintsPath = (Resolve-Path -Path (
+            Join-Path -Path $PSScriptRoot -ChildPath 'kivy-stable-test-constraints.txt'
+        ) -ErrorAction Stop).Path
+        $installArgs += @('--constraint', $constraintsPath)
+    }
+
+    Write-Host "Kivy integration target: $KivyTestTarget; ref: $kivyRef; backend: $env:KIVY_GL_BACKEND"
     python -m pip config set install.find-links "$(pwd)\dist"
+    if ($LASTEXITCODE -ne 0) {
+        throw 'Configuring the local wheel search path failed'
+    }
 
-    git clone --depth 1 https://github.com/kivy/kivy.git kivy_src
+    git clone --depth 1 --branch $kivyRef --single-branch https://github.com/kivy/kivy.git kivy_src
+    if ($LASTEXITCODE -ne 0) {
+        throw "Cloning Kivy ref $kivyRef failed"
+    }
+    $kivyCommit = git -C kivy_src rev-parse HEAD
+    if ($LASTEXITCODE -ne 0) {
+        throw 'Reading the Kivy source commit failed'
+    }
+    Write-Host "Kivy source commit: $kivyCommit"
+
     # use the current kivy_deps just built, not the older version specified in the reqs
-    ((get-content -Path kivy_src/pyproject.toml -Raw) -replace "kivy_deps.$env:PACKAGE_TARGET`_dev~.+;","kivy_deps.$env:PACKAGE_TARGET`_dev;") | set-content -Path kivy_src/pyproject.toml
-    ((get-content -Path kivy_src/pyproject.toml -Raw) -replace "kivy_deps.$env:PACKAGE_TARGET~.+;","kivy_deps.$env:PACKAGE_TARGET;") | set-content -Path kivy_src/pyproject.toml
+    ((get-content -Path kivy_src/pyproject.toml -Raw -ErrorAction Stop) -replace "kivy_deps.$env:PACKAGE_TARGET`_dev~.+;","kivy_deps.$env:PACKAGE_TARGET`_dev;") | set-content -Path kivy_src/pyproject.toml -ErrorAction Stop
+    ((get-content -Path kivy_src/pyproject.toml -Raw -ErrorAction Stop) -replace "kivy_deps.$env:PACKAGE_TARGET~.+;","kivy_deps.$env:PACKAGE_TARGET;") | set-content -Path kivy_src/pyproject.toml -ErrorAction Stop
     # Older Kivy checkouts also declare dependency constraints in setup.cfg.
     if (Test-Path -Path kivy_src/setup.cfg -PathType Leaf) {
-        ((get-content -Path kivy_src/setup.cfg -Raw) -replace "kivy_deps.$env:PACKAGE_TARGET~.+;","kivy_deps.$env:PACKAGE_TARGET;") | set-content -Path kivy_src/setup.cfg
+        ((get-content -Path kivy_src/setup.cfg -Raw -ErrorAction Stop) -replace "kivy_deps.$env:PACKAGE_TARGET~.+;","kivy_deps.$env:PACKAGE_TARGET;") | set-content -Path kivy_src/setup.cfg -ErrorAction Stop
     }
-    python -m pip install "./kivy_src[full,dev]"
 
-    python -c 'import kivy'
-    $test_path=python -c 'import kivy.tests as tests; print(tests.__path__[0])'  --config "kivy:log_level:error"
-    cd "$test_path"
+    $installArgs += './kivy_src[full,dev]'
+    python @installArgs
+    if ($LASTEXITCODE -ne 0) {
+        throw 'Kivy source installation failed'
+    }
 
-    echo "[run]`nplugins = kivy.tools.coverage`n" > .coveragerc
-    python -m pytest .
+    python -c "import kivy; print('Kivy version:', kivy.__version__)"
+    if ($LASTEXITCODE -ne 0) {
+        throw 'Importing the installed Kivy failed'
+    }
+    python -c "from importlib.metadata import version; print('pytest:', version('pytest')); print('pytest-asyncio:', version('pytest-asyncio'))"
+    if ($LASTEXITCODE -ne 0) {
+        throw 'Reporting the installed test-runner versions failed'
+    }
+
+    $testPath = python -c 'import kivy.tests as tests; print(tests.__path__[0])' --config "kivy:log_level:error"
+    if ($LASTEXITCODE -ne 0) {
+        throw 'Locating the installed Kivy tests failed'
+    }
+    Write-Host "Installed Kivy tests: $testPath"
+    if ($KivyTestTarget -eq 'stable') {
+        Write-Host 'Stable coverage: released Kivy 2.3.1 suite with its accepted inherited async-app collection gap; see win/README.md.'
+    }
+
+    Push-Location -LiteralPath "$testPath" -ErrorAction Stop
+    try {
+        Set-Content -Path .coveragerc -Value "[run]`nplugins = kivy.tools.coverage`n" -ErrorAction Stop
+        python -m pytest .
+        if ($LASTEXITCODE -ne 0) {
+            throw 'The installed Kivy test suite failed'
+        }
+    } finally {
+        Pop-Location
+    }
 }
 
 function Get-angle-deps() {

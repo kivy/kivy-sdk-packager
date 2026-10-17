@@ -1,0 +1,35 @@
+name: Windows CI helper tests
+
+on:
+  pull_request:
+    paths:
+      - 'ci/windows_ci.ps1'
+      - 'ci/check_wheel_origins.py'
+      - 'ci/tests/test_local_wheels.py'
+      - '.github/workflows/windows_ci_tests.yml'
+  push:
+    branches:
+      - master
+      - windows_ci
+    paths:
+      - 'ci/windows_ci.ps1'
+      - 'ci/check_wheel_origins.py'
+      - 'ci/tests/test_local_wheels.py'
+      - '.github/workflows/windows_ci_tests.yml'
+
+jobs:
+  helper_tests:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.9'
+          architecture: x64
+      - name: Run local-wheel regression tests
+        run: |
+          python -m pip install --upgrade "pip>=25.3"
+          if ($LASTEXITCODE -ne 0) { throw 'Installing the helper-test pip prerequisite failed' }
+          python -m unittest discover -s ci/tests -p "test_local_wheels.py" -v
+          if ($LASTEXITCODE -ne 0) { throw 'Windows CI helper tests failed' }

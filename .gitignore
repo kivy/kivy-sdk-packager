@@ -2,3 +2,4 @@
 *.dmg
 *.swo
 *.swp
+__pycache__/

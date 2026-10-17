@@ -30,7 +30,7 @@ function Download-Packages() {
 
 
 function Create-Packages() {
-    python -m pip install pip wheel<0.38.0 setuptools --upgrade
+    python -m pip install 'pip>=25.3' 'wheel<0.38.0' setuptools --upgrade
     python -m "win.$env:PACKAGE_TARGET" build_path "$(pwd)\$env:KIVY_BUILD_DIR" arch $env:PACKAGE_ARCH package $env:PACKAGE_TARGET output "$(pwd)\dist" cache "$(pwd)\$env:KIVY_BUILD_CACHE"
     dir "$(pwd)\dist"
     rm "$(pwd)\dist\*tar.gz"
@@ -49,6 +49,50 @@ function Test-kivy {
         [string]$KivyTestTarget = 'development'
     )
 
+    if ($env:PACKAGE_TARGET -cnotin @('angle', 'glew', 'gstreamer', 'sdl2', 'sdl3')) {
+        throw 'PACKAGE_TARGET must select a supported Windows dependency'
+    }
+    if ($env:PACKAGE_ARCH -cne 'x64') {
+        throw 'Windows integration requires PACKAGE_ARCH=x64'
+    }
+    if (($env:PACKAGE_TARGET -eq 'sdl2' -and $KivyTestTarget -ne 'stable') -or
+        ($env:PACKAGE_TARGET -eq 'sdl3' -and $KivyTestTarget -ne 'development')) {
+        throw 'The selected SDL dependency does not match the Kivy test profile'
+    }
+    $pipHelp = python -m pip install --help
+    if ($LASTEXITCODE -ne 0 -or ($pipHelp -join "`n") -notmatch '--build-constraint') {
+        throw 'Test-kivy requires pip >=25.3 for --build-constraint. Run: python -m pip install --upgrade "pip>=25.3"'
+    }
+    $originChecker = (Resolve-Path -LiteralPath (
+        Join-Path $PSScriptRoot 'check_wheel_origins.py'
+    ) -ErrorAction Stop).Path
+    $wheelDirectory = (Resolve-Path -LiteralPath (
+        Join-Path (Get-Location).Path 'dist'
+    ) -ErrorAction Stop).Path
+    $localConstraintsPath = Join-Path (Get-Location).Path 'local-wheel-constraints.txt'
+    $wheelPaths = @()
+    $wheelVersions = @()
+    $localConstraints = foreach ($suffix in @('', '_dev')) {
+        $name = "kivy_deps.$env:PACKAGE_TARGET$suffix"
+        $pattern = '^kivy_deps[._]' + [Regex]::Escape("$env:PACKAGE_TARGET$suffix") + '-'
+        $wheels = @(Get-ChildItem -LiteralPath $wheelDirectory -Filter '*.whl' -File -ErrorAction Stop |
+            Where-Object { $_.Name -match $pattern })
+        if ($wheels.Count -ne 1) {
+            throw "Expected exactly one local $name wheel, found $($wheels.Count)"
+        }
+        $wheel = $wheels[0]
+        $wheelPaths += $wheel.FullName
+        $wheelVersions += $wheel.Name.Split('-')[1]
+        $uri = ([UriBuilder]::new('file', '', -1, $wheel.FullName)).Uri.AbsoluteUri
+        $hash = (Get-FileHash -LiteralPath $wheel.FullName -Algorithm SHA256 -ErrorAction Stop).Hash.ToLowerInvariant()
+        "$name @ $uri#sha256=$hash"
+    }
+    if (@($wheelVersions | Select-Object -Unique).Count -ne 1) {
+        throw 'Local runtime/development wheel versions do not match'
+    }
+    Set-Content -LiteralPath $localConstraintsPath -Value $localConstraints -Encoding utf8 -ErrorAction Stop
+    $localConstraints | ForEach-Object { Write-Host "Local wheel constraint: $_" }
+
     $env:GST_REGISTRY="~/registry.bin"
     $kivyRef = 'master'
     $env:KIVY_GL_BACKEND = 'angle_sdl3'
@@ -62,11 +106,17 @@ function Test-kivy {
         ) -ErrorAction Stop).Path
         $installArgs += @('--constraint', $constraintsPath)
     }
+    $installArgs += @('--constraint', $localConstraintsPath, '--build-constraint', $localConstraintsPath, '--verbose')
 
     Write-Host "Kivy integration target: $KivyTestTarget; ref: $kivyRef; backend: $env:KIVY_GL_BACKEND"
-    python -m pip config set install.find-links "$(pwd)\dist"
+    python -m pip config set install.find-links $wheelDirectory
     if ($LASTEXITCODE -ne 0) {
         throw 'Configuring the local wheel search path failed'
+    }
+
+    python -m pip install --no-index --no-deps --force-reinstall @wheelPaths
+    if ($LASTEXITCODE -ne 0) {
+        throw 'Installing the explicit local dependency wheels failed'
     }
 
     git clone --depth 1 --branch $kivyRef --single-branch https://github.com/kivy/kivy.git kivy_src
@@ -91,6 +141,10 @@ function Test-kivy {
     python @installArgs
     if ($LASTEXITCODE -ne 0) {
         throw 'Kivy source installation failed'
+    }
+    python $originChecker $localConstraintsPath
+    if ($LASTEXITCODE -ne 0) {
+        throw 'Verifying the installed local dependency wheels failed'
     }
 
     python -c "import kivy; print('Kivy version:', kivy.__version__)"
@@ -117,6 +171,10 @@ function Test-kivy {
         python -m pytest .
         if ($LASTEXITCODE -ne 0) {
             throw 'The installed Kivy test suite failed'
+        }
+        python $originChecker $localConstraintsPath
+        if ($LASTEXITCODE -ne 0) {
+            throw 'Verifying local dependency wheels after pytest failed'
         }
     } finally {
         Pop-Location

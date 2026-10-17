@@ -38,6 +38,26 @@ pytest 8.3.5 / pytest-asyncio 0.24.0 pins in
 `Test-kivy -KivyTestTarget development` selects current master. The helper logs
 the actual source commit, backend, Kivy version, and runner versions.
 
+Integration explicitly reinstalls the locally built runtime/development wheel
+pair. Their file URLs and SHA-256 hashes constrain both runtime and isolated
+build dependencies using pip >=25.3. Installed wheel origins and archive hashes
+are verified before and after a successful suite; the constraints and verification
+results are printed in the job log. This checks which wheel archives were installed,
+without tracing every native DLL loaded by a provider.
+
+The separate [Windows CI helper tests](../.github/workflows/windows_ci_tests.yml)
+workflow runs `ci/tests/test_local_wheels.py` once on relevant PRs/pushes. These
+regressions test selection, installed origins, and real pip build isolation using
+synthetic wheels. Test-only changes select this workflow without rebuilding native
+dependencies. To run them locally from the repository root (Python 3.9+,
+pip >=25.3, and PowerShell):
+
+```powershell
+python -m unittest discover -s ci/tests -p "test_local_wheels.py" -v
+```
+
+The wheel workflows' `Test package` steps run the installed Kivy test suite.
+
 Stable results cover the tests collected from the released 2.3.1 suite.
 Its inherited async-app decorator pattern prevents those async app tests from
 being collected with this runner. A successful stable job therefore does not

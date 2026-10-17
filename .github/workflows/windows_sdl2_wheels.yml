@@ -7,6 +7,7 @@ on:
       - 'win/sdl2.py'
       - 'ci/windows_ci.ps1'
       - 'ci/kivy-stable-test-constraints.txt'
+      - 'ci/check_wheel_origins.py'
       - '.github/workflows/windows_sdl2_wheels.yml'
   push:
     branches:
@@ -17,6 +18,7 @@ on:
       - 'win/sdl2.py'
       - 'ci/windows_ci.ps1'
       - 'ci/kivy-stable-test-constraints.txt'
+      - 'ci/check_wheel_origins.py'
       - '.github/workflows/windows_sdl2_wheels.yml'
 
 env:

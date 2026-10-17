@@ -1,0 +1,4 @@
+# Runner for the unmodified Kivy 2.3.1 released test suite.
+# The inherited async-app test collection gap is documented in win/README.md.
+pytest==8.3.5
+pytest-asyncio==0.24.0

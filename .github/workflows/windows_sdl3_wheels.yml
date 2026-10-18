@@ -7,6 +7,7 @@ on:
       - 'win/sdl3.py'
       - 'win/build_sdl3.ps1'
       - 'ci/windows_ci.ps1'
+      - 'ci/check_wheel_origins.py'
       - '.github/workflows/windows_sdl3_wheels.yml'
   push:
     branches:
@@ -17,6 +18,7 @@ on:
       - 'win/sdl3.py'
       - 'win/build_sdl3.ps1'
       - 'ci/windows_ci.ps1'
+      - 'ci/check_wheel_origins.py'
       - '.github/workflows/windows_sdl3_wheels.yml'
 
 env:

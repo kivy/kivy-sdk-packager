@@ -71,8 +71,11 @@ Future SDL3 wheel rows start at Python 3.11; previously published artifacts
 remain available.
 
 Windows jobs have a 30-minute timeout, except ANGLE's native dependency
-preparation, which has a three-hour timeout. A full x86/x64 ANGLE build can
-take over two hours. These limits apply separately to each job.
+preparation, which has a three-hour timeout to allow headroom for source
+synchronization and native compilation. ANGLE preparation builds x64
+DLLs once and shares the `angle_dlls-x64` artifact across every Python
+wheel/integration row. The artifact preserves the `Release_x64/` directory
+expected by the packaging recipe. These limits apply separately to each job.
 
 Process to make a new release
 -----------------------------

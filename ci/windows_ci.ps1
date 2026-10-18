@@ -195,22 +195,14 @@ function Build-angle() {
     python scripts/bootstrap.py
     gclient sync
 
-    gn gen out/Release_x86 --args='is_debug=false target_cpu=""x86""'
-    type out/Release_x86/args.gn
-    autoninja -C out\Release_x86 libEGL
-    autoninja -C out\Release_x86 libGLESv2
-
     gn gen out/Release_x64 --args='is_debug=false target_cpu=""x64""'
     type out/Release_x64/args.gn
     autoninja -C out\Release_x64 libEGL
     autoninja -C out\Release_x64 libGLESv2
 
     dir out\Release_x64
-    dir out\Release_x86
 
     cd ..
     mkdir angle_dlls\Release_x64
-    mkdir angle_dlls\Release_x86
     cp angle_src\out\Release_x64\*.dll angle_dlls\Release_x64
-    cp angle_src\out\Release_x86\*.dll angle_dlls\Release_x86
 }

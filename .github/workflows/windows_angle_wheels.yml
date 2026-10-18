@@ -32,7 +32,7 @@ jobs:
   prepare_angle:
     # using windows-2022 as windows-2025 does not have the proper Windows SDK installed
     runs-on: windows-2022
-    # A full x86/x64 native build can take over two hours.
+    # Allow headroom for ANGLE source sync and slow x64 native compilation.
     timeout-minutes: 180
     env:
       DEPOT_TOOLS_WIN_TOOLCHAIN: 0
@@ -51,7 +51,7 @@ jobs:
           Build-angle
       - uses: actions/upload-artifact@v4.6.0
         with:
-          name: angle_dlls-${{ matrix.python }}-${{ matrix.arch }}
+          name: angle_dlls-x64
           path: angle_dlls
           # overwrite: true
 
@@ -95,9 +95,8 @@ jobs:
         Prepre-env
     - uses: actions/download-artifact@v4.1.8
       with:
+        name: angle_dlls-x64
         path: angle_dlls
-        pattern: angle_dlls-*
-        merge-multiple: true
     - name: Build package
       run: |
         . .\ci\windows_ci.ps1

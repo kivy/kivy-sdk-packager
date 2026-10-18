@@ -2,6 +2,7 @@ from __future__ import absolute_import, print_function
 from .common import *
 from zipfile import ZipFile
 
+# Shared runtime/dev wheel version, separate from the native GLEW version.
 __version__ = '0.3.2'
 
 glew_ver = '2.3.1'

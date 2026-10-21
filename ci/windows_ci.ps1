@@ -195,7 +195,8 @@ function Build-angle() {
     python scripts/bootstrap.py
     gclient sync
 
-    gn gen out/Release_x64 --args='is_debug=false target_cpu=""x64""'
+    # Skip unused WebGPU/Dawn and compiler debug info; PDBs are not packaged.
+    gn gen out/Release_x64 --args='is_debug=false target_cpu=""x64"" angle_enable_wgpu=false symbol_level=0'
     type out/Release_x64/args.gn
     autoninja -C out\Release_x64 libEGL
     autoninja -C out\Release_x64 libGLESv2

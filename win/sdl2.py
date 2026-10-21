@@ -1,7 +1,7 @@
 from os import walk
 from .common import *
 
-__version__ = '0.8.0'
+__version__ = '0.8.1'
 
 sdl2_ver = '2.30.7'
 sdl2_mixer_ver = '2.8.0'

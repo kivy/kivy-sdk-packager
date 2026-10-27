@@ -9,7 +9,9 @@ Kivy versions supported: ``2.2.0+``. For older Kivy versions, use the correspond
 
 The packaged ``.app`` contains a Python virtualenv with ``kivy`` and its dependencies pre-installed.
 
-SDL2 frameworks are included in the app bundle, and the Kivy installation is configured to use them.
+The app includes the native dependencies produced by the selected Kivy source.
+``relocate-kivy.py`` rewrites native load paths and signs bundled libraries and
+Kivy extensions after relocation.
 
 Kivy, on every release, provides a ``Kivy.app`` that can be used as a base for your app, so you don't need to build it from scratch.
 Below are the steps to use the ``Kivy.app`` as a base for your app, or to build your app from scratch.
@@ -35,7 +37,13 @@ Below are the steps to use the ``Kivy.app`` as a base for your app, or to build 
     A local source must contain ``tools/build_macos_dependencies.sh``.
     A missing builder stops the build.
 
-    This will build from scratch all the requirements (openssl, SDL2, SDL2_image, SDL2_mixer, SDL2_ttf, python3).
+    ``-p`` selects the bundled Python. Requirements are resolved and wheels
+    prepared with that interpreter in a build-tools virtualenv outside the app.
+    OpenSSL and Python compilation use the available CPU cores.
+
+    This builds Python, OpenSSL, and the selected Kivy source's native dependencies
+    (currently SDL3, SDL3_image, SDL3_mixer, SDL3_ttf, libpng, and ThorVG, with
+    prebuilt universal2 ANGLE libraries).
     A ``build`` directory is created to contain the``MyApp.app`` directory, where ``MyApp`` is the app's name.
   * To use the existing Kivy app bundle:
     * Download the Kivy app from the Kivy download page, the GitHub releases, or the
@@ -78,7 +86,8 @@ Below are the steps to use the ``Kivy.app`` as a base for your app, or to build 
           osxrelocator -r MyApp.app @rpath/MyFramework.framework/Versions/A/MyFramework \
               @executable_path/Contents/Frameworks/MyFramework.framework/Versions/A/MyFramework
 
-      This should be customized for each framework. See the ``create-osx-bundle.sh`` script for examples.
+      This should be customized for each framework. See ``relocate-kivy.py`` for
+      the native relocation used by ``create-osx-bundle.sh`` for Kivy's dependencies.
   * By using the ``prepare-wheels.py`` helper, download and prepare wheels before installing them.
     This script will download the wheels, accordingly to your ``MACOSX_DEPLOYMENT_TARGET`` and merge them into a single ``universal2`` wheel if one is not available from PyPI.
 

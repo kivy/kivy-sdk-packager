@@ -60,7 +60,7 @@ jobs:
       - name: Upload dmg as artifact
         uses: actions/upload-artifact@v4.6.2
         with:
-          name: KivySDKPackager-${{ matrix.runs-on }}
+          name: KivySDKPackager-${{ matrix.runs_on }}
           path: osx_artifacts
           # overwrite: True
 
@@ -86,7 +86,7 @@ jobs:
         if: matrix.runs_on == 'macos-15-intel'
         run: hdiutil attach osx_artifacts/macos-latest-Kivy.dmg -mountroot .
       - name: Mount build from macos-15-intel runner on macos-latest runner
-        if: matrix.runs_on != 'macos-latest'
+        if: matrix.runs_on == 'macos-latest'
         run: hdiutil attach osx_artifacts/macos-15-intel-Kivy.dmg -mountroot .
       - name: Copy Kivy.app to Applications
         run: cp -R Kivy/Kivy.app /Applications/Kivy.app

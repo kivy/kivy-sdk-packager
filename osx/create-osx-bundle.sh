@@ -150,6 +150,7 @@ curl -L -O "https://www.python.org/ftp/python/${PYVER}/Python-${PYVER}.tgz"
 echo "-- Set MACOSX_DEPLOYMENT_TARGET=11.0"
 export SDKROOT=$(xcrun -sdk macosx --show-sdk-path)
 export MACOSX_DEPLOYMENT_TARGET=11.0
+BUILD_JOBS=$(sysctl -n hw.ncpu)
 
 echo "-- Build OpenSSL (x86_64)"
 tar -xvf "openssl-${OPENSSL_VERSION}.tar.gz"
@@ -157,7 +158,7 @@ mv "openssl-${OPENSSL_VERSION}" "openssl-${OPENSSL_VERSION}_x86_64"
 pushd "openssl-${OPENSSL_VERSION}_x86_64"
 ./Configure darwin64-x86_64-cc
 make clean
-make build_libs
+make -j"$BUILD_JOBS" build_libs
 popd
 
 echo "-- Build OpenSSL (arm64)"
@@ -166,7 +167,7 @@ mv "openssl-${OPENSSL_VERSION}" "openssl-${OPENSSL_VERSION}_arm64"
 pushd "openssl-${OPENSSL_VERSION}_arm64"
 ./Configure darwin64-arm64-cc
 make clean
-make build_libs
+make -j"$BUILD_JOBS" build_libs
 popd
 
 echo "-- Merge OpenSSL libs to a fat library and copy include folder"
@@ -181,10 +182,15 @@ KIVY_APP_PYTHON_PREFIX="${SCRIPT_PATH}/build/${APP_NAME}.app/Contents/Resources/
 KIVY_APP_PYTHON_BIN="${KIVY_APP_PYTHON_PREFIX}/bin/python3"
 tar -xvf "Python-${PYVER}.tgz"
 pushd "Python-${PYVER}"
-PKG_CONFIG="" ./configure --prefix=$KIVY_APP_PYTHON_PREFIX --enable-universalsdk --disable-test-modules --with-universal-archs=universal2 --with-openssl=../openssl
-make
+PKG_CONFIG="" ./configure --prefix="$KIVY_APP_PYTHON_PREFIX" --enable-universalsdk --disable-test-modules --with-universal-archs=universal2 --with-openssl=../openssl
+make -j"$BUILD_JOBS"
 make install
 popd
+
+echo "-- Prepare build tools using the bundled Python, outside the app"
+"$KIVY_APP_PYTHON_BIN" -m venv "$BUILD_FOLDER/build-tools"
+BUILD_PYTHON="$BUILD_FOLDER/build-tools/bin/python"
+"$BUILD_PYTHON" -m pip install pip-tools -r "$SCRIPT_PATH/requirements.txt"
 
 echo "-- Build Kivy dependencies via build_macos_dependencies.sh"
 # Keep sibling helpers in the selected source tree, but build into this directory.
@@ -194,7 +200,7 @@ echo "-- Ensure KIVY_DEPS_ROOT is set to the dependencies folder"
 export KIVY_DEPS_ROOT=$(pwd)/kivy-dependencies
 
 echo "-- Write the selected Kivy source and extras to requirements.in"
-"$PYTHON" - "$KIVY_PATH" "$EXTRAS" > kivy-app-requirements.in <<'PY'
+"$BUILD_PYTHON" - "$KIVY_PATH" "$EXTRAS" > kivy-app-requirements.in <<'PY'
 from pathlib import Path
 import sys
 
@@ -204,36 +210,30 @@ PY
 
 echo "-- Compile the requirements.txt file via pip-compile, so we have a full list of dependencies"
 # This step is needed as the --platform option during pip install requires --no-deps
-pip install pip-tools
-pip-compile kivy-app-requirements.in --no-annotate --no-header -o kivy-app-requirements.txt
+# cryptography 49+ dropped Intel macOS wheels needed for universal2 bundles.
+echo 'cryptography<49' > kivy-app-constraints.txt
+"$BUILD_PYTHON" -m piptools compile kivy-app-requirements.in --constraint kivy-app-constraints.txt --no-annotate --no-header -o kivy-app-requirements.txt
 
 echo "-- Call prepare-wheels.py to download (and fuse) all the wheels and source distributions"
-pip install -r ../requirements.txt
 WHEELS_FOLDER=$(pwd)/wheels
-$PYTHON ../prepare-wheels.py --requirements-file kivy-app-requirements.txt --python-version $PYVER --deployment-target $MACOSX_DEPLOYMENT_TARGET --output-folder $WHEELS_FOLDER
+SSL_CERT_FILE="${SSL_CERT_FILE:-$("$BUILD_PYTHON" -c 'from pip._vendor import certifi; print(certifi.where())')}" \
+"$BUILD_PYTHON" "$SCRIPT_PATH/prepare-wheels.py" --requirements-file kivy-app-requirements.txt --python-version "$PYVER" --deployment-target "$MACOSX_DEPLOYMENT_TARGET" --output-folder "$WHEELS_FOLDER"
 
 echo "-- Create a virtualenv in ${APP_NAME}.app/Contents/Resources"
 pushd "$APP_NAME.app/Contents/Resources/"
-$KIVY_APP_PYTHON_BIN -m pip install --upgrade pip virtualenv --user
-$KIVY_APP_PYTHON_BIN -m venv venv
+"$KIVY_APP_PYTHON_BIN" -m venv venv
+APP_PYTHON="$BUILD_FOLDER/$APP_NAME.app/Contents/Resources/venv/bin/python"
 
 echo "-- Activate the just created virtualenv"
 source venv/bin/activate
 popd
 
 echo "-- Install the requirements via pip"
-SITE_PACKAGES_DIR=$(python -c "import site; print(site.getsitepackages()[0])")
+SITE_PACKAGES_DIR=$("$APP_PYTHON" -c "import site; print(site.getsitepackages()[0])")
 
-pip install --platform macosx_11_0_universal2 --find-links=$WHEELS_FOLDER --no-deps --target $SITE_PACKAGES_DIR -r kivy-app-requirements.txt
-
-echo "-- Relocate SDL2 frameworks on Kivy installation folder"
-pushd $SITE_PACKAGES_DIR/kivy
-python3 -m pip install git+https://github.com/tito/osxrelocator
-osxrelocator -r . @rpath/SDL2.framework/Versions/A/SDL2 @executable_path/../../../../Contents/Frameworks/SDL2.framework/Versions/A/SDL2
-osxrelocator -r . @rpath/SDL2_ttf.framework/Versions/A/SDL2_ttf @executable_path/../../../../Contents/Frameworks/SDL2_ttf.framework/Versions/A/SDL2_ttf
-osxrelocator -r . @rpath/SDL2_image.framework/Versions/A/SDL2_image @executable_path/../../../../Contents/Frameworks/SDL2_image.framework/Versions/A/SDL2_image
-osxrelocator -r . @rpath/SDL2_mixer.framework/Versions/A/SDL2_mixer @executable_path/../../../../Contents/Frameworks/SDL2_mixer.framework/Versions/A/SDL2_mixer
-popd
+# Leave room for the longer loader-relative paths used during native relocation.
+LDFLAGS="${LDFLAGS:-} -Wl,-headerpad_max_install_names" \
+"$APP_PYTHON" -m pip install --platform macosx_11_0_universal2 --find-links="$WHEELS_FOLDER" --no-deps --target "$SITE_PACKAGES_DIR" -r kivy-app-requirements.txt
 
 echo "-- Deactivate virtualenv, is time to relocate things"
 deactivate
@@ -252,18 +252,10 @@ cp "${SCRIPT_PATH}/data/kivy_activate" "${APP_NAME}.app/Contents/Resources/venv/
 
 
 echo "-- Copy Kivy dependencies into $APP_NAME.app/Contents/Frameworks directory"
-cp -R "$KIVY_DEPS_ROOT/dist/frameworks/." "$APP_NAME.app/Contents/Frameworks"
+cp -R "$KIVY_DEPS_ROOT/dist/Frameworks/." "$APP_NAME.app/Contents/Frameworks"
 
-
-echo "-- Change png.framework path in SDL2_ttf"
-install_name_tool -change @rpath/png.framework/Versions/1.6.40/png @loader_path/../../../../Frameworks/png.framework/Versions/1.6.40/png "$APP_NAME.app/Contents/Frameworks/SDL2_ttf.framework/Versions/A/SDL2_ttf"
-
-echo "-- Let's fix Frameworks signing."
-codesign -fs - "${APP_NAME}.app/Contents/Frameworks/png.framework/Versions/1.6.40/png"
-codesign -fs - "${APP_NAME}.app/Contents/Frameworks/SDL2.framework/Versions/A/SDL2"
-codesign -fs - "${APP_NAME}.app/Contents/Frameworks/SDL2_ttf.framework/Versions/A/SDL2_ttf"
-codesign -fs - "${APP_NAME}.app/Contents/Frameworks/SDL2_image.framework/Versions/A/SDL2_image"
-codesign -fs - "${APP_NAME}.app/Contents/Frameworks/SDL2_mixer.framework/Versions/A/SDL2_mixer"
+echo "-- Relocate and sign the bundled native dependencies and Kivy extensions"
+"$BUILD_PYTHON" "$SCRIPT_PATH/relocate-kivy.py" "$BUILD_FOLDER/$APP_NAME.app" "$KIVY_DEPS_ROOT" "$SITE_PACKAGES_DIR/kivy"
 
 echo "-- Launch relocate.sh to relocate deps"
 ../relocate.sh "$APP_NAME.app"

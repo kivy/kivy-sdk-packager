@@ -59,14 +59,30 @@ while [[ "$#" -gt 0 ]]; do
     shift
 done
 
-# get kivy path or url
+PYTHON=python3
+BUILD_FOLDER="$(pwd -P)/build"
+LOCAL_KIVY=0
+
+# Resolve and validate local input before the disposable build tree is removed.
 if [ -d "$KIVY_PATH" ]; then
-    # get full path
-    pushd "$KIVY_PATH"
-    KIVY_PATH="$(pwd)"
-    popd
-else
-    KIVY_PATH="https://github.com/kivy/kivy/archive/$KIVY_PATH.zip"
+    KIVY_PATH=$("$PYTHON" - "$KIVY_PATH" "$BUILD_FOLDER" <<'PY'
+from pathlib import Path
+import sys
+
+source, build = (Path(arg).resolve() for arg in sys.argv[1:])
+if source == build or build in source.parents:
+    sys.exit(f"Local Kivy source must be outside the disposable build directory: {build}")
+print(source)
+PY
+)
+    if [ ! -f "$KIVY_PATH/tools/build_macos_dependencies.sh" ]; then
+        echo "Missing tools/build_macos_dependencies.sh in $KIVY_PATH" >&2
+        exit 1
+    fi
+    LOCAL_KIVY=1
+    if [ -e "$KIVY_PATH/.git" ] && KIVY_COMMIT=$(git -C "$KIVY_PATH" rev-parse HEAD 2>/dev/null); then
+        echo "Local Kivy HEAD: $KIVY_COMMIT (including local changes)"
+    fi
 fi
 
 echo "Using Kivy $KIVY_PATH"
@@ -81,7 +97,6 @@ if [ ! -f "$PLATYPUS" ]; then
 fi
 
 SCRIPT_PATH="${BASH_SOURCE[0]}"
-PYTHON=python3
 
 # follow any symbolic links
 if [ -h "${SCRIPT_PATH}" ]; then
@@ -95,6 +110,20 @@ SCRIPT_PATH=$($PYTHON -c "import os; print(os.path.realpath(os.path.dirname('$SC
 echo "-- Clean previous build (if any) and move to build folder"
 rm -rf build
 mkdir build
+
+if [ "$LOCAL_KIVY" -eq 0 ]; then
+    echo "-- Resolve Kivy ref $KIVY_PATH"
+    git init "$BUILD_FOLDER/kivy-source"
+    git -C "$BUILD_FOLDER/kivy-source" remote add origin https://github.com/kivy/kivy.git
+    git -C "$BUILD_FOLDER/kivy-source" fetch --depth 1 origin "$KIVY_PATH"
+    git -C "$BUILD_FOLDER/kivy-source" checkout --detach FETCH_HEAD
+    KIVY_PATH="$BUILD_FOLDER/kivy-source"
+    echo "Resolved Kivy commit: $(git -C "$KIVY_PATH" rev-parse HEAD)"
+    if [ ! -f "$KIVY_PATH/tools/build_macos_dependencies.sh" ]; then
+        echo "Missing tools/build_macos_dependencies.sh in $KIVY_PATH" >&2
+        exit 1
+    fi
+fi
 
 echo "-- Create initial $APP_NAME.app package"
 $PLATYPUS -DBR -y \
@@ -112,19 +141,11 @@ $PLATYPUS -DBR -y \
 $PYTHON -c "import fcntl; fcntl.fcntl(1, fcntl.F_SETFL, 0)"
 
 echo "-- Entering build folder"
-BUILD_FOLDER=$(pwd)/build
-pushd $BUILD_FOLDER
+pushd "$BUILD_FOLDER"
 
 echo "-- Download needed files"
 curl -L -O "http://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz"
 curl -L -O "https://www.python.org/ftp/python/${PYVER}/Python-${PYVER}.tgz"
-
-echo "-- Copy the Kivy dependencies build script, or download it (from master) if not available"
-if [ -f "$KIVY_PATH/tools/build_macos_dependencies.sh" ]; then
-    cp "$KIVY_PATH/tools/build_macos_dependencies.sh" .
-else
-    curl -L -O "https://raw.githubusercontent.com/kivy/kivy/master/tools/build_macos_dependencies.sh"
-fi
 
 echo "-- Set MACOSX_DEPLOYMENT_TARGET=11.0"
 export SDKROOT=$(xcrun -sdk macosx --show-sdk-path)
@@ -166,19 +187,20 @@ make install
 popd
 
 echo "-- Build Kivy dependencies via build_macos_dependencies.sh"
-chmod +x build_macos_dependencies.sh
-./build_macos_dependencies.sh
+# Keep sibling helpers in the selected source tree, but build into this directory.
+bash "$KIVY_PATH/tools/build_macos_dependencies.sh"
 
 echo "-- Ensure KIVY_DEPS_ROOT is set to the dependencies folder"
 export KIVY_DEPS_ROOT=$(pwd)/kivy-dependencies
 
-echo "-- Write (or load, and add Kivy) the requirements.in file"
-if [ -d "$KIVY_PATH" ]; then
-    KIVY_REQ_LINE="${KIVY_PATH}[${EXTRAS}]"
-else
-    KIVY_REQ_LINE="kivy[${EXTRAS}] @ $KIVY_PATH"
-fi
-echo $KIVY_REQ_LINE > kivy-app-requirements.in
+echo "-- Write the selected Kivy source and extras to requirements.in"
+"$PYTHON" - "$KIVY_PATH" "$EXTRAS" > kivy-app-requirements.in <<'PY'
+from pathlib import Path
+import sys
+
+source, extras = sys.argv[1:]
+print(f"Kivy[{extras}] @ {Path(source).as_uri()}")
+PY
 
 echo "-- Compile the requirements.txt file via pip-compile, so we have a full list of dependencies"
 # This step is needed as the --platform option during pip install requires --no-deps

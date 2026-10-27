@@ -32,7 +32,7 @@ jobs:
           install_platypus
       - name: Install build dependencies
         run: |
-          brew install pkg-config cmake ninja
+          brew install pkg-config cmake ninja meson
       - name: Create macOS App Bundle with extras [dev]
         run: |
           source ci/osx_ci.sh

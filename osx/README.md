@@ -24,6 +24,17 @@ Below are the steps to use the ``Kivy.app`` as a base for your app, or to build 
 
     For all the configuration options, you can run ``./create-osx-bundle.sh -h``.
 
+    ``-k`` accepts a local source directory (including an extracted source archive),
+    or a Git tag, branch, or full commit SHA from ``kivy/kivy``. Remote selections
+    require Git and are fetched once into ``build/kivy-source`` instead of being installed
+    from a separately downloaded archive. Kivy installation and dependency helpers
+    use that same source tree. Local sources include uncommitted changes and must
+    live outside the disposable ``build`` directory, which is deleted before building.
+    The dependency builder runs from ``build`` so its outputs stay there, while
+    sibling helpers are resolved in the selected source's ``tools`` directory.
+    A local source must contain ``tools/build_macos_dependencies.sh``.
+    A missing builder stops the build.
+
     This will build from scratch all the requirements (openssl, SDL2, SDL2_image, SDL2_mixer, SDL2_ttf, python3).
     A ``build`` directory is created to contain the``MyApp.app`` directory, where ``MyApp`` is the app's name.
   * To use the existing Kivy app bundle:

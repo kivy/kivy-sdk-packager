@@ -5,6 +5,8 @@ on:
     paths:
       - 'ci/windows_ci.ps1'
       - 'ci/check_wheel_origins.py'
+      - 'ci/smoke_test_wheels.py'
+      - 'ci/windows_smoke.ps1'
       - 'ci/tests/test_local_wheels.py'
       - '.github/workflows/windows_ci_tests.yml'
   push:
@@ -14,6 +16,8 @@ on:
     paths:
       - 'ci/windows_ci.ps1'
       - 'ci/check_wheel_origins.py'
+      - 'ci/smoke_test_wheels.py'
+      - 'ci/windows_smoke.ps1'
       - 'ci/tests/test_local_wheels.py'
       - '.github/workflows/windows_ci_tests.yml'
 

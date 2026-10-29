@@ -21,11 +21,22 @@ Dependency wheels are built first, then checked against selected Kivy test targe
 | GLEW / GStreamer | 3.9–3.10 | `2.3.1` | `angle_sdl2` |
 | ANGLE / GLEW / GStreamer | 3.11–3.14 | `master` | `angle_sdl3` |
 | SDL2 | 3.9–3.13 | `2.3.1` | `angle_sdl2` |
+| SDL2 (wheel smoke test) | 3.14 | none | none |
 | SDL3 | 3.11–3.14 | `master` | `angle_sdl3` |
 
-This gives 27 x64 build/integration combinations: 11 stable and 16 development.
-Stable and development name the test profiles; two stable ANGLE rows are
-forward-compatibility smoke tests.
+This gives 28 x64 build/test combinations: 11 stable, 16 development, and one
+SDL2 wheel smoke test. Stable and development name the test profiles; two stable
+ANGLE rows are forward-compatibility smoke tests.
+
+No Kivy release supports Python 3.14 yet, so the SDL2 3.14 row runs
+`Test-wheel-smoke` from [`ci/windows_smoke.ps1`](../ci/windows_smoke.ps1)
+instead of the Kivy suite. It installs the local wheel pair,
+verifies their origins, and runs [`ci/smoke_test_wheels.py`](../ci/smoke_test_wheels.py),
+which loads SDL2, SDL2_image, SDL2_mixer and SDL2_ttf through the DLL directory
+`kivy_deps.sdl2` registers, checks their versions against `win/sdl2.py`,
+initializes the image and audio formats Kivy requests, and checks the development
+headers and import libraries are installed. Switch this row to the Kivy suite once
+a Kivy release with Python 3.14 support is available.
 
 The older ANGLE rows lift Kivy 2.3.1's `kivy_deps.angle~=0.4.0`
 pin to exercise ANGLE 0.5.0.
@@ -73,7 +84,8 @@ Kivy replaced httpbin.org with a local test server in
 applies only while the stable ref is 2.3.1.
 
 The table describes the selected test coverage: common-dependency rows
-on Python 3.11–3.14 exercise development Kivy. SDL2's rows exercise stable Kivy.
+on Python 3.11–3.14 exercise development Kivy. SDL2's rows exercise stable Kivy,
+except the 3.14 smoke test.
 Future SDL3 wheel rows start at Python 3.11; previously published artifacts
 remain available.
 
@@ -95,3 +107,4 @@ Process to make a new release
   * Increment ``__version__`` so a new package will be available for pypi.
 * The Windows GitHub CI runs for the specific deps whose path filters match on pull requests and on pushes to the `master` and `windows_ci` branches. Test changes in a pull request; pushing to `windows_ci` remains available for branch-based testing. Sometimes it's expected that the test will fail, e.g. a new python version doesn't have all the other deps on pypi yet.
 * When things work, push to master with `[publish xxx win]`, where `xxx` is e.g. `gstreamer`. Then it will also upload the new wheels to the server and pypi. Even if it fails the tests or to upload, it should still show as a build artifact to be manually uploaded to pypi and the server. `[publish xxx win]` must be listed once for each dependency in the commit message.
+* SDL2 publishing never replaces files that are already published: its PyPI upload uses `twine --skip-existing`, and its server upload sets `UPLOAD_IGNORE_EXISTING` so `ci/windows-server-upload.sh` runs `rsync --ignore-existing`. This lets a new Python version's wheels be added to an existing release (SDL2 0.8.0 for Python 3.14) without a version bump, as long as the recipe is unchanged. Bump ``__version__`` whenever the packaged contents change. The other dependencies' publishing is unchanged.

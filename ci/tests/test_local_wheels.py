@@ -203,10 +203,18 @@ class LocalWheelTests(unittest.TestCase):
                         self.assertIn((option, str(constraints)), list(zip(install, install[1:])))
                     checks = [index for index, call in enumerate(calls) if call ==
                               [str(ROOT / 'ci/check_wheel_origins.py'), str(constraints)]]
+                    pytest_call = ['-m', 'pytest', '.']
+                    if env['WHEEL_TEST_PROFILE'] == 'stable':
+                        for name in ('test_auth_header', 'test_auth_auto'):
+                            pytest_call += ['--deselect',
+                                            'test_urlrequest/test_urlrequest_urllib.py::' + name]
+                    self.assertEqual([call for call in calls if call[:2] == ['-m', 'pytest']],
+                                     [pytest_call])
+                    pytest_index = calls.index(pytest_call)
                     self.assertEqual(len(checks), 2)
                     self.assertLess(calls.index(install), checks[0])
-                    self.assertLess(checks[0], calls.index(['-m', 'pytest', '.']))
-                    self.assertGreater(checks[1], calls.index(['-m', 'pytest', '.']))
+                    self.assertLess(checks[0], pytest_index)
+                    self.assertGreater(checks[1], pytest_index)
                 else:
                     self.assertFalse(installs)
                     if kind in ('old-pip', 'pip-failure'):

@@ -216,6 +216,62 @@ class LocalWheelTests(unittest.TestCase):
                         self.assertIn('do not match' if kind == 'version-mismatch' else
                                       'found 0' if kind == 'missing' else 'found 2', result.stdout)
 
+    @unittest.skipUnless(PWSH, 'PowerShell is required for helper checks')
+    def test_real_powershell_smoke_ordering_and_failure_guards(self):
+        """Record real smoke-helper calls to check install, origin and smoke ordering."""
+        script = '''
+            . $env:WHEEL_TEST_HELPER
+            $script:pythonCalls = [System.Collections.Generic.List[object]]::new()
+            function python {
+                $script:pythonCalls.Add(@($args))
+                $global:LASTEXITCODE = 0
+                if ($args[0] -eq $env:WHEEL_TEST_FAILING_SCRIPT) { $global:LASTEXITCODE = 1 }
+            }
+            try { Test-wheel-smoke; exit 0 }
+            catch { Write-Output $_.Exception.Message; exit 1 }
+            finally {
+                ConvertTo-Json -InputObject $script:pythonCalls.ToArray() -Depth 3 |
+                    Set-Content -LiteralPath $env:WHEEL_TEST_CALLS -Encoding utf8
+            }
+        '''
+        checker = str(ROOT / 'ci/check_wheel_origins.py')
+        smoke = str(ROOT / 'ci/smoke_test_wheels.py')
+        cases = {'valid': ('sdl2', ''), 'unsupported': ('glew', ''), 'missing': ('sdl2', ''),
+                 'origin-failure': ('sdl2', checker), 'smoke-failure': ('sdl2', smoke)}
+        for kind, (target, failing) in cases.items():
+            with self.subTest(kind=kind):
+                root = self.root / ('smoke-' + kind)
+                wheels = make_pair(root / 'dist', target)
+                if kind == 'missing':
+                    wheels[1].unlink()
+                env = {**os.environ, 'PACKAGE_TARGET': target, 'PACKAGE_ARCH': 'x64',
+                       'WHEEL_TEST_HELPER': str(ROOT / 'ci/windows_smoke.ps1'),
+                       'WHEEL_TEST_CALLS': str(root / 'python-calls.json'),
+                       'WHEEL_TEST_FAILING_SCRIPT': failing,
+                       'DOTNET_SYSTEM_GLOBALIZATION_INVARIANT': '1'}
+                result = subprocess.run([PWSH, '-NoLogo', '-NoProfile', '-Command', script],
+                                        env=env, cwd=root, stdout=subprocess.PIPE,
+                                        stderr=subprocess.STDOUT, text=True, timeout=30)
+                self.assertEqual(result.returncode, 0 if kind == 'valid' else 1, result.stdout)
+                calls = json.loads((root / 'python-calls.json').read_text(encoding='utf-8-sig'))
+                constraints = str(root / 'local-wheel-constraints.txt')
+                expected = [['-m', 'pip', 'install', '--no-index', '--no-deps', '--force-reinstall']
+                            + [str(wheel) for wheel in wheels], [checker, constraints], [smoke, target]]
+                if kind == 'valid':
+                    self.assertEqual(calls, expected)
+                elif kind == 'unsupported':
+                    self.assertEqual(calls, [])
+                    self.assertIn('only defined for PACKAGE_TARGET=sdl2', result.stdout)
+                elif kind == 'missing':
+                    self.assertEqual(calls, [])
+                    self.assertIn('found 0', result.stdout)
+                elif kind == 'origin-failure':
+                    self.assertEqual(calls, expected[:2])
+                    self.assertIn('Verifying the installed local dependency wheels failed', result.stdout)
+                else:
+                    self.assertEqual(calls, expected)
+                    self.assertIn('The dependency smoke test failed', result.stdout)
+
     def test_real_isolated_build_constraints(self):
         """Local outer packages alone must not satisfy the isolated-build check."""
         help_result = subprocess.run([sys.executable, '-m', 'pip', 'install', '--help'],

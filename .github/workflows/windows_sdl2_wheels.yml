@@ -8,6 +8,9 @@ on:
       - 'ci/windows_ci.ps1'
       - 'ci/kivy-stable-test-constraints.txt'
       - 'ci/check_wheel_origins.py'
+      - 'ci/smoke_test_wheels.py'
+      - 'ci/windows_smoke.ps1'
+      - 'ci/windows-server-upload.sh'
       - '.github/workflows/windows_sdl2_wheels.yml'
   push:
     branches:
@@ -19,6 +22,9 @@ on:
       - 'ci/windows_ci.ps1'
       - 'ci/kivy-stable-test-constraints.txt'
       - 'ci/check_wheel_origins.py'
+      - 'ci/smoke_test_wheels.py'
+      - 'ci/windows_smoke.ps1'
+      - 'ci/windows-server-upload.sh'
       - '.github/workflows/windows_sdl2_wheels.yml'
 
 env:
@@ -65,8 +71,22 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python: [ '3.9', '3.10', '3.11' , '3.12', '3.13' ]
+        python: [ '3.9', '3.10', '3.11', '3.12', '3.13', '3.14' ]
         arch: ['x64']
+        include:
+          - python: '3.9'
+            package-test: kivy-stable
+          - python: '3.10'
+            package-test: kivy-stable
+          - python: '3.11'
+            package-test: kivy-stable
+          - python: '3.12'
+            package-test: kivy-stable
+          - python: '3.13'
+            package-test: kivy-stable
+          # No Kivy release supports 3.14 yet; see win/README.md.
+          - python: '3.14'
+            package-test: smoke
     env:
       PACKAGE_ARCH: ${{ matrix.arch }}
     steps:
@@ -101,6 +121,7 @@ jobs:
       if: contains(github.event.head_commit.message, '[publish sdl2 win]')
       env:
         UBUNTU_UPLOAD_KEY: ${{ secrets.UBUNTU_UPLOAD_KEY }}
+        UPLOAD_IGNORE_EXISTING: 1
         MSYSTEM: MINGW64
         CHERE_INVOKING: 1
       run: |
@@ -112,8 +133,14 @@ jobs:
         TWINE_USERNAME: "__token__"
         TWINE_PASSWORD: ${{ secrets.pypi_password }}
       run: |
-        twine upload --non-interactive dist/*
+        twine upload --non-interactive --skip-existing dist/*
     - name: Test package
+      if: matrix.package-test == 'kivy-stable'
       run: |
         . .\ci\windows_ci.ps1
         Test-kivy -KivyTestTarget stable
+    - name: Smoke test package
+      if: matrix.package-test == 'smoke'
+      run: |
+        . .\ci\windows_smoke.ps1
+        Test-wheel-smoke

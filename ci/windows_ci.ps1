@@ -168,7 +168,18 @@ function Test-kivy {
     Push-Location -LiteralPath "$testPath" -ErrorAction Stop
     try {
         Set-Content -Path .coveragerc -Value "[run]`nplugins = kivy.tools.coverage`n" -ErrorAction Stop
-        python -m pytest .
+        $pytestArgs = @('.')
+        if ($kivyRef -eq '2.3.1') {
+            # Kivy 2.3.1's UrlRequest auth tests compare live httpbin.org responses
+            # exactly; httpbin now adds "authorized": true. Fixed upstream by
+            # kivy/kivy#9304 (in 2.3.2+). Drop this when $kivyRef moves past 2.3.1.
+            $pytestArgs += @(
+                '--deselect', 'test_urlrequest/test_urlrequest_urllib.py::test_auth_header',
+                '--deselect', 'test_urlrequest/test_urlrequest_urllib.py::test_auth_auto'
+            )
+            Write-Host 'Deselected httpbin-dependent 2.3.1 auth tests; see kivy/kivy#9304.'
+        }
+        python -m pytest @pytestArgs
         if ($LASTEXITCODE -ne 0) {
             throw 'The installed Kivy test suite failed'
         }

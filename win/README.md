@@ -65,6 +65,13 @@ establish async-app coverage. Async-harness repair is a separate follow-up;
 see the [later upstream pytest/async-harness repair](https://github.com/kivy/kivy/commit/122596b656304aef81b53de2aebfc53bd24f0ecc)
 for background.
 
+Stable jobs also deselect the 2.3.1 suite's `test_auth_header` and
+`test_auth_auto` UrlRequest tests. They compare live httpbin.org responses
+exactly, and httpbin.org now returns an extra `"authorized": true` field.
+Kivy replaced httpbin.org with a local test server in
+[kivy/kivy#9304](https://github.com/kivy/kivy/pull/9304), so the deselection
+applies only while the stable ref is 2.3.1.
+
 The table describes the selected test coverage: common-dependency rows
 on Python 3.11–3.14 exercise development Kivy. SDL2's rows exercise stable Kivy.
 Future SDL3 wheel rows start at Python 3.11; previously published artifacts

@@ -211,22 +211,19 @@ PY
 echo "-- Compile the requirements.txt file via pip-compile, so we have a full list of dependencies"
 # This step is needed as the --platform option during pip install requires --no-deps
 # cryptography 49+ dropped Intel macOS wheels needed for universal2 bundles.
+# TODO: Revisit when compatible wheels cover both macOS architectures,
+# or a universal2 source-build path is validated.
 echo 'cryptography<49' > kivy-app-constraints.txt
 "$BUILD_PYTHON" -m piptools compile kivy-app-requirements.in --constraint kivy-app-constraints.txt --no-annotate --no-header -o kivy-app-requirements.txt
 
 echo "-- Call prepare-wheels.py to download (and fuse) all the wheels and source distributions"
 WHEELS_FOLDER=$(pwd)/wheels
-SSL_CERT_FILE="${SSL_CERT_FILE:-$("$BUILD_PYTHON" -c 'from pip._vendor import certifi; print(certifi.where())')}" \
+SSL_CERT_FILE="${SSL_CERT_FILE:-$("$BUILD_PYTHON" -c 'import certifi; print(certifi.where())')}" \
 "$BUILD_PYTHON" "$SCRIPT_PATH/prepare-wheels.py" --requirements-file kivy-app-requirements.txt --python-version "$PYVER" --deployment-target "$MACOSX_DEPLOYMENT_TARGET" --output-folder "$WHEELS_FOLDER"
 
 echo "-- Create a virtualenv in ${APP_NAME}.app/Contents/Resources"
-pushd "$APP_NAME.app/Contents/Resources/"
-"$KIVY_APP_PYTHON_BIN" -m venv venv
+"$KIVY_APP_PYTHON_BIN" -m venv "$BUILD_FOLDER/$APP_NAME.app/Contents/Resources/venv"
 APP_PYTHON="$BUILD_FOLDER/$APP_NAME.app/Contents/Resources/venv/bin/python"
-
-echo "-- Activate the just created virtualenv"
-source venv/bin/activate
-popd
 
 echo "-- Install the requirements via pip"
 SITE_PACKAGES_DIR=$("$APP_PYTHON" -c "import site; print(site.getsitepackages()[0])")
@@ -234,9 +231,6 @@ SITE_PACKAGES_DIR=$("$APP_PYTHON" -c "import site; print(site.getsitepackages()[
 # Leave room for the longer loader-relative paths used during native relocation.
 LDFLAGS="${LDFLAGS:-} -Wl,-headerpad_max_install_names" \
 "$APP_PYTHON" -m pip install --platform macosx_11_0_universal2 --find-links="$WHEELS_FOLDER" --no-deps --target "$SITE_PACKAGES_DIR" -r kivy-app-requirements.txt
-
-echo "-- Deactivate virtualenv, is time to relocate things"
-deactivate
 
 echo "-- Relocate virtualenv"
 pushd "$APP_NAME.app/Contents/Resources/venv/bin"

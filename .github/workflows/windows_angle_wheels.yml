@@ -31,7 +31,7 @@ env:
 jobs:
   prepare_angle:
     # using windows-2022 as windows-2025 does not have the proper Windows SDK installed
-    runs-on: windows-2022
+    runs-on: windows-2025
     # Allow headroom for ANGLE source sync and slow x64 native compilation.
     timeout-minutes: 180
     env:
@@ -58,7 +58,7 @@ jobs:
 
   windows_wheels:
     # using windows-2022 as windows-2025 does not have the proper Windows SDK installed
-    runs-on: windows-2022
+    runs-on: windows-2025
     timeout-minutes: 30
     needs: prepare_angle
     strategy:

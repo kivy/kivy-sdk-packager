@@ -8,6 +8,8 @@ on:
       - 'win/build_sdl3.ps1'
       - 'ci/windows_ci.ps1'
       - 'ci/check_wheel_origins.py'
+      - 'ci/smoke_test_wheels.py'
+      - 'ci/windows_smoke.ps1'
       - 'ci/windows-server-upload.sh'
       - '.github/workflows/windows_sdl3_wheels.yml'
   push:
@@ -20,6 +22,8 @@ on:
       - 'win/build_sdl3.ps1'
       - 'ci/windows_ci.ps1'
       - 'ci/check_wheel_origins.py'
+      - 'ci/smoke_test_wheels.py'
+      - 'ci/windows_smoke.ps1'
       - 'ci/windows-server-upload.sh'
       - '.github/workflows/windows_sdl3_wheels.yml'
 
@@ -56,8 +60,20 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python: [ '3.11', '3.12', '3.13', '3.14' ]
+        python: [ '3.11', '3.12', '3.13', '3.14', '3.15' ]
         arch: ['x64']
+        include:
+          - python: '3.11'
+            package-test: kivy-development
+          - python: '3.12'
+            package-test: kivy-development
+          - python: '3.13'
+            package-test: kivy-development
+          - python: '3.14'
+            package-test: kivy-development
+          # No Kivy release or master supports 3.15 yet; see win/README.md.
+          - python: '3.15'
+            package-test: smoke
     env:
       PACKAGE_ARCH: ${{ matrix.arch }}
     steps:
@@ -85,9 +101,15 @@ jobs:
         name: sdl3_wheel_${{ matrix.arch }}_${{ matrix.python }}
         path: dist
     - name: Test package
+      if: matrix.package-test == 'kivy-development'
       run: |
         . .\ci\windows_ci.ps1
         Test-kivy -KivyTestTarget development
+    - name: Smoke test package
+      if: matrix.package-test == 'smoke'
+      run: |
+        . .\ci\windows_smoke.ps1
+        Test-wheel-smoke
 
   publish:
     # Runs only after every build/test row passes, and uploads those rows' wheels.

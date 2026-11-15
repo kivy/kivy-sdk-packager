@@ -8,6 +8,8 @@ on:
       - 'ci/windows_ci.ps1'
       - 'ci/kivy-stable-test-constraints.txt'
       - 'ci/check_wheel_origins.py'
+      - 'ci/smoke_test_wheels.py'
+      - 'ci/windows_smoke.ps1'
       - 'ci/windows-server-upload.sh'
       - '.github/workflows/windows_angle_wheels.yml'
   push:
@@ -20,6 +22,8 @@ on:
       - 'ci/windows_ci.ps1'
       - 'ci/kivy-stable-test-constraints.txt'
       - 'ci/check_wheel_origins.py'
+      - 'ci/smoke_test_wheels.py'
+      - 'ci/windows_smoke.ps1'
       - 'ci/windows-server-upload.sh'
       - '.github/workflows/windows_angle_wheels.yml'
 
@@ -66,22 +70,21 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python: [ '3.9', '3.10', '3.11', '3.12', '3.13', '3.14' ]
+        python: [ '3.11', '3.12', '3.13', '3.14', '3.15' ]
         arch: ['x64']
         include:
-          # 3.9/3.10: forward-compatibility smoke tests; see win/README.md.
-          - python: '3.9'
-            kivy-test-target: stable
-          - python: '3.10'
-            kivy-test-target: stable
+          # 3.11-3.13: forward-compatibility tests; see win/README.md.
           - python: '3.11'
-            kivy-test-target: development
+            package-test: kivy-stable
           - python: '3.12'
-            kivy-test-target: development
+            package-test: kivy-stable
           - python: '3.13'
-            kivy-test-target: development
+            package-test: kivy-stable
           - python: '3.14'
-            kivy-test-target: development
+            package-test: kivy-stable
+          # No Kivy release supports 3.15 yet; see win/README.md.
+          - python: '3.15'
+            package-test: smoke
     env:
       PACKAGE_ARCH: ${{ matrix.arch }}
     steps:
@@ -110,9 +113,15 @@ jobs:
         path: dist
         overwrite: true
     - name: Test package
+      if: matrix.package-test == 'kivy-stable'
       run: |
         . .\ci\windows_ci.ps1
-        Test-kivy -KivyTestTarget '${{ matrix.kivy-test-target }}'
+        Test-kivy -KivyTestTarget stable
+    - name: Smoke test package
+      if: matrix.package-test == 'smoke'
+      run: |
+        . .\ci\windows_smoke.ps1
+        Test-wheel-smoke
 
   publish:
     # Runs only after every build/test row passes, and uploads those rows' wheels.

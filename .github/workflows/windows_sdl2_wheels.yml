@@ -71,13 +71,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python: [ '3.9', '3.10', '3.11', '3.12', '3.13', '3.14' ]
+        python: [ '3.11', '3.12', '3.13', '3.14', '3.15' ]
         arch: ['x64']
         include:
-          - python: '3.9'
-            package-test: kivy-stable
-          - python: '3.10'
-            package-test: kivy-stable
           - python: '3.11'
             package-test: kivy-stable
           - python: '3.12'
@@ -86,6 +82,9 @@ jobs:
             package-test: kivy-stable
           - python: '3.14'
             package-test: kivy-stable
+          # No Kivy release supports 3.15 yet; see win/README.md.
+          - python: '3.15'
+            package-test: smoke
     env:
       PACKAGE_ARCH: ${{ matrix.arch }}
     steps:

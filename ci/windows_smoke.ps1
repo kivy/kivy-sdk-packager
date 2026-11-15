@@ -1,6 +1,6 @@
 function Test-wheel-smoke {
-    if ($env:PACKAGE_TARGET -cne 'sdl2') {
-        throw 'Smoke tests are only defined for PACKAGE_TARGET=sdl2'
+    if ($env:PACKAGE_TARGET -cnotin @('angle', 'glew', 'gstreamer', 'sdl2', 'sdl3')) {
+        throw 'PACKAGE_TARGET must select a supported Windows dependency'
     }
     if ($env:PACKAGE_ARCH -cne 'x64') {
         throw 'Windows smoke tests require PACKAGE_ARCH=x64'

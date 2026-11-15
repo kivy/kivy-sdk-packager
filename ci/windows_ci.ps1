@@ -181,6 +181,63 @@ function Test-kivy {
     }
 }
 
+function Get-published-wheel($name, $version, $directory) {
+    # Any win_amd64 wheel works: kivy_deps wheels share their contents across Python tags.
+    $release = Invoke-RestMethod -Uri "https://pypi.org/pypi/$name/$version/json" -ErrorAction Stop
+    $file = @($release.urls | Where-Object { $_.filename -like '*-win_amd64.whl' })[0]
+    if (-not $file) {
+        throw "No published win_amd64 wheel for $name $version"
+    }
+    New-Item -ItemType Directory -Force -Path $directory -ErrorAction Stop | Out-Null
+    $path = Join-Path (Resolve-Path -LiteralPath $directory).Path $file.filename
+    Invoke-WebRequest -Uri $file.url -OutFile $path -ErrorAction Stop
+    $hash = (Get-FileHash -LiteralPath $path -Algorithm SHA256 -ErrorAction Stop).Hash.ToLowerInvariant()
+    if ($hash -ne $file.digests.sha256) {
+        throw "Downloaded $($file.filename) does not match its PyPI SHA-256"
+    }
+    Write-Host "Published wheel: $($file.filename) sha256=$hash"
+    $path
+}
+
+function Get-published-angle-dlls {
+    Param([Parameter(Mandatory)][string]$Version)
+
+    $wheel = Get-published-wheel 'kivy_deps.angle' $Version 'angle_published'
+    $archive = Join-Path 'angle_published' 'runtime.zip'
+    Copy-Item -LiteralPath $wheel -Destination $archive -ErrorAction Stop
+    Expand-Archive -LiteralPath $archive -DestinationPath 'angle_published\runtime' -ErrorAction Stop
+    $dlls = @(Get-ChildItem -Path 'angle_published\runtime\*.data\data\share\angle\bin\*.dll' -File)
+    $expected = @('d3dcompiler_47.dll', 'libEGL.dll', 'libGLESv2.dll')
+    if ((@($dlls.Name | Sort-Object) -join ',') -ne ($expected -join ',')) {
+        throw "Expected $($expected -join ', ') in the published wheel, found $(@($dlls.Name) -join ', ')"
+    }
+    New-Item -ItemType Directory -Force -Path 'angle_dlls\Release_x64' -ErrorAction Stop | Out-Null
+    $dlls | Copy-Item -Destination 'angle_dlls\Release_x64' -ErrorAction Stop
+    Get-ChildItem 'angle_dlls\Release_x64' | ForEach-Object {
+        Write-Host "$($_.Name) sha256=$((Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant())"
+    }
+}
+
+function Compare-published-angle-wheels {
+    Param([Parameter(Mandatory)][string]$Version)
+
+    $comparer = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot 'compare_wheel_contents.py') -ErrorAction Stop).Path
+    foreach ($suffix in @('', '_dev')) {
+        $name = "kivy_deps.angle$suffix"
+        $pattern = '^kivy_deps[._]' + [Regex]::Escape("angle$suffix") + '-'
+        $built = @(Get-ChildItem -LiteralPath 'dist' -Filter '*.whl' -File -ErrorAction Stop |
+            Where-Object { $_.Name -match $pattern })
+        if ($built.Count -ne 1) {
+            throw "Expected exactly one local $name wheel, found $($built.Count)"
+        }
+        $reference = Get-published-wheel $name $Version 'angle_reference'
+        python $comparer $reference $built[0].FullName
+        if ($LASTEXITCODE -ne 0) {
+            throw "$name does not match the published $Version contents"
+        }
+    }
+}
+
 function Get-angle-deps() {
     Invoke-WebRequest -Uri "https://storage.googleapis.com/chrome-infra/depot_tools.zip" -OutFile depot_tools.zip
     7z x depot_tools.zip -odepot_tools

@@ -96,10 +96,22 @@ suite without deselections.
 
 Windows jobs have a 30-minute timeout, except ANGLE's native dependency
 preparation, which has a three-hour timeout to allow headroom for source
-synchronization and native compilation. ANGLE preparation builds x64
+synchronization and native compilation. ANGLE preparation produces the x64
 DLLs once and shares the `angle_dlls-x64` artifact across every Python
 wheel/integration row. The artifact preserves the `Release_x64/` directory
 expected by the packaging recipe. These limits apply separately to each job.
+
+ANGLE preparation does not recompile ANGLE while `published_dlls` in
+`win/angle.py` names a published `kivy_deps.angle` release (currently `0.5.0`).
+Instead it downloads that release's `win_amd64` wheel from PyPI, checks the
+download against PyPI's SHA-256, and extracts its three DLLs in a few seconds.
+Each wheel row then checks, with `ci/compare_wheel_contents.py`, that the
+`kivy_deps.angle` and `kivy_deps.angle_dev` wheels it built contain exactly the
+same files, byte for byte, as that release. Wheel metadata (`*.dist-info/`) and
+the `__version__` line are excluded from the check, so a patch release that only
+repackages the same DLLs for a new Python version still matches. Set
+`published_dlls = None` to build ANGLE from source; the comparison step is then
+skipped.
 
 Process to make a new release
 -----------------------------
@@ -110,6 +122,7 @@ Process to make a new release
   * Check that the download url is still valid.
     * If there are multiple files downloaded per dependency make sure they are all valid.
   * Increment ``__version__`` so a new package will be available for pypi.
+  * For ANGLE, keep ``published_dlls`` to repackage an existing release's DLLs (for example, to add a Python version), or set it to ``None`` when updating ANGLE itself so CI builds from source. After that release is published, set ``published_dlls`` to its version.
 * The Windows GitHub CI runs for the specific deps whose path filters match on pull requests and on pushes to the `master` and `windows_ci` branches. Test changes in a pull request; pushing to `windows_ci` remains available for branch-based testing. For a new Python version that Kivy or the other deps don't support on PyPI yet, use `package-test: smoke` rows instead of the Kivy suite.
 * When things work, push to master with `[publish xxx win]`, where `xxx` is e.g. `gstreamer`. `[publish xxx win]` must be listed once for each dependency in the commit message. The workflow still builds and tests every Python row; a separate `publish` job then runs only if every row passed. It downloads those rows' tested wheel artifacts, without rebuilding, and uploads them to the server and PyPI. If any row fails, nothing is uploaded, and the built wheels remain available as workflow artifacts. A row that is expected to fail therefore blocks publishing until it is fixed, switched to a smoke test, or removed.
 * Publishing never replaces files that are already published: PyPI uploads use `twine --skip-existing`, and server uploads set `UPLOAD_IGNORE_EXISTING` so `ci/windows-server-upload.sh` runs `rsync --ignore-existing`. Re-publishing an existing version therefore uploads only the files that are missing, such as a new Python version's wheels. Changing the contents of published wheels needs a ``__version__`` bump.

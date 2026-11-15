@@ -9,6 +9,7 @@ on:
       - 'ci/kivy-stable-test-constraints.txt'
       - 'ci/check_wheel_origins.py'
       - 'ci/smoke_test_wheels.py'
+      - 'ci/compare_wheel_contents.py'
       - 'ci/windows_smoke.ps1'
       - 'ci/windows-server-upload.sh'
       - '.github/workflows/windows_angle_wheels.yml'
@@ -23,6 +24,7 @@ on:
       - 'ci/kivy-stable-test-constraints.txt'
       - 'ci/check_wheel_origins.py'
       - 'ci/smoke_test_wheels.py'
+      - 'ci/compare_wheel_contents.py'
       - 'ci/windows_smoke.ps1'
       - 'ci/windows-server-upload.sh'
       - '.github/workflows/windows_angle_wheels.yml'
@@ -42,16 +44,32 @@ jobs:
     timeout-minutes: 180
     env:
       DEPOT_TOOLS_WIN_TOOLCHAIN: 0
+    outputs:
+      published-dlls: ${{ steps.source.outputs.published-dlls }}
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-python@v7
         with:
           python-version: 3.x
+      - name: Select DLL source
+        id: source
+        run: |
+          $version = python -c "from win.angle import published_dlls; print(published_dlls or '')"
+          if ($LASTEXITCODE -ne 0) { throw 'Reading published_dlls from win/angle.py failed' }
+          Write-Host "Published DLL release: $(if ($version) { $version } else { 'none; building from source' })"
+          "published-dlls=$version" >> $env:GITHUB_OUTPUT
+      - name: Get published DLLs
+        if: steps.source.outputs.published-dlls != ''
+        run: |
+          . .\ci\windows_ci.ps1
+          Get-published-angle-dlls -Version '${{ steps.source.outputs.published-dlls }}'
       - name: Get dependecies
+        if: steps.source.outputs.published-dlls == ''
         run: |
           . .\ci\windows_ci.ps1
           Get-angle-deps
       - name: Build dependecies
+        if: steps.source.outputs.published-dlls == ''
         run: |
           . .\ci\windows_ci.ps1
           Build-angle
@@ -112,6 +130,11 @@ jobs:
         name: angle_wheels-${{ matrix.python }}-${{ matrix.arch }}
         path: dist
         overwrite: true
+    - name: Compare with published release
+      if: needs.prepare_angle.outputs.published-dlls != ''
+      run: |
+        . .\ci\windows_ci.ps1
+        Compare-published-angle-wheels -Version '${{ needs.prepare_angle.outputs.published-dlls }}'
     - name: Test package
       if: matrix.package-test == 'kivy-stable'
       run: |

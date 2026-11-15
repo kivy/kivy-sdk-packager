@@ -3,6 +3,11 @@ from .common import *
 
 __version__ = '0.5.0'
 
+# Published kivy_deps.angle release whose DLLs CI repackages instead of
+# recompiling ANGLE; the built wheels must match its contents. None builds
+# ANGLE from source (see Get-angle-deps and Build-angle in ci/windows_ci.ps1).
+published_dlls = '0.5.0'
+
 
 def get_angle(cache, build_path, arch, package, output, download_only=False):
     data = []

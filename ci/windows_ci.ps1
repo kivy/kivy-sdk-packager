@@ -30,7 +30,8 @@ function Download-Packages() {
 
 
 function Create-Packages() {
-    python -m pip install 'pip>=25.3' 'wheel<0.38.0' setuptools --upgrade
+    # setuptools 83+ requires Python 3.10; 82.0.1 is the last release supporting 3.9.
+    python -m pip install --upgrade 'pip>=25.3' "setuptools==84.2.1; python_version >= '3.10'" "setuptools==82.0.1; python_version < '3.10'"
     python -m "win.$env:PACKAGE_TARGET" build_path "$(pwd)\$env:KIVY_BUILD_DIR" arch $env:PACKAGE_ARCH package $env:PACKAGE_TARGET output "$(pwd)\dist" cache "$(pwd)\$env:KIVY_BUILD_CACHE"
     dir "$(pwd)\dist"
     rm "$(pwd)\dist\*tar.gz"

@@ -17,33 +17,33 @@ Dependency wheels are built first, then checked against selected Kivy test targe
 
 | Dependency | Python | Kivy ref | GL backend |
 | --- | --- | --- | --- |
-| ANGLE (forward-compatibility smoke) | 3.9–3.10 | `2.3.1` | `angle_sdl2` |
-| GLEW / GStreamer | 3.9–3.10 | `2.3.1` | `angle_sdl2` |
+| ANGLE (forward-compatibility smoke) | 3.9–3.10 | `2.3.2` | `angle_sdl2` |
+| GLEW / GStreamer | 3.9–3.10 | `2.3.2` | `angle_sdl2` |
 | ANGLE / GLEW / GStreamer | 3.11–3.14 | `master` | `angle_sdl3` |
-| SDL2 | 3.9–3.13 | `2.3.1` | `angle_sdl2` |
-| SDL2 (wheel smoke test) | 3.14 | none | none |
+| SDL2 | 3.9–3.14 | `2.3.2` | `angle_sdl2` |
 | SDL3 | 3.11–3.14 | `master` | `angle_sdl3` |
 
-This gives 28 x64 build/test combinations: 11 stable, 16 development, and one
-SDL2 wheel smoke test. Stable and development name the test profiles; two stable
-ANGLE rows are forward-compatibility smoke tests.
+This gives 28 x64 build/test combinations: 12 stable and 16 development.
+Stable and development name the test profiles; two stable ANGLE rows are
+forward-compatibility smoke tests.
 
-No Kivy release supports Python 3.14 yet, so the SDL2 3.14 row runs
+The SDL2 workflow also supports a `package-test: smoke` row for a Python
+version that no Kivy release supports yet. Such a row runs
 `Test-wheel-smoke` from [`ci/windows_smoke.ps1`](../ci/windows_smoke.ps1)
 instead of the Kivy suite. It installs the local wheel pair,
 verifies their origins, and runs [`ci/smoke_test_wheels.py`](../ci/smoke_test_wheels.py),
 which loads SDL2, SDL2_image, SDL2_mixer and SDL2_ttf through the DLL directory
 `kivy_deps.sdl2` registers, checks their versions against `win/sdl2.py`,
 initializes the image and audio formats Kivy requests, and checks the development
-headers and import libraries are installed. Switch this row to the Kivy suite once
-a Kivy release with Python 3.14 support is available.
+headers and import libraries are installed. No row currently uses it: Kivy 2.3.2
+supports every SDL2 Python version, including 3.14.
 
-The older ANGLE rows lift Kivy 2.3.1's `kivy_deps.angle~=0.4.0`
-pin to exercise ANGLE 0.5.0.
-Normal Kivy 2.3.1 installations resolve ANGLE 0.4.x; these checks do not
-establish a supported released installation with ANGLE 0.5.0.
+The older ANGLE rows lift Kivy 2.3.2's `kivy_deps.angle~=0.4.0`
+pin (used before Python 3.14) to exercise ANGLE 0.5.0.
+Normal Kivy 2.3.2 installations on those Python versions resolve ANGLE 0.4.x;
+these checks do not establish a supported released installation with ANGLE 0.5.0.
 
-`Test-kivy -KivyTestTarget stable` selects released Kivy 2.3.1 and the
+`Test-kivy -KivyTestTarget stable` selects released Kivy 2.3.2 and the
 pytest 8.3.5 / pytest-asyncio 0.24.0 pins in
 [`ci/kivy-stable-test-constraints.txt`](../ci/kivy-stable-test-constraints.txt).
 `Test-kivy -KivyTestTarget development` selects current master. The helper logs
@@ -69,23 +69,15 @@ python -m unittest discover -s ci/tests -p "test_local_wheels.py" -v
 
 The wheel workflows' `Test package` steps run the installed Kivy test suite.
 
-Stable results cover the tests collected from the released 2.3.1 suite.
-Its inherited async-app decorator pattern prevents those async app tests from
-being collected with this runner. A successful stable job therefore does not
-establish async-app coverage. Async-harness repair is a separate follow-up;
-see the [later upstream pytest/async-harness repair](https://github.com/kivy/kivy/commit/122596b656304aef81b53de2aebfc53bd24f0ecc)
-for background.
-
-Stable jobs also deselect the 2.3.1 suite's `test_auth_header` and
-`test_auth_auto` UrlRequest tests. They compare live httpbin.org responses
-exactly, and httpbin.org now returns an extra `"authorized": true` field.
-Kivy replaced httpbin.org with a local test server in
-[kivy/kivy#9304](https://github.com/kivy/kivy/pull/9304), so the deselection
-applies only while the stable ref is 2.3.1.
+Stable results cover the full released 2.3.2 suite, including its async app
+tests, which 2.3.1's decorator pattern kept from being collected. Kivy 2.3.2
+fixed that collection in [kivy/kivy#9457](https://github.com/kivy/kivy/pull/9457)
+and replaced the UrlRequest tests' live httpbin.org requests with local servers in
+[kivy/kivy#9452](https://github.com/kivy/kivy/pull/9452), so stable jobs run the
+suite without deselections.
 
 The table describes the selected test coverage: common-dependency rows
-on Python 3.11–3.14 exercise development Kivy. SDL2's rows exercise stable Kivy,
-except the 3.14 smoke test.
+on Python 3.11–3.14 exercise development Kivy. SDL2's rows all exercise stable Kivy.
 Future SDL3 wheel rows start at Python 3.11; previously published artifacts
 remain available.
 

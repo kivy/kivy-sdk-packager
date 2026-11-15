@@ -84,9 +84,8 @@ jobs:
             package-test: kivy-stable
           - python: '3.13'
             package-test: kivy-stable
-          # No Kivy release supports 3.14 yet; see win/README.md.
           - python: '3.14'
-            package-test: smoke
+            package-test: kivy-stable
     env:
       PACKAGE_ARCH: ${{ matrix.arch }}
     steps:

@@ -100,7 +100,7 @@ function Test-kivy {
     $installArgs = @('-m', 'pip', 'install')
 
     if ($KivyTestTarget -eq 'stable') {
-        $kivyRef = '2.3.1'
+        $kivyRef = '2.3.2'
         $env:KIVY_GL_BACKEND = 'angle_sdl2'
         $constraintsPath = (Resolve-Path -Path (
             Join-Path -Path $PSScriptRoot -ChildPath 'kivy-stable-test-constraints.txt'
@@ -163,24 +163,13 @@ function Test-kivy {
     }
     Write-Host "Installed Kivy tests: $testPath"
     if ($KivyTestTarget -eq 'stable') {
-        Write-Host 'Stable coverage: released Kivy 2.3.1 suite with its accepted inherited async-app collection gap; see win/README.md.'
+        Write-Host 'Stable coverage: released Kivy 2.3.2 suite; see win/README.md.'
     }
 
     Push-Location -LiteralPath "$testPath" -ErrorAction Stop
     try {
         Set-Content -Path .coveragerc -Value "[run]`nplugins = kivy.tools.coverage`n" -ErrorAction Stop
-        $pytestArgs = @('.')
-        if ($kivyRef -eq '2.3.1') {
-            # Kivy 2.3.1's UrlRequest auth tests compare live httpbin.org responses
-            # exactly; httpbin now adds "authorized": true. Fixed upstream by
-            # kivy/kivy#9304 (in 2.3.2+). Drop this when $kivyRef moves past 2.3.1.
-            $pytestArgs += @(
-                '--deselect', 'test_urlrequest/test_urlrequest_urllib.py::test_auth_header',
-                '--deselect', 'test_urlrequest/test_urlrequest_urllib.py::test_auth_auto'
-            )
-            Write-Host 'Deselected httpbin-dependent 2.3.1 auth tests; see kivy/kivy#9304.'
-        }
-        python -m pytest @pytestArgs
+        python -m pytest .
         if ($LASTEXITCODE -ne 0) {
             throw 'The installed Kivy test suite failed'
         }

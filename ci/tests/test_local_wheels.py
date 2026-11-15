@@ -204,10 +204,6 @@ class LocalWheelTests(unittest.TestCase):
                     checks = [index for index, call in enumerate(calls) if call ==
                               [str(ROOT / 'ci/check_wheel_origins.py'), str(constraints)]]
                     pytest_call = ['-m', 'pytest', '.']
-                    if env['WHEEL_TEST_PROFILE'] == 'stable':
-                        for name in ('test_auth_header', 'test_auth_auto'):
-                            pytest_call += ['--deselect',
-                                            'test_urlrequest/test_urlrequest_urllib.py::' + name]
                     self.assertEqual([call for call in calls if call[:2] == ['-m', 'pytest']],
                                      [pytest_call])
                     pytest_index = calls.index(pytest_call)

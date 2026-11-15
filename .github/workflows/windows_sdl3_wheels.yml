@@ -8,6 +8,9 @@ on:
       - 'win/build_sdl3.ps1'
       - 'ci/windows_ci.ps1'
       - 'ci/check_wheel_origins.py'
+      - 'ci/smoke_test_wheels.py'
+      - 'ci/windows_smoke.ps1'
+      - 'ci/windows-server-upload.sh'
       - '.github/workflows/windows_sdl3_wheels.yml'
   push:
     branches:
@@ -19,6 +22,9 @@ on:
       - 'win/build_sdl3.ps1'
       - 'ci/windows_ci.ps1'
       - 'ci/check_wheel_origins.py'
+      - 'ci/smoke_test_wheels.py'
+      - 'ci/windows_smoke.ps1'
+      - 'ci/windows-server-upload.sh'
       - '.github/workflows/windows_sdl3_wheels.yml'
 
 env:
@@ -54,8 +60,20 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python: [ '3.11', '3.12', '3.13', '3.14' ]
+        python: [ '3.11', '3.12', '3.13', '3.14', '3.15' ]
         arch: ['x64']
+        include:
+          - python: '3.11'
+            package-test: kivy-development
+          - python: '3.12'
+            package-test: kivy-development
+          - python: '3.13'
+            package-test: kivy-development
+          - python: '3.14'
+            package-test: kivy-development
+          # No Kivy release or master supports 3.15 yet; see win/README.md.
+          - python: '3.15'
+            package-test: smoke
     env:
       PACKAGE_ARCH: ${{ matrix.arch }}
     steps:
@@ -82,26 +100,52 @@ jobs:
       with:
         name: sdl3_wheel_${{ matrix.arch }}_${{ matrix.python }}
         path: dist
+    - name: Test package
+      if: matrix.package-test == 'kivy-development'
+      run: |
+        . .\ci\windows_ci.ps1
+        Test-kivy -KivyTestTarget development
+    - name: Smoke test package
+      if: matrix.package-test == 'smoke'
+      run: |
+        . .\ci\windows_smoke.ps1
+        Test-wheel-smoke
+
+  publish:
+    # Runs only after every build/test row passes, and uploads those rows' wheels.
+    if: contains(github.event.head_commit.message, '[publish sdl3 win]')
+    needs: windows_wheels
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+    - uses: actions/checkout@v7
+    - name: Set up Python
+      uses: actions/setup-python@v7
+      with:
+        python-version: 3.x
+    - name: Download tested wheels
+      uses: actions/download-artifact@v8.0.2
+      with:
+        pattern: sdl3_wheel_*
+        path: dist
+        merge-multiple: true
+    - name: List wheels
+      run: dir dist
     - name: Install MSYS2
-      if: contains(github.event.head_commit.message, '[publish sdl3 win]')
       run: choco install msys2
     - name: Upload wheels to server
-      if: contains(github.event.head_commit.message, '[publish sdl3 win]')
       env:
         UBUNTU_UPLOAD_KEY: ${{ secrets.UBUNTU_UPLOAD_KEY }}
+        UPLOAD_IGNORE_EXISTING: 1
         MSYSTEM: MINGW64
         CHERE_INVOKING: 1
       run: |
         . .\ci\windows_ci.ps1
         Upload-windows-wheels-to-server -ip "$env:SERVER_IP"
     - name: Publish to PyPI
-      if: contains(github.event.head_commit.message, '[publish sdl3 win]')
       env:
         TWINE_USERNAME: "__token__"
         TWINE_PASSWORD: ${{ secrets.pypi_password }}
       run: |
-        twine upload --non-interactive dist/*
-    - name: Test package
-      run: |
-        . .\ci\windows_ci.ps1
-        Test-kivy -KivyTestTarget development
+        python -m pip install twine
+        twine upload --non-interactive --skip-existing dist/*

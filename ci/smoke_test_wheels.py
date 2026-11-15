@@ -2,7 +2,7 @@
 
 Run from the repository root with ``PYTHONPATH=.`` (as the wheel workflows set),
 after installing the local runtime/development wheel pair (``Test-wheel-smoke``
-in ``windows_ci.ps1`` does both):
+in ``windows_smoke.ps1`` does both):
     python ci/smoke_test_wheels.py sdl2
 
 DLLs are loaded by name only, so they must resolve through the directories the
@@ -14,7 +14,10 @@ import argparse
 import ctypes
 import importlib
 from pathlib import Path
+import re
 import sysconfig
+
+ROOT = Path(__file__).resolve().parents[1]
 
 
 class SDLVersion(ctypes.Structure):
@@ -90,7 +93,105 @@ def smoke_test_sdl2():
                     ['libs/' + name for name in libs])
 
 
-SMOKE_TESTS = {'sdl2': smoke_test_sdl2}
+def smoke_test_angle():
+    ctypes.CDLL('d3dcompiler_47')
+    ctypes.CDLL('libGLESv2')
+    egl = ctypes.CDLL('libEGL')
+    egl.eglGetDisplay.restype = ctypes.c_void_p
+    egl.eglGetDisplay.argtypes = [ctypes.c_void_p]
+    egl.eglInitialize.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_int32),
+                                  ctypes.POINTER(ctypes.c_int32)]
+    egl.eglQueryString.restype = ctypes.c_char_p
+    egl.eglQueryString.argtypes = [ctypes.c_void_p, ctypes.c_int32]
+    egl.eglTerminate.argtypes = [ctypes.c_void_p]
+
+    display = egl.eglGetDisplay(None)  # EGL_DEFAULT_DISPLAY
+    major, minor = ctypes.c_int32(), ctypes.c_int32()
+    if not display or not egl.eglInitialize(display, ctypes.byref(major), ctypes.byref(minor)):
+        raise RuntimeError('ANGLE could not initialize the default EGL display')
+    print('EGL {}.{} initialized: {}'.format(
+        major.value, minor.value, egl.eglQueryString(display, 0x3054).decode()),  # EGL_VERSION
+        flush=True)
+    egl.eglTerminate(display)
+
+
+def smoke_test_glew():
+    from win import glew as recipe
+
+    glew = ctypes.CDLL('glew32')
+    glew.glewGetString.restype = ctypes.c_char_p
+    glew.glewGetString.argtypes = [ctypes.c_uint]
+    check_version('GLEW', glew.glewGetString(1).decode(), recipe.glew_ver)  # GLEW_VERSION
+    check_dev_files('glew', ['include/GL/glew.h', 'include/GL/wglew.h', 'libs/glew32.lib'])
+
+
+def smoke_test_gstreamer():
+    from win import gstreamer as recipe
+
+    # The explicit .dll suffix stops Windows reading ".0-0" as the extension.
+    gst = ctypes.CDLL('gstreamer-1.0-0.dll')
+    parts = [ctypes.c_uint() for _ in range(4)]
+    gst.gst_version(*(ctypes.byref(part) for part in parts))
+    check_version('GStreamer', '.'.join(str(part.value) for part in parts[:3]),
+                  recipe.gst_ver)
+
+    gst.gst_init(None, None)
+    gst.gst_element_factory_find.restype = ctypes.c_void_p
+    gst.gst_element_factory_find.argtypes = [ctypes.c_char_p]
+    gst.gst_object_unref.argtypes = [ctypes.c_void_p]
+    # Elements Kivy's gstplayer pipeline needs, found through GST_PLUGIN_PATH.
+    for name in ('playbin', 'appsink', 'videoconvert', 'audioconvert'):
+        factory = gst.gst_element_factory_find(name.encode())
+        if not factory:
+            raise RuntimeError('GStreamer has no {} element'.format(name))
+        gst.gst_object_unref(factory)
+        print('GStreamer found {}'.format(name), flush=True)
+
+    check_dev_files('gstreamer', ['include/gst/gst.h', 'include/glib.h',
+                                  'libs/gstreamer-1.0.lib', 'libs/glib-2.0.lib',
+                                  'libs/gobject-2.0.lib'])
+
+
+def sdl3_version(library, function):
+    getter = getattr(library, function)
+    getter.restype = ctypes.c_int
+    number = getter()
+    return '{}.{}.{}'.format(number // 1000000, number // 1000 % 1000, number % 1000)
+
+
+def smoke_test_sdl3():
+    script = (ROOT / 'win' / 'build_sdl3.ps1').read_text()
+    versions = dict(re.findall(r'\$WINDOWS__(SDL3\w*?)__VERSION\s*=\s*"([^"]+)"', script))
+
+    sdl = ctypes.CDLL('SDL3')
+    check_version('SDL3', sdl3_version(sdl, 'SDL_GetVersion'), versions['SDL3'])
+    image = ctypes.CDLL('SDL3_image')
+    check_version('SDL3_image', sdl3_version(image, 'IMG_Version'), versions['SDL3_IMAGE'])
+
+    mixer = ctypes.CDLL('SDL3_mixer')
+    check_version('SDL3_mixer', sdl3_version(mixer, 'MIX_Version'), versions['SDL3_MIXER'])
+    mixer.MIX_Init.restype = ctypes.c_bool
+    if not mixer.MIX_Init():
+        raise RuntimeError('SDL3_mixer could not initialize')
+    mixer.MIX_Quit()
+
+    ttf = ctypes.CDLL('SDL3_ttf')
+    check_version('SDL3_ttf', sdl3_version(ttf, 'TTF_Version'), versions['SDL3_TTF'])
+    ttf.TTF_Init.restype = ctypes.c_bool
+    if not ttf.TTF_Init():
+        raise RuntimeError('SDL3_ttf could not initialize')
+    ttf.TTF_Quit()
+
+    headers = ['SDL3/SDL.h', 'SDL3_image/SDL_image.h', 'SDL3_mixer/SDL_mixer.h',
+               'SDL3_ttf/SDL_ttf.h']
+    libs = ['SDL3.lib', 'SDL3_image.lib', 'SDL3_mixer.lib', 'SDL3_ttf.lib']
+    check_dev_files('sdl3', ['include/' + name for name in headers] +
+                    ['libs/' + name for name in libs])
+
+
+SMOKE_TESTS = {'angle': smoke_test_angle, 'glew': smoke_test_glew,
+               'gstreamer': smoke_test_gstreamer, 'sdl2': smoke_test_sdl2,
+               'sdl3': smoke_test_sdl3}
 
 
 def smoke_test(target):

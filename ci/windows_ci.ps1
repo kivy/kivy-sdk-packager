@@ -30,7 +30,7 @@ function Download-Packages() {
 
 
 function Create-Packages() {
-    python -m pip install 'pip>=25.3' 'wheel<0.38.0' setuptools --upgrade
+    python -m pip install --upgrade 'pip>=25.3' 'setuptools==84.2.1'
     python -m "win.$env:PACKAGE_TARGET" build_path "$(pwd)\$env:KIVY_BUILD_DIR" arch $env:PACKAGE_ARCH package $env:PACKAGE_TARGET output "$(pwd)\dist" cache "$(pwd)\$env:KIVY_BUILD_CACHE"
     dir "$(pwd)\dist"
     rm "$(pwd)\dist\*tar.gz"
@@ -99,7 +99,7 @@ function Test-kivy {
     $installArgs = @('-m', 'pip', 'install')
 
     if ($KivyTestTarget -eq 'stable') {
-        $kivyRef = '2.3.1'
+        $kivyRef = '2.3.2'
         $env:KIVY_GL_BACKEND = 'angle_sdl2'
         $constraintsPath = (Resolve-Path -Path (
             Join-Path -Path $PSScriptRoot -ChildPath 'kivy-stable-test-constraints.txt'
@@ -162,24 +162,13 @@ function Test-kivy {
     }
     Write-Host "Installed Kivy tests: $testPath"
     if ($KivyTestTarget -eq 'stable') {
-        Write-Host 'Stable coverage: released Kivy 2.3.1 suite with its accepted inherited async-app collection gap; see win/README.md.'
+        Write-Host 'Stable coverage: released Kivy 2.3.2 suite; see win/README.md.'
     }
 
     Push-Location -LiteralPath "$testPath" -ErrorAction Stop
     try {
         Set-Content -Path .coveragerc -Value "[run]`nplugins = kivy.tools.coverage`n" -ErrorAction Stop
-        $pytestArgs = @('.')
-        if ($kivyRef -eq '2.3.1') {
-            # Kivy 2.3.1's UrlRequest auth tests compare live httpbin.org responses
-            # exactly; httpbin now adds "authorized": true. Fixed upstream by
-            # kivy/kivy#9304 (in 2.3.2+). Drop this when $kivyRef moves past 2.3.1.
-            $pytestArgs += @(
-                '--deselect', 'test_urlrequest/test_urlrequest_urllib.py::test_auth_header',
-                '--deselect', 'test_urlrequest/test_urlrequest_urllib.py::test_auth_auto'
-            )
-            Write-Host 'Deselected httpbin-dependent 2.3.1 auth tests; see kivy/kivy#9304.'
-        }
-        python -m pytest @pytestArgs
+        python -m pytest .
         if ($LASTEXITCODE -ne 0) {
             throw 'The installed Kivy test suite failed'
         }
@@ -189,6 +178,63 @@ function Test-kivy {
         }
     } finally {
         Pop-Location
+    }
+}
+
+function Get-published-wheel($name, $version, $directory) {
+    # Any win_amd64 wheel works: kivy_deps wheels share their contents across Python tags.
+    $release = Invoke-RestMethod -Uri "https://pypi.org/pypi/$name/$version/json" -ErrorAction Stop
+    $file = @($release.urls | Where-Object { $_.filename -like '*-win_amd64.whl' })[0]
+    if (-not $file) {
+        throw "No published win_amd64 wheel for $name $version"
+    }
+    New-Item -ItemType Directory -Force -Path $directory -ErrorAction Stop | Out-Null
+    $path = Join-Path (Resolve-Path -LiteralPath $directory).Path $file.filename
+    Invoke-WebRequest -Uri $file.url -OutFile $path -ErrorAction Stop
+    $hash = (Get-FileHash -LiteralPath $path -Algorithm SHA256 -ErrorAction Stop).Hash.ToLowerInvariant()
+    if ($hash -ne $file.digests.sha256) {
+        throw "Downloaded $($file.filename) does not match its PyPI SHA-256"
+    }
+    Write-Host "Published wheel: $($file.filename) sha256=$hash"
+    $path
+}
+
+function Get-published-angle-dlls {
+    Param([Parameter(Mandatory)][string]$Version)
+
+    $wheel = Get-published-wheel 'kivy_deps.angle' $Version 'angle_published'
+    $archive = Join-Path 'angle_published' 'runtime.zip'
+    Copy-Item -LiteralPath $wheel -Destination $archive -ErrorAction Stop
+    Expand-Archive -LiteralPath $archive -DestinationPath 'angle_published\runtime' -ErrorAction Stop
+    $dlls = @(Get-ChildItem -Path 'angle_published\runtime\*.data\data\share\angle\bin\*.dll' -File)
+    $expected = @('d3dcompiler_47.dll', 'libEGL.dll', 'libGLESv2.dll')
+    if ((@($dlls.Name | Sort-Object) -join ',') -ne ($expected -join ',')) {
+        throw "Expected $($expected -join ', ') in the published wheel, found $(@($dlls.Name) -join ', ')"
+    }
+    New-Item -ItemType Directory -Force -Path 'angle_dlls\Release_x64' -ErrorAction Stop | Out-Null
+    $dlls | Copy-Item -Destination 'angle_dlls\Release_x64' -ErrorAction Stop
+    Get-ChildItem 'angle_dlls\Release_x64' | ForEach-Object {
+        Write-Host "$($_.Name) sha256=$((Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant())"
+    }
+}
+
+function Compare-published-angle-wheels {
+    Param([Parameter(Mandatory)][string]$Version)
+
+    $comparer = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot 'compare_wheel_contents.py') -ErrorAction Stop).Path
+    foreach ($suffix in @('', '_dev')) {
+        $name = "kivy_deps.angle$suffix"
+        $pattern = '^kivy_deps[._]' + [Regex]::Escape("angle$suffix") + '-'
+        $built = @(Get-ChildItem -LiteralPath 'dist' -Filter '*.whl' -File -ErrorAction Stop |
+            Where-Object { $_.Name -match $pattern })
+        if ($built.Count -ne 1) {
+            throw "Expected exactly one local $name wheel, found $($built.Count)"
+        }
+        $reference = Get-published-wheel $name $Version 'angle_reference'
+        python $comparer $reference $built[0].FullName
+        if ($LASTEXITCODE -ne 0) {
+            throw "$name does not match the published $Version contents"
+        }
     }
 }
 

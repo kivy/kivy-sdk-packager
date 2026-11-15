@@ -8,6 +8,10 @@ on:
       - 'ci/windows_ci.ps1'
       - 'ci/kivy-stable-test-constraints.txt'
       - 'ci/check_wheel_origins.py'
+      - 'ci/smoke_test_wheels.py'
+      - 'ci/compare_wheel_contents.py'
+      - 'ci/windows_smoke.ps1'
+      - 'ci/windows-server-upload.sh'
       - '.github/workflows/windows_angle_wheels.yml'
   push:
     branches:
@@ -19,6 +23,10 @@ on:
       - 'ci/windows_ci.ps1'
       - 'ci/kivy-stable-test-constraints.txt'
       - 'ci/check_wheel_origins.py'
+      - 'ci/smoke_test_wheels.py'
+      - 'ci/compare_wheel_contents.py'
+      - 'ci/windows_smoke.ps1'
+      - 'ci/windows-server-upload.sh'
       - '.github/workflows/windows_angle_wheels.yml'
 
 env:
@@ -36,16 +44,32 @@ jobs:
     timeout-minutes: 180
     env:
       DEPOT_TOOLS_WIN_TOOLCHAIN: 0
+    outputs:
+      published-dlls: ${{ steps.source.outputs.published-dlls }}
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-python@v7
         with:
           python-version: 3.x
+      - name: Select DLL source
+        id: source
+        run: |
+          $version = python -c "from win.angle import published_dlls; print(published_dlls or '')"
+          if ($LASTEXITCODE -ne 0) { throw 'Reading published_dlls from win/angle.py failed' }
+          Write-Host "Published DLL release: $(if ($version) { $version } else { 'none; building from source' })"
+          "published-dlls=$version" >> $env:GITHUB_OUTPUT
+      - name: Get published DLLs
+        if: steps.source.outputs.published-dlls != ''
+        run: |
+          . .\ci\windows_ci.ps1
+          Get-published-angle-dlls -Version '${{ steps.source.outputs.published-dlls }}'
       - name: Get dependecies
+        if: steps.source.outputs.published-dlls == ''
         run: |
           . .\ci\windows_ci.ps1
           Get-angle-deps
       - name: Build dependecies
+        if: steps.source.outputs.published-dlls == ''
         run: |
           . .\ci\windows_ci.ps1
           Build-angle
@@ -64,22 +88,21 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python: [ '3.9', '3.10', '3.11', '3.12', '3.13', '3.14' ]
+        python: [ '3.11', '3.12', '3.13', '3.14', '3.15' ]
         arch: ['x64']
         include:
-          # 3.9/3.10: forward-compatibility smoke tests; see win/README.md.
-          - python: '3.9'
-            kivy-test-target: stable
-          - python: '3.10'
-            kivy-test-target: stable
+          # 3.11-3.13: forward-compatibility tests; see win/README.md.
           - python: '3.11'
-            kivy-test-target: development
+            package-test: kivy-stable
           - python: '3.12'
-            kivy-test-target: development
+            package-test: kivy-stable
           - python: '3.13'
-            kivy-test-target: development
+            package-test: kivy-stable
           - python: '3.14'
-            kivy-test-target: development
+            package-test: kivy-stable
+          # No Kivy release supports 3.15 yet; see win/README.md.
+          - python: '3.15'
+            package-test: smoke
     env:
       PACKAGE_ARCH: ${{ matrix.arch }}
     steps:
@@ -107,25 +130,57 @@ jobs:
         name: angle_wheels-${{ matrix.python }}-${{ matrix.arch }}
         path: dist
         overwrite: true
+    - name: Compare with published release
+      if: needs.prepare_angle.outputs.published-dlls != ''
+      run: |
+        . .\ci\windows_ci.ps1
+        Compare-published-angle-wheels -Version '${{ needs.prepare_angle.outputs.published-dlls }}'
+    - name: Test package
+      if: matrix.package-test == 'kivy-stable'
+      run: |
+        . .\ci\windows_ci.ps1
+        Test-kivy -KivyTestTarget stable
+    - name: Smoke test package
+      if: matrix.package-test == 'smoke'
+      run: |
+        . .\ci\windows_smoke.ps1
+        Test-wheel-smoke
+
+  publish:
+    # Runs only after every build/test row passes, and uploads those rows' wheels.
+    if: contains(github.event.head_commit.message, '[publish angle win]')
+    needs: windows_wheels
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+    - uses: actions/checkout@v7
+    - name: Set up Python
+      uses: actions/setup-python@v7
+      with:
+        python-version: 3.x
+    - name: Download tested wheels
+      uses: actions/download-artifact@v8.0.2
+      with:
+        pattern: angle_wheels-*
+        path: dist
+        merge-multiple: true
+    - name: List wheels
+      run: dir dist
     - name: Install MSYS2
       run: choco install msys2
     - name: Upload wheels to server
-      if: contains(github.event.head_commit.message, '[publish angle win]')
       env:
         UBUNTU_UPLOAD_KEY: ${{ secrets.UBUNTU_UPLOAD_KEY }}
+        UPLOAD_IGNORE_EXISTING: 1
         MSYSTEM: MINGW64
         CHERE_INVOKING: 1
       run: |
         . .\ci\windows_ci.ps1
         Upload-windows-wheels-to-server -ip "$env:SERVER_IP"
     - name: Publish to PyPI
-      if: contains(github.event.head_commit.message, '[publish angle win]')
       env:
         TWINE_USERNAME: "__token__"
         TWINE_PASSWORD: ${{ secrets.pypi_password }}
       run: |
-        twine upload --non-interactive dist/*
-    - name: Test package
-      run: |
-        . .\ci\windows_ci.ps1
-        Test-kivy -KivyTestTarget '${{ matrix.kivy-test-target }}'
+        python -m pip install twine
+        twine upload --non-interactive --skip-existing dist/*

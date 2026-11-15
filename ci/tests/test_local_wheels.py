@@ -3,7 +3,7 @@
 Run from the repository root:
     python -m unittest discover -s ci/tests -p "test_local_wheels.py" -v
 
-The ``Windows CI helper tests`` workflow runs this command on Python 3.9 with
+The ``Windows CI helper tests`` workflow runs this command on Python 3.11 with
 pip >=25.3 and PowerShell. Tiny synthetic wheels and a self-contained build
 backend exercise real pip resolution, including isolated build dependencies,
 without building Kivy.
@@ -17,6 +17,7 @@ import io
 import json
 import os
 from pathlib import Path
+import re
 import shutil
 import subprocess
 import sys
@@ -28,6 +29,7 @@ import venv
 import zipfile
 
 from ci.check_wheel_origins import check_origins
+from ci.compare_wheel_contents import compare_wheels
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -105,6 +107,35 @@ class LocalWheelTests(unittest.TestCase):
         self.assertEqual(output.count('Verified local wheel:'), 2)
         self.assertIn('%23', output)
         self.assertIn('%C3%BC', output)
+
+    def test_wheel_contents_match_except_metadata_and_version(self):
+        def wheel(label, name, version, dll=b'DLL', code=b'dep_bins = []\n', extra=None):
+            path = self.root / 'compare' / label / '{}-{}-cp314-cp314-win_amd64.whl'.format(name, version)
+            path.parent.mkdir(parents=True)
+            files = {'kivy_deps/angle/__init__.py':
+                         "__version__ = '{}'\n".format(version).encode() + code,
+                     '{}-{}.dist-info/METADATA'.format(name, version):
+                         'Name: {}\nVersion: {}\n'.format(name, version).encode()}
+            if dll is not None:
+                files['{}-{}.data/data/share/angle/bin/libEGL.dll'.format(name, version)] = dll
+            files.update(extra or {})
+            with zipfile.ZipFile(path, 'w') as archive:
+                for member, data in files.items():
+                    archive.writestr(member, data)
+            return path
+
+        reference = wheel('reference', 'kivy_deps.angle', '0.5.0')
+        with redirect_stdout(io.StringIO()) as output:
+            compare_wheels(reference, wheel('bump', 'kivy_deps_angle', '0.5.1'))
+        self.assertIn('Matched 2 files', output.getvalue())
+        cases = {'changed': ({'dll': b'OTHER'}, 'changed data/share/angle/bin/libEGL.dll'),
+                 'missing': ({'dll': None}, 'missing data/share/angle/bin/libEGL.dll'),
+                 'unexpected': ({'extra': {'kivy_deps/angle/extra.py': b''}},
+                                'unexpected kivy_deps/angle/extra.py'),
+                 'code': ({'code': b'dep_bins = None\n'}, 'changed kivy_deps/angle/__init__.py')}
+        for case, (changes, message) in cases.items():
+            with self.subTest(case=case), self.assertRaisesRegex(RuntimeError, re.escape(message)):
+                compare_wheels(reference, wheel(case, 'kivy_deps_angle', '0.5.1', **changes))
 
     def test_python39_underscore_metadata_lookup(self):
         records = {name.replace('.', '_'): record for name, record in self.records().items()}
@@ -204,10 +235,6 @@ class LocalWheelTests(unittest.TestCase):
                     checks = [index for index, call in enumerate(calls) if call ==
                               [str(ROOT / 'ci/check_wheel_origins.py'), str(constraints)]]
                     pytest_call = ['-m', 'pytest', '.']
-                    if env['WHEEL_TEST_PROFILE'] == 'stable':
-                        for name in ('test_auth_header', 'test_auth_auto'):
-                            pytest_call += ['--deselect',
-                                            'test_urlrequest/test_urlrequest_urllib.py::' + name]
                     self.assertEqual([call for call in calls if call[:2] == ['-m', 'pytest']],
                                      [pytest_call])
                     pytest_index = calls.index(pytest_call)
@@ -244,7 +271,8 @@ class LocalWheelTests(unittest.TestCase):
         '''
         checker = str(ROOT / 'ci/check_wheel_origins.py')
         smoke = str(ROOT / 'ci/smoke_test_wheels.py')
-        cases = {'valid': ('sdl2', ''), 'unsupported': ('glew', ''), 'missing': ('sdl2', ''),
+        cases = {'valid': ('sdl2', ''), 'valid-angle': ('angle', ''),
+                 'unsupported': ('sdl1', ''), 'missing': ('sdl2', ''),
                  'origin-failure': ('sdl2', checker), 'smoke-failure': ('sdl2', smoke)}
         for kind, (target, failing) in cases.items():
             with self.subTest(kind=kind):
@@ -260,16 +288,17 @@ class LocalWheelTests(unittest.TestCase):
                 result = subprocess.run([PWSH, '-NoLogo', '-NoProfile', '-Command', script],
                                         env=env, cwd=root, stdout=subprocess.PIPE,
                                         stderr=subprocess.STDOUT, text=True, timeout=30)
-                self.assertEqual(result.returncode, 0 if kind == 'valid' else 1, result.stdout)
+                valid = kind.startswith('valid')
+                self.assertEqual(result.returncode, 0 if valid else 1, result.stdout)
                 calls = json.loads((root / 'python-calls.json').read_text(encoding='utf-8-sig'))
                 constraints = str(root / 'local-wheel-constraints.txt')
                 expected = [['-m', 'pip', 'install', '--no-index', '--no-deps', '--force-reinstall']
                             + [str(wheel) for wheel in wheels], [checker, constraints], [smoke, target]]
-                if kind == 'valid':
+                if valid:
                     self.assertEqual(calls, expected)
                 elif kind == 'unsupported':
                     self.assertEqual(calls, [])
-                    self.assertIn('only defined for PACKAGE_TARGET=sdl2', result.stdout)
+                    self.assertIn('must select a supported Windows dependency', result.stdout)
                 elif kind == 'missing':
                     self.assertEqual(calls, [])
                     self.assertIn('found 0', result.stdout)

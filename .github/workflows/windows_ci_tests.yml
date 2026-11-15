@@ -6,6 +6,7 @@ on:
       - 'ci/windows_ci.ps1'
       - 'ci/check_wheel_origins.py'
       - 'ci/smoke_test_wheels.py'
+      - 'ci/compare_wheel_contents.py'
       - 'ci/windows_smoke.ps1'
       - 'ci/tests/test_local_wheels.py'
       - '.github/workflows/windows_ci_tests.yml'
@@ -17,6 +18,7 @@ on:
       - 'ci/windows_ci.ps1'
       - 'ci/check_wheel_origins.py'
       - 'ci/smoke_test_wheels.py'
+      - 'ci/compare_wheel_contents.py'
       - 'ci/windows_smoke.ps1'
       - 'ci/tests/test_local_wheels.py'
       - '.github/workflows/windows_ci_tests.yml'
@@ -29,7 +31,7 @@ jobs:
       - uses: actions/checkout@v7
       - uses: actions/setup-python@v7
         with:
-          python-version: '3.9'
+          python-version: '3.11'
           architecture: x64
       - name: Run local-wheel regression tests
         run: |

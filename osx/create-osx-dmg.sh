@@ -70,7 +70,7 @@ fi
 # create the initial dmg
 echo "-- Create volume"
 du -sm "$work_dir/${STAGING_DIR}" | awk '{print $1}' > "$work_dir/_size"
-expr "$(cat "$work_dir/_size")" + 99 > "$work_dir/_size"
+expr "$(cat "$work_dir/_size")" \* 2 > "$work_dir/_size"
 
 hdiutil create -srcfolder "$work_dir/${STAGING_DIR}" -volname "${VOL_NAME}" -fs HFS+ \
 	-format UDRW -size "$(cat "$work_dir/_size")M" \

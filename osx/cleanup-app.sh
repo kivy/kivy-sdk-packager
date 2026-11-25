@@ -46,3 +46,6 @@ rm -rf "$PYTHON_PATH/"lib/{lib*,pkgconfig}
 rm -rf "$PYTHON_PATH/"include
 rm -rf "$PYTHON_PATH"/lib/pkgconfig
 rm -rf "$PYTHON_PATH"/lib/{itcl*,tcl*,tdbc*,tk*,tK*,libtk*,libtcl*}
+
+cp -rf "$APP_PATH"/Contents/Resources/yourapp/_applibs/* "$VENV_PATH"/lib/python3.*/site-packages
+rm -rf "$APP_PATH"/Contents/Resources/yourapp/_applibs
